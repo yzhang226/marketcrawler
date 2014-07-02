@@ -1,5 +1,6 @@
 package org.omega.marketcrawler.common;
 
+import java.net.URL;
 import java.util.Collection;
 
 public final class Utils {
@@ -23,6 +24,11 @@ public final class Utils {
 	
 	public static boolean isNotEmpty(Collection<?> list) {
 		return !isEmpty(list);
+	}
+	
+	public static String getResourcePath(String resource) {
+		URL url = Utils.class.getClassLoader().getResource(resource);
+		return url == null ? "" : url.getPath();
 	}
 	
 }

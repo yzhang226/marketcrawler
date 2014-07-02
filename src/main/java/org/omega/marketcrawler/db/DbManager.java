@@ -14,6 +14,7 @@ public final class DbManager {
 		Connection conn = null;
 		try {
 			conn = pds.getConnection();
+			conn.setAutoCommit(false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

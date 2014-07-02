@@ -7,7 +7,7 @@ public final class SqlUtils {
 	public static String preparedSql4History(String watchedSymbol, String exchangeSymbol, String operatorName) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO ").append(getHistoryTableName(watchedSymbol, exchangeSymbol, operatorName)).append(" (")
-		  .append("trade_time, trade_type, price, total_units, total_cost").append(") VALUES (?, ?, ?, ?)")
+		  .append("trade_time, trade_type, price, total_units, total_cost").append(") VALUES (?, ?, ?, ?, ?)")
 		  .append(" ON DUPLICATE KEY UPDATE total_cost=total_cost");
 		return sb.toString();
 	}
@@ -27,9 +27,9 @@ public final class SqlUtils {
 	
 	public static String getHistoryTableName(String watchedSymbol, String exchangeSymbol, String operatorName) {
 		return new StringBuilder("history_")
+		.append(operatorName.toLowerCase()).append("_")
 		.append(exchangeSymbol.toLowerCase()).append("_")
-		.append(watchedSymbol.toLowerCase()).append("_")
-		.append(operatorName.toLowerCase()).toString();
+		.append(watchedSymbol.toLowerCase()).toString();
 	}
 	
 	

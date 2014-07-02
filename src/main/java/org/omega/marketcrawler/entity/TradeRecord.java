@@ -4,14 +4,14 @@ public class TradeRecord extends _BaseEntity {
 
 	private static final long serialVersionUID = -1558808898415695311L;
 	
-	public static final short TYPE_SELL = new Short("0").shortValue();
-	public static final short TYPE_BUY = new Short("1").shortValue();
+	public static final short TRADE_TYPE_SELL = new Short("1");
+	public static final short TRADE_TYPE_BUY = new Short("2");
+	public static final short TRADE_TYPE_NA = new Short("0");
 	
 	
 	private long tradeTime;
 	/**
-	 * sell - 0
-	 * buy - 1
+	 * sell - 0, buy - 1, NA - 9
 	 */
 	private short tradeType;
 	private double price;
