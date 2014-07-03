@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.entity.MarketSummary;
-import org.omega.marketcrawler.entity.TradeRecord;
+import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.net.NetUtils;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -72,7 +72,7 @@ public final class Bittrex extends TradeOperator {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<MarketSummary> getMarketSummarys() {
+	public List<MarketSummary> getMarketSummaries() {
 		List<MarketSummary> records = null;
 		try {
 			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI());
@@ -119,10 +119,10 @@ public final class Bittrex extends TradeOperator {
 	
 	/**
 	 *
-	 * @see org.omega.marketcrawler.exchange.TradeOperator#getHistory(java.lang.String, java.lang.String)
+	 * @see org.omega.marketcrawler.exchange.TradeOperator#getMarketTrades(java.lang.String, java.lang.String)
 	 */
-	public List<TradeRecord> getHistory(String watchedSymbol, String exchangeSymbol) {
-		List<TradeRecord> records = null;
+	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
+		List<MarketTrade> records = null;
 		try {
 			String recordText = getHistoryJsonText(watchedSymbol, exchangeSymbol);
 			JsonFactory jfactory = new JsonFactory();
@@ -135,12 +135,12 @@ public final class Bittrex extends TradeOperator {
 		return records;
 	}
 	
-	private List<TradeRecord> readData(JsonParser parser) throws Exception {
+	private List<MarketTrade> readData(JsonParser parser) throws Exception {
 		  if (parser.nextToken() != JsonToken.START_OBJECT) {
 		    throw new Exception("Expected data to start with an Object");
 		  }
 
-		  List<TradeRecord> records = null;
+		  List<MarketTrade> records = null;
 		  String fieldValue = null;
 		  
 		  while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -154,13 +154,13 @@ public final class Bittrex extends TradeOperator {
 		   } else if (KEY_MESSAGE.equalsIgnoreCase(fieldName)) {
 			   // count = parser.getIntValue();
 		   } else if (KEY_RESULT.equalsIgnoreCase(fieldName)) {
-			   records = new ArrayList<TradeRecord>(DEFAULT_LIMITATION);
-			   TradeRecord re = null;
+			   records = new ArrayList<MarketTrade>(DEFAULT_LIMITATION);
+			   MarketTrade re = null;
 			   SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			   while (parser.nextToken() != JsonToken.END_ARRAY) {
 				   if (parser.getCurrentToken() == JsonToken.START_OBJECT) {
-					   re = new TradeRecord();
-					   re.setTradeType(TradeRecord.TRADE_TYPE_NA);
+					   re = new MarketTrade();
+					   re.setTradeType(MarketTrade.TRADE_TYPE_NA);
 					   parser.nextToken();
 				   } else if (parser.getCurrentToken() == JsonToken.END_OBJECT) {
 					   records.add(re);
@@ -205,7 +205,7 @@ public final class Bittrex extends TradeOperator {
 //			System.out.println(sd.format(new Date(r.getTradeTime())) + ", " + r.toReadableText());
 //		}
 		
-		List<MarketSummary> summs = Bittrex.instance().getMarketSummarys();
+		List<MarketSummary> summs = Bittrex.instance().getMarketSummaries();
 		for (MarketSummary summ : summs) {
 			System.out.println(summ.toReadableText());
 		}

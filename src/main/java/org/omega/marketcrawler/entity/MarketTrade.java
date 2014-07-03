@@ -1,6 +1,6 @@
 package org.omega.marketcrawler.entity;
 
-public class TradeRecord extends _BaseEntity {
+public class MarketTrade extends _BaseEntity {
 
 	
 	private static final long serialVersionUID = -5408828461710055307L;

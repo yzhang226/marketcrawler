@@ -2,7 +2,8 @@ package org.omega.marketcrawler.exchange;
 
 import java.util.List;
 
-import org.omega.marketcrawler.entity.TradeRecord;
+import org.omega.marketcrawler.entity.MarketSummary;
+import org.omega.marketcrawler.entity.MarketTrade;
 
 
 public abstract class TradeOperator {
@@ -30,7 +31,9 @@ public abstract class TradeOperator {
 	 */
 	public abstract String getHistoryJsonText(String watchedSymbol, String exchangeSymbol);
 	
-	public abstract List<TradeRecord> getHistory(String watchedSymbol, String exchangeSymbol);
+	public abstract List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol);
+	
+	public abstract List<MarketSummary> getMarketSummaries();
 	
 
 }

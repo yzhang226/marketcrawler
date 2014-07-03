@@ -12,7 +12,7 @@ import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
-import org.omega.marketcrawler.entity.TradeRecord;
+import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.net.NetUtils;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -71,10 +71,10 @@ public final class Mintpal extends TradeOperator {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<MarketSummary> getMarketSummarys(String... exchangeSymbol) {
+	public List<MarketSummary> getMarketSummaries() {
 		List<MarketSummary> records = null;
 		try {
-			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI(exchangeSymbol));
+			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI());
 			ObjectMapper mapper = new ObjectMapper();
 			
 			LinkedHashMap<String, Object> map = mapper.readValue(recordText, LinkedHashMap.class);
@@ -94,7 +94,6 @@ public final class Mintpal extends TradeOperator {
 					}
 				}
 			}
-			
 		} catch (Exception e) {
 			log.error("try to get and convert json Market Summary to object error.", e);
 		}
@@ -124,8 +123,8 @@ public final class Mintpal extends TradeOperator {
 	/**
 	 * NOTE: Type 0 refers to a BUY and type 1 refers to a SELL. Time is specified as a unix timestamp with microseconds.
 	 */
-	public List<TradeRecord> getHistory(String watchedSymbol, String exchangeSymbol) {
-		List<TradeRecord> records = null;
+	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
+		List<MarketTrade> records = null;
 		try {
 			String recordText = getHistoryJsonText(watchedSymbol, exchangeSymbol);
 			JsonFactory jfactory = new JsonFactory();
@@ -138,12 +137,12 @@ public final class Mintpal extends TradeOperator {
 		return records;
 	}
 	
-	private List<TradeRecord> readMarketTrades(JsonParser parser) throws Exception {
+	private List<MarketTrade> readMarketTrades(JsonParser parser) throws Exception {
 	  if (parser.nextToken() != JsonToken.START_OBJECT) {
 	    throw new Exception("Expected data to start with an Object");
 	  }
 
-	  List<TradeRecord> records = null;
+	  List<MarketTrade> records = null;
 	  int count = 0;
 	  String fieldValue = null;
 	  
@@ -158,11 +157,11 @@ public final class Mintpal extends TradeOperator {
 	   } else if (KEY_COUNT.equalsIgnoreCase(fieldName)) {
 		   count = parser.getIntValue();
 	   } else if (KEY_DATA.equalsIgnoreCase(fieldName)) {
-		   records = new ArrayList<TradeRecord>(count);
-		   TradeRecord re = null;
+		   records = new ArrayList<MarketTrade>(count);
+		   MarketTrade re = null;
 		   while (parser.nextToken() != JsonToken.END_ARRAY) {
 			   if (parser.getCurrentToken() == JsonToken.START_OBJECT) {
-				   re = new TradeRecord();
+				   re = new MarketTrade();
 				   parser.nextToken();
 			   } else if (parser.getCurrentToken() == JsonToken.END_OBJECT) {
 				   records.add(re);
@@ -176,9 +175,9 @@ public final class Mintpal extends TradeOperator {
 			   
 			   if (fieldName.equalsIgnoreCase("type")) {
 				   if (TYPE_BUY.equalsIgnoreCase(fieldValue)) {
-					   re.setTradeType(TradeRecord.TRADE_TYPE_BUY);
+					   re.setTradeType(MarketTrade.TRADE_TYPE_BUY);
 				   } else if (TYPE_SELL.equalsIgnoreCase(fieldValue)) {
-					   re.setTradeType(TradeRecord.TRADE_TYPE_SELL);
+					   re.setTradeType(MarketTrade.TRADE_TYPE_SELL);
 				   }
 			   } else if (fieldName.equalsIgnoreCase("price")) {
 				   re.setPrice(Double.valueOf(fieldValue));
@@ -210,7 +209,7 @@ public final class Mintpal extends TradeOperator {
 //		}
 //		System.out.println(SqlUtils.getInsertSql4TradeRecord(watchedSymbol, exchangeSymbol));
 		
-		Mintpal.instance().getMarketSummarys(exchangeSymbol);
+		Mintpal.instance().getMarketSummaries();
 		
 	}
 

@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.SqlUtils;
 import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.db.MyDbUtils;
-import org.omega.marketcrawler.entity.TradeRecord;
+import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.exchange.OperatorFactory;
 
 
@@ -44,12 +44,12 @@ public class HistoryDataFetcher extends Thread {
 				conn.createStatement().execute(SqlUtils.getCreateSql4MarketHistory(watchedSymbol, exchangeSymbol, operator));
 			}
 			
-			List<TradeRecord> records = OperatorFactory.get(operator).getHistory(watchedSymbol, exchangeSymbol);
+			List<MarketTrade> records = OperatorFactory.get(operator).getMarketTrades(watchedSymbol, exchangeSymbol);
 			
 			
 			prep = conn.prepareStatement(SqlUtils.preparedSql4History(watchedSymbol, exchangeSymbol, operator));
 			
-			for (TradeRecord re : records) {
+			for (MarketTrade re : records) {
 				// trade_time, trade_type, price, total_units, total_cost
 				prep.setLong(1, re.getTradeTime());
 				prep.setShort(2, re.getTradeType());
