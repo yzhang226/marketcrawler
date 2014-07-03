@@ -2,14 +2,13 @@ package org.omega.marketcrawler.entity;
 
 public class TradeRecord extends _BaseEntity {
 
-	private static final long serialVersionUID = -1558808898415695311L;
+	
+	private static final long serialVersionUID = -5408828461710055307L;
 	
 	public static final byte TRADE_TYPE_NA = 0;
 	public static final byte TRADE_TYPE_BUY = 1;
 	public static final byte TRADE_TYPE_SELL = 2;
 
-	
-	
 	private long tradeTime;
 	/**
 	 * NA - 0, buy - 1, sell - 2
