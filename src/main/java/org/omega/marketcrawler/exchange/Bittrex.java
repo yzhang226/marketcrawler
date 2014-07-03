@@ -3,18 +3,22 @@ package org.omega.marketcrawler.exchange;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.TradeRecord;
 import org.omega.marketcrawler.net.NetUtils;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class Bittrex extends TradeOperator {
 	
@@ -46,11 +50,71 @@ public final class Bittrex extends TradeOperator {
 	}
 	
 	// https://bittrex.com/api/v1/public/getmarkethistory?market=BTC-DOGE&count=5
+	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
+		StringBuilder api = new StringBuilder(getBaseAPI());
+		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
+		
+		return api.toString();
+	}
+	
+	// https://bittrex.com/api/v1/public/getmarketsummaries
+	public String getMarketSummaryAPI() {
+		StringBuilder api = new StringBuilder(getBaseAPI());
+		api.append("public/getmarketsummaries");
+		return api.toString();
+	}
+	
 	public String getHistoryJsonText(String watchedSymbol, String exchangeSymbol) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
 		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
 		
 		return NetUtils.accessDirectly(api.toString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<MarketSummary> getMarketSummarys() {
+		List<MarketSummary> records = null;
+		try {
+			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI());
+			ObjectMapper mapper = new ObjectMapper();
+			
+			LinkedHashMap<String, Object> map = mapper.readValue(recordText, LinkedHashMap.class);
+			
+			if (STATUS_TRUE.equals(String.valueOf(map.get(KEY_SUCCESS)))) {
+				records = new ArrayList<>(45);
+				List<Map<String, Object>> data = (List<Map<String, Object>>) map.get(KEY_RESULT);
+				MarketSummary summ = null;
+				for (Map<String, Object> da : data) {
+					summ = transfer(da);
+					if (summ != null) {
+						records.add(summ);
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error("try to get and convert json Market Summary to object error.", e);
+		}
+		
+		return records;
+	}
+	
+	private MarketSummary transfer(Map<String, Object> da) {
+		MarketSummary summ = new MarketSummary();
+		
+		String[] ss = da.get("MarketName").toString().split("-");
+		summ.setExchangeSymbol(ss[1]);
+		summ.setWatchedSymbol(ss[0]);
+		
+		if (da.get("Last") != null) summ.setLastPrice((double) da.get("Last"));
+		if (da.get("PrevDay") != null) summ.setYesterdayPrice((double) da.get("PrevDay"));
+//		summ.setChange(da.get("change"));
+		if (da.get("High") != null) summ.setHighest24h((double) da.get("High"));
+		if (da.get("Low") != null) summ.setLowest24h((double) da.get("Low"));
+		if (da.get("BaseVolume") != null) summ.setVolume24h((double) da.get("BaseVolume"));
+		if (da.get("Bid") != null) summ.setTopBid((double) da.get("Bid"));
+		if (da.get("Ask") != null) summ.setTopAsk((double) da.get("Ask"));
+		
+		return summ;
 	}
 	
 	/**
@@ -135,10 +199,15 @@ public final class Bittrex extends TradeOperator {
 //		Mintpal.instance().getHistory("DOGE", Symbol.BTC.name());
 		String watchedSymbol = "BC";
 		String exchangeSymbol = Symbol.BTC.name();
-		List<TradeRecord> records = Bittrex.instance().getHistory(watchedSymbol, exchangeSymbol);
-		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		for (TradeRecord r : records) {
-			System.out.println(sd.format(new Date(r.getTradeTime())) + ", " + r.toReadableText());
+//		List<TradeRecord> records = Bittrex.instance().getHistory(watchedSymbol, exchangeSymbol);
+//		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+//		for (TradeRecord r : records) {
+//			System.out.println(sd.format(new Date(r.getTradeTime())) + ", " + r.toReadableText());
+//		}
+		
+		List<MarketSummary> summs = Bittrex.instance().getMarketSummarys();
+		for (MarketSummary summ : summs) {
+			System.out.println(summ.toReadableText());
 		}
 	
 	}
