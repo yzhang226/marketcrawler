@@ -4,16 +4,17 @@ public class TradeRecord extends _BaseEntity {
 
 	private static final long serialVersionUID = -1558808898415695311L;
 	
-	public static final short TRADE_TYPE_SELL = new Short("1");
-	public static final short TRADE_TYPE_BUY = new Short("2");
-	public static final short TRADE_TYPE_NA = new Short("0");
+	public static final byte TRADE_TYPE_NA = 0;
+	public static final byte TRADE_TYPE_BUY = 1;
+	public static final byte TRADE_TYPE_SELL = 2;
+
 	
 	
 	private long tradeTime;
 	/**
-	 * sell - 0, buy - 1, NA - 9
+	 * NA - 0, buy - 1, sell - 2
 	 */
-	private short tradeType;
+	private byte tradeType;
 	private double price;
 	private double totalUnits;
 	private double totalCost;
@@ -23,10 +24,10 @@ public class TradeRecord extends _BaseEntity {
 	public void setTradeTime(long tradeTime) {
 		this.tradeTime = tradeTime;
 	}
-	public short getTradeType() {
+	public byte getTradeType() {
 		return tradeType;
 	}
-	public void setTradeType(short tradeType) {
+	public void setTradeType(byte tradeType) {
 		this.tradeType = tradeType;
 	}
 	public double getPrice() {
