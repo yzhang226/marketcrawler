@@ -37,8 +37,11 @@ public final class SystemWarmup {
 		AltCoinService altSer = new AltCoinService();
 		try {
 			List<String> watchedSymbols = altSer.findWatchedSymbols();
+			System.out.println(watchedSymbols);
 			List<WatchListItem> items = ser.findWatchedItmes(watchedSymbols);
-			
+			for (WatchListItem item : items) {
+				System.out.println(item.toReadableText());
+			}
 			ConstantPool.inst().getWatchedItmes().addAll(items);
 		} catch (Exception e) {
 			log.error("init watch list item error.", e);
@@ -48,6 +51,10 @@ public final class SystemWarmup {
 //		ConstantPool.inst().getWatchedItmes().addAll(altSer.findWatchedSymbols());
 		
 		
+	}
+	
+	public static void main(String[] args) {
+		inst().warmup();
 	}
 	
 }

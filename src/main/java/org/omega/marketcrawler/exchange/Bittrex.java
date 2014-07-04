@@ -106,8 +106,8 @@ public final class Bittrex extends TradeOperator {
 			summ = new MarketSummary();
 			summ.setOperator(NAME);
 			String[] ss = da.get("MarketName").toString().split("-");
-			summ.setExchangeSymbol(ss[1]);
-			summ.setWatchedSymbol(ss[0]);
+			summ.setWatchedSymbol(ss[1]);
+			summ.setExchangeSymbol(ss[0]);
 			
 			if (da.get("Last") != null) summ.setLastPrice((double) da.get("Last"));
 			if (da.get("PrevDay") != null) summ.setYesterdayPrice((double) da.get("PrevDay"));
