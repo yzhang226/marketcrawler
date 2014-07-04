@@ -1,6 +1,6 @@
 package org.omega.marketcrawler.exchange;
 
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,7 +27,7 @@ public final class Mintpal extends TradeOperator {
 	public static final String NAME = "mintpal";
 	private static final String VERSION = "v2";
 	
-	private static final int DEFAULT_LIMITATION = 100;
+	private static final int DEFAULT_LIMITATION = 50;
 	
 	public static final String STATUS_SUCCESS = "success";
 	public static final String TYPE_SELL = "SELL";
@@ -49,6 +49,8 @@ public final class Mintpal extends TradeOperator {
 	}
 	
 	// https://api.mintpal.com/v2/market/trades/{COIN}/{EXCHANGE}
+	// https://api.mintpal.com/v2/market/trades/{COIN}/{EXCHANGE}/{LIMIT} - 404, not implement
+	// maximum limit is 200.
 	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
 		api.append("market/trades/").append(watchedSymbol).append("/").append(exchangeSymbol);
@@ -87,11 +89,10 @@ public final class Mintpal extends TradeOperator {
 				records = new ArrayList<>(count);
 				List<Map<String, String>> data = (List<Map<String, String>>) map.get(KEY_DATA);
 				MarketSummary summ = null;
+				Timestamp curr = new Timestamp(System.currentTimeMillis());
 				for (Map<String, String> da : data) {
-					summ = transfer(da);
-					if (summ != null) {
-						records.add(summ);
-					}
+					summ = transfer(da, curr);
+					if (summ != null) { records.add(summ); }
 				}
 			}
 		} catch (Exception e) {
@@ -101,22 +102,28 @@ public final class Mintpal extends TradeOperator {
 		return records;
 	}
 	
-	private MarketSummary transfer(Map<String, String> da) {
-		MarketSummary summ = new MarketSummary();
-		
-		summ.setMarketId(Integer.valueOf(da.get("market_id")));
-		if (da.containsKey("coin")) summ.setCoinName(da.get("coin"));
-		summ.setWatchedSymbol(da.get("code"));
-		summ.setExchangeSymbol(da.get("exchange"));
-		summ.setLastPrice(Double.valueOf(da.get("last_price")));
-		summ.setYesterdayPrice(Double.valueOf(da.get("yesterday_price")));
-		summ.setChange(Double.valueOf(da.get("exchange")));
-		summ.setHighest24h(Double.valueOf(da.get("24hhigh")));
-		summ.setLowest24h(Double.valueOf(da.get("24hlow")));
-		summ.setVolume24h(Double.valueOf(da.get("24hlow")));
-		summ.setTopBid(Double.valueOf(da.get("top_bid")));
-		summ.setTopAsk(Double.valueOf(da.get("top_ask")));
-		
+	private MarketSummary transfer(Map<String, String> da, Timestamp curr) {
+		MarketSummary summ = null;
+		try {
+			summ = new MarketSummary();
+			summ.setOperator(NAME);
+			summ.setMarketId(Integer.valueOf(da.get("market_id")));
+			if (da.containsKey("coin")) summ.setCoinName(da.get("coin"));
+			summ.setWatchedSymbol(da.get("code"));
+			summ.setExchangeSymbol(da.get("exchange"));
+			summ.setLastPrice(Double.valueOf(da.get("last_price")));
+			summ.setYesterdayPrice(Double.valueOf(da.get("yesterday_price")));
+			summ.setFluctuation(Double.valueOf(da.get("change")));
+			summ.setHighest24h(Double.valueOf(da.get("24hhigh")));
+			summ.setLowest24h(Double.valueOf(da.get("24hlow")));
+			summ.setVolume24h(Double.valueOf(da.get("24hlow")));
+			summ.setTopBid(Double.valueOf(da.get("top_bid")));
+			summ.setTopAsk(Double.valueOf(da.get("top_ask")));
+			summ.setUpdateTime(curr);
+		} catch (Exception e) {
+			summ = null;
+			log.error("", e);
+		}
 		return summ;
 	}
 
@@ -202,14 +209,15 @@ public final class Mintpal extends TradeOperator {
 //		Mintpal.instance().getHistory("DOGE", Symbol.BTC.name());
 		String watchedSymbol = "BC";
 		String exchangeSymbol = Symbol.BTC.name();
-//		List<TradeRecord> records = Mintpal.instance().getHistory(watchedSymbol, exchangeSymbol);
+		List<MarketTrade> records = Mintpal.instance().getMarketTrades(watchedSymbol, exchangeSymbol);
 //		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ss");
-//		for (TradeRecord r : rs) {
-//			System.out.println(sd.format(new Date(r.getTradeTime())) + ", " + r.toReadableText());
-//		}
+		System.out.println("records.size() is  " + records.size());
+		for (MarketTrade r : records) {
+			System.out.println(r.toReadableText());
+		}
 //		System.out.println(SqlUtils.getInsertSql4TradeRecord(watchedSymbol, exchangeSymbol));
 		
-		Mintpal.instance().getMarketSummaries();
+//		Mintpal.instance().getMarketSummaries();
 		
 	}
 

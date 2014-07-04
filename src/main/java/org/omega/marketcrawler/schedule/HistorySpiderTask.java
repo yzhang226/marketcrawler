@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.exchange.Mintpal;
 import org.omega.marketcrawler.thread.HistoryDataFetcher;
 
@@ -19,7 +20,8 @@ public class HistorySpiderTask extends TimerTask {
 	
 	public void run() {
 		log.info("start HistorySpiderTask");
-		new HistoryDataFetcher("BC", Symbol.BTC.name(), Mintpal.NAME).start();;
+		WatchListItem item = new WatchListItem(Mintpal.NAME, "BC", Symbol.BTC.name());
+		new HistoryDataFetcher(item).start();;
 	}
 	
 	public static void main(String[] args) {

@@ -1,25 +1,36 @@
 package org.omega.marketcrawler.entity;
 
-import java.util.Map;
+import java.sql.Timestamp;
+
 
 public class MarketSummary extends _BaseEntity {
 
 	private static final long serialVersionUID = -7201154621168472099L;
 	
-	private int marketId;
-	private String coinName;
+	private String operator;
 	private String watchedSymbol;
 	private String exchangeSymbol;
+	private String coinName;
 	private double lastPrice;
 	private double yesterdayPrice;
-	private Double change;
+	// chnage
+	private Double fluctuation;
 	private double highest24h;
 	private double lowest24h;
 	private double volume24h;
+	private double coinVolume24h;
 	private double topBid;
 	private double topAsk;
+	private Timestamp updateTime;
+	private int marketId;
 	
 	// 
+	public String getOperator() {
+		return operator;
+	}
+	public void setOperator(String operator) {
+		this.operator = operator;
+	}
 	public int getMarketId() {
 		return marketId;
 	}
@@ -56,11 +67,11 @@ public class MarketSummary extends _BaseEntity {
 	public void setYesterdayPrice(double yesterdayPrice) {
 		this.yesterdayPrice = yesterdayPrice;
 	}
-	public Double getChange() {
-		return change;
+	public Double getFluctuation() {
+		return fluctuation;
 	}
-	public void setChange(Double change) {
-		this.change = change;
+	public void setFluctuation(Double fluctuation) {
+		this.fluctuation = fluctuation;
 	}
 	public double getHighest24h() {
 		return highest24h;
@@ -92,21 +103,35 @@ public class MarketSummary extends _BaseEntity {
 	public void setTopAsk(double topAsk) {
 		this.topAsk = topAsk;
 	}
+	public Timestamp getUpdateTime() {
+		return updateTime;
+	}
+	public void setUpdateTime(Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+	public double getCoinVolume24h() {
+		return coinVolume24h;
+	}
+	public void setCoinVolume24h(double coinVolume24h) {
+		this.coinVolume24h = coinVolume24h;
+	}
 	
 	public String toReadableText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(marketId).append(", ")
-		  .append(coinName).append(", ")
+		  .append(operator).append(", ")
 		  .append(watchedSymbol).append(", ")
 		  .append(exchangeSymbol).append(", ")
+		  .append(coinName).append(", ")
 		  .append(lastPrice).append(", ")
 		  .append(yesterdayPrice).append(", ")
-		  .append(change).append(", ")
+		  .append(fluctuation).append(", ")
 		  .append(highest24h).append(", ")
 		  .append(lowest24h).append(", ")
 		  .append(volume24h).append(", ")
 		  .append(topBid).append(", ")
-		  .append(topAsk).append(", ");
+		  .append(topAsk).append(", ")
+		  .append(updateTime).append(", ");
 		return sb.toString();
 	}
 

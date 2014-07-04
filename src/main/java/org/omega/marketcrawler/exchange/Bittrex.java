@@ -1,5 +1,6 @@
 package org.omega.marketcrawler.exchange;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,10 +83,11 @@ public final class Bittrex extends TradeOperator {
 			
 			if (STATUS_TRUE.equals(String.valueOf(map.get(KEY_SUCCESS)))) {
 				records = new ArrayList<>(45);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 				List<Map<String, Object>> data = (List<Map<String, Object>>) map.get(KEY_RESULT);
 				MarketSummary summ = null;
 				for (Map<String, Object> da : data) {
-					summ = transfer(da);
+					summ = transfer(da, sdf);
 					if (summ != null) {
 						records.add(summ);
 					}
@@ -98,22 +100,30 @@ public final class Bittrex extends TradeOperator {
 		return records;
 	}
 	
-	private MarketSummary transfer(Map<String, Object> da) {
-		MarketSummary summ = new MarketSummary();
-		
-		String[] ss = da.get("MarketName").toString().split("-");
-		summ.setExchangeSymbol(ss[1]);
-		summ.setWatchedSymbol(ss[0]);
-		
-		if (da.get("Last") != null) summ.setLastPrice((double) da.get("Last"));
-		if (da.get("PrevDay") != null) summ.setYesterdayPrice((double) da.get("PrevDay"));
-//		summ.setChange(da.get("change"));
-		if (da.get("High") != null) summ.setHighest24h((double) da.get("High"));
-		if (da.get("Low") != null) summ.setLowest24h((double) da.get("Low"));
-		if (da.get("BaseVolume") != null) summ.setVolume24h((double) da.get("BaseVolume"));
-		if (da.get("Bid") != null) summ.setTopBid((double) da.get("Bid"));
-		if (da.get("Ask") != null) summ.setTopAsk((double) da.get("Ask"));
-		
+	private MarketSummary transfer(Map<String, Object> da, SimpleDateFormat sdf) {
+		MarketSummary summ = null;
+		try {
+			summ = new MarketSummary();
+			summ.setOperator(NAME);
+			String[] ss = da.get("MarketName").toString().split("-");
+			summ.setExchangeSymbol(ss[1]);
+			summ.setWatchedSymbol(ss[0]);
+			
+			if (da.get("Last") != null) summ.setLastPrice((double) da.get("Last"));
+			if (da.get("PrevDay") != null) summ.setYesterdayPrice((double) da.get("PrevDay"));
+	//		summ.setChange(da.get("change"));
+			if (da.get("High") != null) summ.setHighest24h((double) da.get("High"));
+			if (da.get("Low") != null) summ.setLowest24h((double) da.get("Low"));
+			if (da.get("BaseVolume") != null) summ.setVolume24h((double) da.get("BaseVolume"));
+			if (da.get("Volume") != null) summ.setCoinVolume24h((double) da.get("Volume"));
+			if (da.get("Bid") != null) summ.setTopBid((double) da.get("Bid"));
+			if (da.get("Ask") != null) summ.setTopAsk((double) da.get("Ask"));
+			// "TimeStamp" : "2014-04-19T20:49:50.053"
+			if (da.get("TimeStamp") != null) summ.setUpdateTime(new Timestamp(sdf.parse((String) da.get("TimeStamp")).getTime()));
+		} catch (Exception e) {
+			summ = null;
+			log.error("", e);
+		}
 		return summ;
 	}
 	

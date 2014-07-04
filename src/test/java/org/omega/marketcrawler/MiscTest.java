@@ -40,7 +40,7 @@ public class MiscTest {
 
 		// Create a QueryRunner that will use connections from the given DataSource
 		QueryRunner run = new QueryRunner();
-		Connection conn = DbManager.getConnection();
+		Connection conn = DbManager.inst().getConnection();
 		// Execute the query and get the results back from the handler
 		List<Object[]> objs = run.query(conn, "SELECT * FROM bct_topic", h);
 		

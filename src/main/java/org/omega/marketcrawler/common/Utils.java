@@ -3,6 +3,8 @@ package org.omega.marketcrawler.common;
 import java.net.URL;
 import java.util.Collection;
 
+import org.omega.marketcrawler.entity.WatchListItem;
+
 public final class Utils {
 
 
@@ -29,6 +31,13 @@ public final class Utils {
 	public static String getResourcePath(String resource) {
 		URL url = Utils.class.getClassLoader().getResource(resource);
 		return url == null ? "" : url.getPath();
+	}
+	
+	public static String getMarketTradeTable(WatchListItem item) {
+		return new StringBuilder("trade_")
+		.append(item.getOperator().toLowerCase()).append("_")
+		.append(item.getExchangeSymbol().toLowerCase()).append("_")
+		.append(item.getWatchedSymbol().toLowerCase()).toString();
 	}
 	
 }
