@@ -118,7 +118,11 @@ public final class Bittrex extends TradeOperator {
 			if (da.get("Volume") != null) summ.setCoinVolume24h((double) da.get("Volume"));
 			if (da.get("Bid") != null) summ.setTopBid((double) da.get("Bid"));
 			if (da.get("Ask") != null) summ.setTopAsk((double) da.get("Ask"));
-			// "TimeStamp" : "2014-04-19T20:49:50.053"
+			// "TimeStamp" : "2014-04-19T20:49:50.053" PSEUDOCOIN 2014-07-07T05:16:07
+			String time = (String) da.get("TimeStamp");
+			if (time.length() < 20 ) {
+				time = time + ".000";
+			}
 			if (da.get("TimeStamp") != null) summ.setUpdateTime(new Timestamp(sdf.parse((String) da.get("TimeStamp")).getTime()));
 		} catch (Exception e) {
 			summ = null;

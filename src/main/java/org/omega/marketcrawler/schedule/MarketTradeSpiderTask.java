@@ -12,16 +12,16 @@ import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.exchange.Mintpal;
-import org.omega.marketcrawler.thread.HistoryDataFetcher;
+import org.omega.marketcrawler.thread.MarketTradeSpider;
 
-public class HistorySpiderTask extends TimerTask {
+public class MarketTradeSpiderTask extends TimerTask {
 	
-	private static final Log log = LogFactory.getLog(HistorySpiderTask.class);
+	private static final Log log = LogFactory.getLog(MarketTradeSpiderTask.class);
 	
 	public void run() {
 		log.info("start HistorySpiderTask");
 		WatchListItem item = new WatchListItem(Mintpal.NAME, "BC", Symbol.BTC.name());
-		new HistoryDataFetcher(item).start();;
+		new MarketTradeSpider(item).start();;
 	}
 	
 	public static void main(String[] args) {
@@ -39,7 +39,7 @@ public class HistorySpiderTask extends TimerTask {
 		long period = 1 * 60 * 1000;// 1 minute
 		
 		Timer timer = new Timer();
-		timer.schedule(new HistorySpiderTask(), c.getTime(), period);
+		timer.schedule(new MarketTradeSpiderTask(), c.getTime(), period);
 
 	}
 

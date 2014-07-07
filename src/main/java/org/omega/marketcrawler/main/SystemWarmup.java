@@ -1,12 +1,14 @@
-package org.omega.marketcrawler.common;
+package org.omega.marketcrawler.main;
 
 import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omega.marketcrawler.common.ConstantPool;
 import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.db.MarketSummaryService;
+import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.exchange.Bittrex;
 import org.omega.marketcrawler.exchange.Mintpal;
@@ -24,7 +26,7 @@ public final class SystemWarmup {
 	}
 	
 	public void warmup() {
-		// 
+		// first, fetch all market summaries
 		MarketSummaryService ser = new MarketSummaryService();
 		try {
 			ser.save(Mintpal.instance().getMarketSummaries());
@@ -39,18 +41,29 @@ public final class SystemWarmup {
 			List<String> watchedSymbols = altSer.findWatchedSymbols();
 			System.out.println(watchedSymbols);
 			List<WatchListItem> items = ser.findWatchedItmes(watchedSymbols);
+			
+			MarketTradeService mtser = new MarketTradeService();
 			for (WatchListItem item : items) {
-				System.out.println(item.toReadableText());
+				if (!mtser.existWatchedTable(item)) {
+					mtser.createWatchedTable(item);
+				}
 			}
+			log.info(getWatchedItemsInfo(items));
+			
 			ConstantPool.inst().getWatchedItmes().addAll(items);
 		} catch (Exception e) {
 			log.error("init watch list item error.", e);
 		}
 		
-		
-//		ConstantPool.inst().getWatchedItmes().addAll(altSer.findWatchedSymbols());
-		
-		
+	}
+	
+	private String getWatchedItemsInfo(List<WatchListItem> items) {
+		StringBuilder sb = new StringBuilder("There are ");
+		sb.append(items.size()).append(" coins that being watched.").append("\n");
+		for (WatchListItem item : items) {
+			sb.append(item.toReadableText()).append("|");
+		}
+		return sb.toString();
 	}
 	
 	public static void main(String[] args) {

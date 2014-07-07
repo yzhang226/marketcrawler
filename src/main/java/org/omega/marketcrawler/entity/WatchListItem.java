@@ -90,6 +90,14 @@ public class WatchListItem extends _BaseEntity {
 		return sb.toString();
 	}
 	
+	public String toSimpleText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(operator).append("_")
+		.append(watchedSymbol).append("_")
+		.append(exchangeSymbol).append("_");
+		return sb.toString();
+	}
+	
 	
 	
 }

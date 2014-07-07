@@ -27,7 +27,7 @@ public final class Mintpal extends TradeOperator {
 	public static final String NAME = "mintpal";
 	private static final String VERSION = "v2";
 	
-	private static final int DEFAULT_LIMITATION = 50;
+//	private static final int DEFAULT_LIMITATION = 50;
 	
 	public static final String STATUS_SUCCESS = "success";
 	public static final String TYPE_SELL = "SELL";

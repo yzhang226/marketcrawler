@@ -10,35 +10,31 @@ import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.exchange.OperatorFactory;
 
-public class HistoryDataFetcher extends Thread {
+public class MarketTradeSpider extends Thread {
 	
-	private static final Log log = LogFactory.getLog(HistoryDataFetcher.class);
+	private static final Log log = LogFactory.getLog(MarketTradeSpider.class);
 	
 	private WatchListItem item;
 	
-	public HistoryDataFetcher(WatchListItem item) {
+	public MarketTradeSpider(WatchListItem item) {
 		this.item = item;
 	}
 	
 	public void run() {
+		setName(item.toSimpleText() + "");
+		
 		long start = System.currentTimeMillis();
-		log.info("start HistoryDataFetcher");
+		log.info("start");
 		
 		try {
-			MarketTradeService mtser = new MarketTradeService();
-			if (!mtser.existWatchedTable(item)) {
-				mtser.createWatchedTable(item);
-			}
-			
 			List<MarketTrade> records = OperatorFactory.getMarketTrades(item);
-			mtser.save(item, records);
+			new MarketTradeService().save(item, records);
 		} catch (SQLException e) {
 			log.error("fetch [" + item.toReadableText() + "]'s market data error.", e);
 		}
 		
 		long end = System.currentTimeMillis();
-		log.info("end HistoryDataFetcher, total spent time is [" + (end -start) + "].");
-
+		log.info("end, total spent time is [" + (end -start) + "].");
 	}
 
 }
