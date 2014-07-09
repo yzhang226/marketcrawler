@@ -58,7 +58,6 @@ public class MarketSummaryService {
 		return DbManager.inst().batch(sql.toString(), params);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<MarketSummary> findAll() throws SQLException {
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
 		BeanListHandler<MarketSummary> handler = new BeanListHandler<>(MarketSummary.class, rowProcessor);
@@ -66,7 +65,6 @@ public class MarketSummaryService {
 		return (List<MarketSummary>) DbManager.inst().query("select * from market_summary",  handler);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<WatchListItem> findWatchedItmes(List<String> watchedSymbols) throws SQLException {
 		if (Utils.isEmpty(watchedSymbols)) return new ArrayList<>(0);
 		

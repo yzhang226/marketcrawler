@@ -16,11 +16,16 @@ public class AltCoinService {
 	public static final byte STATUS_WATCHED = 11;
 	
 	public List<String> findWatchedSymbols() throws SQLException {
-		String sql = "select abbr_name from alt_coin where status = " + STATUS_WATCHED;
+		String sql = "select abbr_name from alt_coin where status = " + STATUS_WATCHED ;// + " limit 1"
 		
 		ColumnListHandler<String> handler = new ColumnListHandler<>(1);
 		
-		return (List<String>) DbManager.inst().query(sql, handler);
+		List<String> symbols = DbManager.inst().query(sql, handler);
+		
+//		symbols = new ArrayList<>();
+//		symbols.add("VRC");
+		
+		return symbols;
 	}
 	
 	public static void main(String[] args) throws SQLException {

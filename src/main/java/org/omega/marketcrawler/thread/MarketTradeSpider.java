@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omega.marketcrawler.common.MyCache;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -21,20 +23,31 @@ public class MarketTradeSpider extends Thread {
 	}
 	
 	public void run() {
-		setName(item.toSimpleText() + "");
+		setName(item.toSimpleText());
 		
 		long start = System.currentTimeMillis();
-		log.info("start");
-		
+		MarketTradeService ser = new MarketTradeService();
+		StringBuilder info = new StringBuilder();
 		try {
 			List<MarketTrade> records = OperatorFactory.getMarketTrades(item);
-			new MarketTradeService().save(item, records);
+			Utils.removeRepeated(item, records);
+			int[] resu = ser.save(item, records);
+			
+			int updated = Utils.countBatchResult(resu);
+			if (updated > 0) {
+				// update cache
+				for (MarketTrade mt : records) {
+					MyCache.inst().addKey(item, mt.getTradeTime());
+				}
+				info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
+			}
 		} catch (SQLException e) {
 			log.error("fetch [" + item.toReadableText() + "]'s market data error.", e);
 		}
 		
-		long end = System.currentTimeMillis();
-		log.info("end, total spent time is [" + (end -start) + "].");
+		info.insert(0, "end crawler, total spent time is [" + (System.currentTimeMillis() - start) + "].");
+		
+		log.info(info.toString());
 	}
 
 }

@@ -84,17 +84,17 @@ public class WatchListItem extends _BaseEntity {
 	
 	public String toReadableText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(operator).append(",")
-		.append(watchedSymbol).append(",")
-		.append(exchangeSymbol).append(",");
+		sb.append(operator).append("_")
+		.append(exchangeSymbol).append("_")
+		.append(watchedSymbol);
 		return sb.toString();
 	}
 	
 	public String toSimpleText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(operator).append("_")
-		.append(watchedSymbol).append("_")
-		.append(exchangeSymbol).append("_");
+		.append(exchangeSymbol.toLowerCase()).append("_")
+		.append(watchedSymbol.toLowerCase());
 		return sb.toString();
 	}
 	

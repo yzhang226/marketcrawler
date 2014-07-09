@@ -10,8 +10,7 @@
 	</appender>
 	
 	<appender name="rollingAppender" class="org.apache.log4j.RollingFileAppender" >
-<!-- 		<param name="File" value="/opt/apache-tomcat-7.0.42/logs/mediation.log" /> -->
-		<param name="File" value="/storage/log/market_crawler.log" />
+		<param name="File" value="/programs/marketcrawler/market_crawler.log" />
 		<param name="MaxFileSize" value="10MB"/>
         <param name="MaxBackupIndex" value="5"/>
 		<param name="Append" value="true" />
@@ -30,7 +29,7 @@
 	<root>
 		<priority value="INFO" />
 		<appender-ref ref="STDOUT" />
-<!-- 		<appender-ref ref="rollingAppender" /> -->
+		<appender-ref ref="rollingAppender" />
 	</root>
 </log4j:configuration>
 

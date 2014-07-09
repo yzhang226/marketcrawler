@@ -1,19 +1,20 @@
 package org.omega.marketcrawler.exchange;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
+import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.net.NetUtils;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -65,12 +66,12 @@ public final class Bittrex extends TradeOperator {
 		return api.toString();
 	}
 	
-	public String getHistoryJsonText(String watchedSymbol, String exchangeSymbol) {
-		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
-		
-		return NetUtils.accessDirectly(api.toString());
-	}
+//	public String getHistoryJsonText(String watchedSymbol, String exchangeSymbol) {
+//		StringBuilder api = new StringBuilder(getBaseAPI());
+//		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
+//		
+//		return NetUtils.accessDirectly(api.toString());
+//	}
 	
 	@SuppressWarnings("unchecked")
 	public List<MarketSummary> getMarketSummaries() {
@@ -109,21 +110,21 @@ public final class Bittrex extends TradeOperator {
 			summ.setWatchedSymbol(ss[1]);
 			summ.setExchangeSymbol(ss[0]);
 			
-			if (da.get("Last") != null) summ.setLastPrice((double) da.get("Last"));
-			if (da.get("PrevDay") != null) summ.setYesterdayPrice((double) da.get("PrevDay"));
+			if (da.get("Last") != null) summ.setLastPrice((Double) da.get("Last"));
+			if (da.get("PrevDay") != null) summ.setYesterdayPrice((Double) da.get("PrevDay"));
 	//		summ.setChange(da.get("change"));
-			if (da.get("High") != null) summ.setHighest24h((double) da.get("High"));
-			if (da.get("Low") != null) summ.setLowest24h((double) da.get("Low"));
-			if (da.get("BaseVolume") != null) summ.setVolume24h((double) da.get("BaseVolume"));
-			if (da.get("Volume") != null) summ.setCoinVolume24h((double) da.get("Volume"));
-			if (da.get("Bid") != null) summ.setTopBid((double) da.get("Bid"));
-			if (da.get("Ask") != null) summ.setTopAsk((double) da.get("Ask"));
+			if (da.get("High") != null) summ.setHighest24h((Double) da.get("High"));
+			if (da.get("Low") != null) summ.setLowest24h((Double) da.get("Low"));
+			if (da.get("BaseVolume") != null) summ.setVolume24h((Double) da.get("BaseVolume"));
+			if (da.get("Volume") != null) summ.setCoinVolume24h((Double) da.get("Volume"));
+			if (da.get("Bid") != null) summ.setTopBid((Double) da.get("Bid"));
+			if (da.get("Ask") != null) summ.setTopAsk((Double) da.get("Ask"));
 			// "TimeStamp" : "2014-04-19T20:49:50.053" PSEUDOCOIN 2014-07-07T05:16:07
 			String time = (String) da.get("TimeStamp");
 			if (time.length() < 20 ) {
 				time = time + ".000";
 			}
-			if (da.get("TimeStamp") != null) summ.setUpdateTime(new Timestamp(sdf.parse((String) da.get("TimeStamp")).getTime()));
+			if (da.get("TimeStamp") != null) summ.setUpdateTime(new Timestamp(sdf.parse(time).getTime()));
 		} catch (Exception e) {
 			summ = null;
 			log.error("", e);
@@ -138,7 +139,7 @@ public final class Bittrex extends TradeOperator {
 	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
 		List<MarketTrade> records = null;
 		try {
-			String recordText = getHistoryJsonText(watchedSymbol, exchangeSymbol);
+			String recordText = NetUtils.accessDirectly(getMarketTradeAPI(watchedSymbol, exchangeSymbol));
 			JsonFactory jfactory = new JsonFactory();
 			JsonParser parser = jfactory.createParser(recordText);
 			records = readData(parser);
@@ -195,6 +196,9 @@ public final class Bittrex extends TradeOperator {
 				   } else if (fieldName.equalsIgnoreCase("TimeStamp")) {// 2014-02-25T07:40:08.68
 					   long millsec = 0;
 					   try {
+							if (fieldValue.length() < 20 ) {
+								fieldValue = fieldValue + ".000";
+							}
 						   millsec = sdf.parse(fieldValue).getTime();
 					   } catch (Exception e) {
 						   log.error("parse date text[" + fieldValue + "] error.", e);
@@ -209,20 +213,23 @@ public final class Bittrex extends TradeOperator {
 		  return records;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 //		Mintpal.instance().getHistory("DOGE", Symbol.BTC.name());
-		String watchedSymbol = "BC";
-		String exchangeSymbol = Symbol.BTC.name();
-//		List<TradeRecord> records = Bittrex.instance().getHistory(watchedSymbol, exchangeSymbol);
+//		String watchedSymbol = "URO";
+//		String exchangeSymbol = Symbol.BTC.name();
+		WatchListItem item = new WatchListItem(NAME, "URO", Symbol.BTC.name());
+		List<MarketTrade> records = Bittrex.instance().getMarketTrades(item.getWatchedSymbol(), item.getExchangeSymbol());
+		MarketTradeService tser = new MarketTradeService();
+		tser.save(item, records);
 //		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 //		for (TradeRecord r : records) {
 //			System.out.println(sd.format(new Date(r.getTradeTime())) + ", " + r.toReadableText());
 //		}
 		
-		List<MarketSummary> summs = Bittrex.instance().getMarketSummaries();
-		for (MarketSummary summ : summs) {
-			System.out.println(summ.toReadableText());
-		}
+//		List<MarketSummary> summs = Bittrex.instance().getMarketSummaries();
+//		for (MarketSummary summ : summs) {
+//			System.out.println(summ.toReadableText());
+//		}
 	
 	}
 

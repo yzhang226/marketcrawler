@@ -3,6 +3,11 @@ package org.omega.marketcrawler.db;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ArrayHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
@@ -19,7 +24,7 @@ public class MarketTradeService {
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO ").append(getMarketTradeTable(item)).append(" (")
 		  .append("trade_time, trade_type, price, total_units, total_cost").append(") VALUES (?, ?, ?, ?, ?)")
-		  .append(" ON DUPLICATE KEY UPDATE total_cost=VALUES(total_cost)");
+		  .append(" ON DUPLICATE KEY UPDATE total_cost=total_cost");
 		return sb.toString();
 	}
 	
@@ -54,6 +59,25 @@ public class MarketTradeService {
 			params[i][4] = records.get(i).getTotalCost();
 		}
 		return DbManager.inst().batch(preparedSql4MarketTrade(item), params);
+	}
+	
+	public Long getCount(WatchListItem item) throws SQLException {
+		ResultSetHandler<Object[]> handler = new ArrayHandler();
+		Object[] resu = (Object[]) DbManager.inst().query("select count(*) from " + getMarketTradeTable(item), handler);
+		return (Long) resu[0];
+	}
+	
+	public List<Long> findAllTradeTimes(WatchListItem item) throws SQLException {
+		ColumnListHandler<Long> handler = new ColumnListHandler<>(1);
+		List<Long> resu = DbManager.inst().query("select trade_time from " + getMarketTradeTable(item), handler);
+		return resu;
+	}
+	
+	public static void main(String[] args) throws SQLException {
+		WatchListItem item = new WatchListItem("mintpal", "VRC", Symbol.BTC.name());
+		MarketTradeService tser = new MarketTradeService();
+//		System.out.println(tser.getCount(item));
+		System.out.println(tser.findAllTradeTimes(item));
 	}
 	
 }

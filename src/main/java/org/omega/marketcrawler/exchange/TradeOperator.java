@@ -29,7 +29,7 @@ public abstract class TradeOperator {
 	 * @param exchangeSymbol - for example: BTC
 	 * @return
 	 */
-	public abstract String getHistoryJsonText(String watchedSymbol, String exchangeSymbol);
+//	public abstract String getHistoryJsonText(String watchedSymbol, String exchangeSymbol);
 	
 	public abstract List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol);
 	

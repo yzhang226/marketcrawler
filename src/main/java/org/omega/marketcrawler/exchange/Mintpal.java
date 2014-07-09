@@ -67,11 +67,6 @@ public final class Mintpal extends TradeOperator {
 		return api.toString();
 	}
 	
-	
-	public String getHistoryJsonText(String watchedSymbol, String exchangeSymbol) {
-		return NetUtils.accessDirectly(getMarketTradeAPI(watchedSymbol, exchangeSymbol));
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<MarketSummary> getMarketSummaries() {
 		List<MarketSummary> records = null;
@@ -133,10 +128,16 @@ public final class Mintpal extends TradeOperator {
 	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
 		List<MarketTrade> records = null;
 		try {
-			String recordText = getHistoryJsonText(watchedSymbol, exchangeSymbol);
+			String recordText = NetUtils.accessDirectly(getMarketTradeAPI(watchedSymbol, exchangeSymbol));
 			JsonFactory jfactory = new JsonFactory();
 			JsonParser parser = jfactory.createParser(recordText);
 			records = readMarketTrades(parser);
+			
+//			for (MarketTrade mt : records) {
+//				log.info(mt.toReadableText());
+//				break;
+//			}
+			
 		} catch (Exception e) {
 			log.error("try to get and convert json history to object error.", e);
 		}

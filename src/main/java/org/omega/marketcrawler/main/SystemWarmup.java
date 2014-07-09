@@ -2,10 +2,12 @@ package org.omega.marketcrawler.main;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omega.marketcrawler.common.ConstantPool;
+import org.omega.marketcrawler.common.MyCache;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.db.MarketSummaryService;
 import org.omega.marketcrawler.db.MarketTradeService;
@@ -45,12 +47,24 @@ public final class SystemWarmup {
 			MarketTradeService mtser = new MarketTradeService();
 			for (WatchListItem item : items) {
 				if (!mtser.existWatchedTable(item)) {
+					log.info("create trade table for item[" + item.toSimpleText() + "].");
 					mtser.createWatchedTable(item);
 				}
 			}
 			log.info(getWatchedItemsInfo(items));
 			
-			ConstantPool.inst().getWatchedItmes().addAll(items);
+			MyCache.inst().getWatchedItmes().addAll(items);
+			
+			for (WatchListItem it : items) {
+				List<Long> keys = mtser.findAllTradeTimes(it);
+				if (Utils.isNotEmpty(keys)) {
+					Set<Long> itemKeys = MyCache.inst().getCachedKeys(it);
+					for (Long tt : keys) {
+						itemKeys.add(tt);
+					}
+				}
+			}
+			
 		} catch (Exception e) {
 			log.error("init watch list item error.", e);
 		}
@@ -59,7 +73,7 @@ public final class SystemWarmup {
 	
 	private String getWatchedItemsInfo(List<WatchListItem> items) {
 		StringBuilder sb = new StringBuilder("There are ");
-		sb.append(items.size()).append(" coins that being watched.").append("\n");
+		sb.append(items.size()).append(" items that being watched.").append("\n");
 		for (WatchListItem item : items) {
 			sb.append(item.toReadableText()).append("|");
 		}

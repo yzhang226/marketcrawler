@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Default options loaded by BoneCP. Modify as per your needs. This file has
+     been automatically generated. -->
+<bonecp-config>
+	<default-config>
+		<!-- <property name="poolName">(null or no default value)</property> -->
+	</default-config>
+	
+	<named-config name="market">
+		<property name="minConnectionsPerPartition">1</property>
+		<property name="maxConnectionsPerPartition">10</property>
+		<property name="acquireIncrement">1</property>
+		<property name="partitionCount">1</property>
+
+		<property name="jdbcUrl">jdbc:mysql://localhost:3306/core_crawler?zeroDateTimeBehavior=convertToNull</property>
+		<property name="username">root</property>
+		<property name="password">6567zhyf</property>
+
+		<property name="idleConnectionTestPeriodInMinutes">0</property>
+		<property name="idleMaxAgeInMinutes">60</property>
+		<property name="statementsCacheSize">10</property>
+		<property name="closeConnectionWatch">false</property>
+		<property name="connectionTimeoutInMs">0</property>
+		<property name="closeConnectionWatchTimeoutInMs">0</property>
+
+		<property name="defaultAutoCommit">true</property>
+		<property name="defaultReadOnly">false</property>
+	</named-config>
+	
+</bonecp-config>
