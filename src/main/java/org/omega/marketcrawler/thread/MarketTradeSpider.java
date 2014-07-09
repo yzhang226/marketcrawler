@@ -37,7 +37,7 @@ public class MarketTradeSpider extends Thread {
 			if (updated > 0) {
 				// update cache
 				for (MarketTrade mt : records) {
-					MyCache.inst().addKey(item, mt.getTradeTime());
+					MyCache.inst().addPK(item, mt.getTradeTime());
 				}
 				info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
 			}

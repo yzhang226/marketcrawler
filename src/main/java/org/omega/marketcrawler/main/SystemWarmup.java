@@ -58,7 +58,7 @@ public final class SystemWarmup {
 			for (WatchListItem it : items) {
 				List<Long> keys = mtser.findAllTradeTimes(it);
 				if (Utils.isNotEmpty(keys)) {
-					Set<Long> itemKeys = MyCache.inst().getCachedKeys(it);
+					Set<Long> itemKeys = MyCache.inst().getCachedPKs(it);
 					for (Long tt : keys) {
 						itemKeys.add(tt);
 					}

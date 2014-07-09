@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.job.MarketTradeCrawlerJob;
-import org.omega.marketcrawler.job.SystemWarmupJob;
+import org.omega.marketcrawler.job.WatchNewCoinsJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -17,8 +17,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
-
-import com.mchange.v2.cfg.MultiPropertiesConfig;
 
 
 public final class SystemLauncher extends Thread {
@@ -58,10 +56,10 @@ public final class SystemLauncher extends Thread {
 	            		        		  SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
 	                              .build();
             
-            JobDetail warmupJob = JobBuilder.newJob(SystemWarmupJob.class).withIdentity("warmupjob", "warmupgroup").build();
+            JobDetail warmupJob = JobBuilder.newJob(WatchNewCoinsJob.class).withIdentity("warmupjob", "warmupgroup").build();
             Trigger warmupTri = TriggerBuilder.newTrigger().withIdentity("warmupTri", "warmupTriGrop")
-  		          			.startAt(Utils.addSeconds(curr, 6 * Utils.SECONDS_ONE_HOUR)).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(6).repeatForever())
+  		          			.startAt(Utils.addSeconds(curr, 15 * 60)).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
   		          			.build();
             
             // Tell quartz to schedule the job using our trigger

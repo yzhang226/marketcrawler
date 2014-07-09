@@ -18,28 +18,42 @@ public final class MyCache {
 	}
 	
 	// 
-	private Map<WatchListItem, Set<Long>> pooledKeys = new HashMap<>();
-	private Set<WatchListItem> watchedItmes = new HashSet<>();
+	private Map<WatchListItem, Set<Long>> pooledPKs = new HashMap<>();
+	private Set<WatchListItem> watchedItems = new HashSet<>();
+	private Set<String> watchedSymbols = new HashSet<>();
 	
 	public Set<WatchListItem> getWatchedItmes() {
-		return watchedItmes;
+		return watchedItems;
 	}
 	
-	public Set<Long> getCachedKeys(WatchListItem item) {
-		Set<Long> keys = pooledKeys.get(item);
+	public Set<String> getWatchedSymbols() {
+		return watchedSymbols;
+	}
+	
+	public boolean cointainsItem(WatchListItem item) {
+		return watchedItems.contains(item);
+	}
+	
+	public boolean containsSymbol(String symbol) {
+		return watchedSymbols.contains(symbol);
+	}
+	
+	
+	public Set<Long> getCachedPKs(WatchListItem item) {
+		Set<Long> keys = pooledPKs.get(item);
 		if (Utils.isEmpty(keys)) {
 			keys = new HashSet<>(300);
-			pooledKeys.put(item, keys);
+			pooledPKs.put(item, keys);
 		}
 		return keys;
 	}
 	
 	public boolean containsKey(WatchListItem item, Long key) {
-		return getCachedKeys(item).contains(key);
+		return getCachedPKs(item).contains(key);
 	}
 	
-	public boolean addKey(WatchListItem item, Long key) {
-		return getCachedKeys(item).add(key);
+	public boolean addPK(WatchListItem item, Long key) {
+		return getCachedPKs(item).add(key);
 	}
 	
 	

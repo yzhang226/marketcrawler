@@ -16,6 +16,11 @@ public class Misc2Test {
 		System.out.println(ddd);
 		NumberFormat formatter = new DecimalFormat("#.##");     
 		System.out.println(formatter.format(ddd));
+		
+		double x = 1.9841269841;
+		System.out.println(String.format("%1$.1fy", x));
+		System.out.println(String.format("%1$.2fy", x));
+		
 	}
 	
 }

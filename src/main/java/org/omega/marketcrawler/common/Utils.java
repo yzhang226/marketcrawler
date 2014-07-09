@@ -73,6 +73,8 @@ public final class Utils {
 	}
 	
 	public static void removeRepeated(WatchListItem item, List<MarketTrade> records) {
+		if (isEmpty(records)) return;
+		
 		Iterator<MarketTrade> iter = records.iterator();
 		MarketTrade nxt = null;
 		while (iter.hasNext()) {
