@@ -28,7 +28,7 @@
 	
 	<root>
 		<priority value="INFO" />
-		<!-- <appender-ref ref="STDOUT" /> -->
+		<appender-ref ref="STDOUT" />
 		<appender-ref ref="rollingAppender" />
 	</root>
 </log4j:configuration>

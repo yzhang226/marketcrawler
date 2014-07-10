@@ -11,16 +11,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.net.NetUtils;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class Bittrex extends TradeOperator {
 	
@@ -32,8 +27,7 @@ public final class Bittrex extends TradeOperator {
 	private static final String VERSION = "v1";
 	
 	// count	optional	a number between 1-100 for the number of entries to return (default = 20)
-	private static final int DEFAULT_LIMITATION = 20;
-	
+//	private static final int DEFAULT_LIMITATION = 20;
 	
 	public static final String STATUS_TRUE = "true";
 	
@@ -41,24 +35,23 @@ public final class Bittrex extends TradeOperator {
 	public static final String KEY_MESSAGE = "message";
 	public static final String KEY_RESULT = "result";
 	
+	public static final String TIME_PATTERN_BITTREX = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+	
 	private Bittrex() {}
 	
 	public static Bittrex instance() {
 		return inst;
 	}
 	
+	@Override
+	public String getName() {
+		return NAME;
+	}
+	
 	public String getBaseAPI() {
 		return new StringBuilder("https://bittrex.com/api/").append(VERSION).append("/").toString();
 	}
-	
-	// https://bittrex.com/api/v1/public/getmarkethistory?market=BTC-DOGE&count=5
-	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
-		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
-		
-		return api.toString();
-	}
-	
+
 	// https://bittrex.com/api/v1/public/getmarketsummaries
 	public String getMarketSummaryAPI() {
 		StringBuilder api = new StringBuilder(getBaseAPI());
@@ -66,151 +59,97 @@ public final class Bittrex extends TradeOperator {
 		return api.toString();
 	}
 	
-//	public String getHistoryJsonText(String watchedSymbol, String exchangeSymbol) {
-//		StringBuilder api = new StringBuilder(getBaseAPI());
-//		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
-//		
-//		return NetUtils.accessDirectly(api.toString());
-//	}
+	// https://bittrex.com/api/v1/public/getmarkethistory?market=BTC-DOGE&count=5
+	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
+		StringBuilder api = new StringBuilder(getBaseAPI());
+		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
+		return api.toString();
+	}
+	
 	
 	@SuppressWarnings("unchecked")
-	public List<MarketSummary> getMarketSummaries() {
+	public List<MarketSummary> transferJsonToMarketSummary(Object jsonObj) {
+		LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) jsonObj;
 		List<MarketSummary> records = null;
-		try {
-			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI());
-			ObjectMapper mapper = new ObjectMapper();
-			
-			LinkedHashMap<String, Object> map = mapper.readValue(recordText, LinkedHashMap.class);
-			
-			if (STATUS_TRUE.equals(String.valueOf(map.get(KEY_SUCCESS)))) {
-				records = new ArrayList<>(45);
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-				List<Map<String, Object>> data = (List<Map<String, Object>>) map.get(KEY_RESULT);
-				MarketSummary summ = null;
-				for (Map<String, Object> da : data) {
-					summ = transfer(da, sdf);
-					if (summ != null) {
-						records.add(summ);
+		
+		if (STATUS_TRUE.equals(String.valueOf(json.get(KEY_SUCCESS)))) {
+			records = new ArrayList<>(45);
+			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+			List<Map<String, Object>> data = (List<Map<String, Object>>) json.get(KEY_RESULT);
+			MarketSummary summ = null;
+			Object field = null;
+			for (Map<String, Object> da : data) {
+				summ = new MarketSummary();
+				try {
+					summ.setOperator(NAME);
+					String[] ss = da.get("MarketName").toString().split("-");
+					summ.setWatchedSymbol(ss[1]);
+					summ.setExchangeSymbol(ss[0]);
+					
+					if ((field = da.get("Last")) != null) summ.setLastPrice((Double) field);
+					if ((field = da.get("PrevDay")) != null) summ.setYesterdayPrice((Double) field);
+					if ((field = da.get("High")) != null) summ.setHighest24h((Double) field);
+					if ((field = da.get("Low")) != null) summ.setLowest24h((Double) field);
+					if ((field = da.get("BaseVolume")) != null) summ.setVolume24h((Double) field);
+					if ((field = da.get("Volume")) != null) summ.setCoinVolume24h((Double) field);
+					if ((field = da.get("Bid")) != null) summ.setTopBid((Double) field);
+					if ((field = da.get("Ask")) != null) summ.setTopAsk((Double) field);
+					if ((field = da.get("TimeStamp")) != null) {// "2014-04-19T20:49:50.053" 2014-07-07T05:16:07
+						long millonSec = parseMillsecs((String) field, sdf);
+						summ.setUpdateTime(new Timestamp(millonSec));
 					}
+				} catch (Exception e) {
+					summ = null;
+					log.error("convert one json row error.", e);
 				}
+				if (summ != null) { records.add(summ); }
 			}
-		} catch (Exception e) {
-			log.error("try to get and convert json Market Summary to object error.", e);
 		}
 		
 		return records;
 	}
 	
-	private MarketSummary transfer(Map<String, Object> da, SimpleDateFormat sdf) {
-		MarketSummary summ = null;
+	
+	@SuppressWarnings("unchecked")
+	public List<MarketTrade> transferJsonToMarketTrade(Object jsonObj) {
+		LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) jsonObj;
+		List<MarketTrade> records = null;
+		if (STATUS_TRUE.equals(String.valueOf(json.get(KEY_SUCCESS)))) {
+			records = new ArrayList<>(25);
+			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+			List<Map<String, Object>> data = (List<Map<String, Object>>) json.get(KEY_RESULT);
+			MarketTrade re = null;
+			Object field = null;
+			for (Map<String, Object> da : data) {
+				re = new MarketTrade();
+				try {
+					if ((field = da.get("Price")) != null) { re.setPrice((Double) field); }
+					if ((field = da.get("Quantity")) != null) { re.setTotalUnits((Double) field); }
+					if ((field = da.get("Total")) != null) { re.setTotalCost((Double) field); }
+					if ((field = da.get("TimeStamp")) != null) {  re.setTradeTime(parseMillsecs((String) field, sdf)); }
+				} catch (Exception e) {
+					re = null;
+					log.error("convert one json row error.", e);
+				}
+				if (re != null) { records.add(re); }
+			}
+		}
+		
+		return records;
+	}
+
+	private long parseMillsecs(String time, SimpleDateFormat sdf) {
+		long millsec = 0;
 		try {
-			summ = new MarketSummary();
-			summ.setOperator(NAME);
-			String[] ss = da.get("MarketName").toString().split("-");
-			summ.setWatchedSymbol(ss[1]);
-			summ.setExchangeSymbol(ss[0]);
-			
-			if (da.get("Last") != null) summ.setLastPrice((Double) da.get("Last"));
-			if (da.get("PrevDay") != null) summ.setYesterdayPrice((Double) da.get("PrevDay"));
-	//		summ.setChange(da.get("change"));
-			if (da.get("High") != null) summ.setHighest24h((Double) da.get("High"));
-			if (da.get("Low") != null) summ.setLowest24h((Double) da.get("Low"));
-			if (da.get("BaseVolume") != null) summ.setVolume24h((Double) da.get("BaseVolume"));
-			if (da.get("Volume") != null) summ.setCoinVolume24h((Double) da.get("Volume"));
-			if (da.get("Bid") != null) summ.setTopBid((Double) da.get("Bid"));
-			if (da.get("Ask") != null) summ.setTopAsk((Double) da.get("Ask"));
-			// "TimeStamp" : "2014-04-19T20:49:50.053" PSEUDOCOIN 2014-07-07T05:16:07
-			String time = (String) da.get("TimeStamp");
-			if (time.length() < 20 ) {
+			if (Utils.isNotEmpty(time) && time.length() < 20) {
 				time = time + ".000";
 			}
-			if (da.get("TimeStamp") != null) summ.setUpdateTime(new Timestamp(sdf.parse(time).getTime()));
+			if (Utils.isNotEmpty(time)) millsec = sdf.parse(time).getTime();
 		} catch (Exception e) {
-			summ = null;
-			log.error("", e);
+			log.error("parse date text[" + time + "] error.", e);
 		}
-		return summ;
-	}
-	
-	/**
-	 *
-	 * @see org.omega.marketcrawler.exchange.TradeOperator#getMarketTrades(java.lang.String, java.lang.String)
-	 */
-	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
-		List<MarketTrade> records = null;
-		try {
-			String recordText = NetUtils.accessDirectly(getMarketTradeAPI(watchedSymbol, exchangeSymbol));
-			JsonFactory jfactory = new JsonFactory();
-			JsonParser parser = jfactory.createParser(recordText);
-			records = readData(parser);
-		} catch (Exception e) {
-			log.error("try to get and convert json history to object error.", e);
-		}
-		
-		return records;
-	}
-	
-	private List<MarketTrade> readData(JsonParser parser) throws Exception {
-		  if (parser.nextToken() != JsonToken.START_OBJECT) {
-		    throw new Exception("Expected data to start with an Object");
-		  }
 
-		  List<MarketTrade> records = null;
-		  String fieldValue = null;
-		  
-		  while (parser.nextToken() != JsonToken.END_OBJECT) {
-		   String fieldName = parser.getCurrentName();
-		   parser.nextToken(); // Let's move to value
-		   
-		   if (KEY_SUCCESS.equalsIgnoreCase(fieldName)) {
-			   if (!STATUS_TRUE.equals(parser.getText())) {
-				   break;
-			   }
-		   } else if (KEY_MESSAGE.equalsIgnoreCase(fieldName)) {
-			   // count = parser.getIntValue();
-		   } else if (KEY_RESULT.equalsIgnoreCase(fieldName)) {
-			   records = new ArrayList<MarketTrade>(DEFAULT_LIMITATION);
-			   MarketTrade re = null;
-			   SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			   while (parser.nextToken() != JsonToken.END_ARRAY) {
-				   if (parser.getCurrentToken() == JsonToken.START_OBJECT) {
-					   re = new MarketTrade();
-					   re.setTradeType(MarketTrade.TRADE_TYPE_NA);
-					   parser.nextToken();
-				   } else if (parser.getCurrentToken() == JsonToken.END_OBJECT) {
-					   records.add(re);
-					   continue;
-				   }
-				   
-				   fieldName = parser.getCurrentName();
-				   
-				   parser.nextToken();
-				   fieldValue = parser.getText();
-				   
-				   if (fieldName.equalsIgnoreCase("Price")) {
-					   re.setPrice(Double.valueOf(fieldValue));
-				   } else if (fieldName.equalsIgnoreCase("Quantity")) {
-					   re.setTotalUnits(Double.valueOf(fieldValue));
-				   } else if (fieldName.equalsIgnoreCase("Total")) {
-					   re.setTotalCost(Double.valueOf(fieldValue));
-				   } else if (fieldName.equalsIgnoreCase("TimeStamp")) {// 2014-02-25T07:40:08.68
-					   long millsec = 0;
-					   try {
-							if (fieldValue.length() < 20 ) {
-								fieldValue = fieldValue + ".000";
-							}
-						   millsec = sdf.parse(fieldValue).getTime();
-					   } catch (Exception e) {
-						   log.error("parse date text[" + fieldValue + "] error.", e);
-					   }
-					   re.setTradeTime(millsec);
-				   }
-			   }
-		   }
-		  }
-		  parser.close();
-		  
-		  return records;
+		return millsec;
 	}
 	
 	public static void main(String[] args) throws SQLException {

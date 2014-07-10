@@ -2,6 +2,7 @@ package org.omega.marketcrawler.common;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,12 +23,20 @@ public final class MyCache {
 	private Set<WatchListItem> watchedItems = new HashSet<>();
 	private Set<String> watchedSymbols = new HashSet<>();
 	
-	public Set<WatchListItem> getWatchedItmes() {
+	public Set<WatchListItem> getWatchedItems() {
 		return watchedItems;
 	}
 	
-	public Set<String> getWatchedSymbols() {
-		return watchedSymbols;
+//	public Set<String> getWatchedSymbols() {
+//		return watchedSymbols;
+//	}
+	
+	public void addAllItems(List<WatchListItem> items) {
+		if (Utils.isEmpty(items)) return;
+		for (WatchListItem item : items) {
+			watchedItems.add(item);
+			watchedSymbols.add(item.getWatchedSymbol());
+		}
 	}
 	
 	public boolean cointainsItem(WatchListItem item) {

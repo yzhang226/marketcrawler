@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
-import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +16,7 @@ import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.exchange.Bittrex;
 import org.omega.marketcrawler.exchange.Mintpal;
+import org.omega.marketcrawler.exchange.Poloniex;
 
 public class MarketSummaryService {
 	
@@ -74,11 +74,17 @@ public class MarketSummaryService {
 		}
 		nsql.deleteCharAt(nsql.length() - 1);
 		nsql.append(")");
-		System.out.println(nsql.toString());
+//		System.out.println(nsql.toString());
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
 		BeanListHandler<WatchListItem> handler = new BeanListHandler<>(WatchListItem.class, rowProcessor);
 		
 		return (List<WatchListItem>) DbManager.inst().query(nsql.toString(), handler);
+	}
+	
+	public void refreshAllSummaries() throws SQLException {
+		save(Mintpal.instance().getMarketSummaries());
+		save(Bittrex.instance().getMarketSummaries());
+		save(Poloniex.instance().getMarketSummaries());
 	}
 	
 	public static void main(String[] args) throws SQLException {

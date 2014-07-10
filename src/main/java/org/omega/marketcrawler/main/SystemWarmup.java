@@ -12,8 +12,6 @@ import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.db.MarketSummaryService;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.exchange.Bittrex;
-import org.omega.marketcrawler.exchange.Mintpal;
 
 public final class SystemWarmup {
 	
@@ -31,8 +29,7 @@ public final class SystemWarmup {
 		// first, fetch all market summaries
 		MarketSummaryService ser = new MarketSummaryService();
 		try {
-			ser.save(Mintpal.instance().getMarketSummaries());
-			ser.save(Bittrex.instance().getMarketSummaries());
+			ser.refreshAllSummaries();
 		} catch (SQLException e) {
 			log.error("init market summaries error.", e);
 		}
@@ -47,13 +44,13 @@ public final class SystemWarmup {
 			MarketTradeService mtser = new MarketTradeService();
 			for (WatchListItem item : items) {
 				if (!mtser.existWatchedTable(item)) {
-					log.info("create trade table for item[" + item.toSimpleText() + "].");
 					mtser.createWatchedTable(item);
+					log.info("create trade table for item[" + item.toSimpleText() + "].");
 				}
 			}
 			log.info(getWatchedItemsInfo(items));
 			
-			MyCache.inst().getWatchedItmes().addAll(items);
+			MyCache.inst().addAllItems(items);
 			
 			for (WatchListItem it : items) {
 				List<Long> keys = mtser.findAllTradeTimes(it);

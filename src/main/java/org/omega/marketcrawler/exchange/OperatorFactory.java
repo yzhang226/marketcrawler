@@ -15,6 +15,8 @@ public final class OperatorFactory {
 			return Mintpal.instance();
 		case Bittrex.NAME:
 			return Bittrex.instance();
+		case Poloniex.NAME:
+			return Poloniex.instance();
 		default:
 			return null;
 		}

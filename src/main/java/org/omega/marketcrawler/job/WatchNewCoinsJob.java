@@ -12,8 +12,6 @@ import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.db.MarketSummaryService;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.exchange.Bittrex;
-import org.omega.marketcrawler.exchange.Mintpal;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -23,9 +21,6 @@ public class WatchNewCoinsJob implements Job {
 	private static final Log log = LogFactory.getLog(WatchNewCoinsJob.class);
 	
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-//		log.info("start");
-		
-		// load watch list item for watched coins
 		AltCoinService altSer = new AltCoinService();
 		try {
 			List<String> addedSymbols = new ArrayList<>();
@@ -37,9 +32,6 @@ public class WatchNewCoinsJob implements Job {
 			}
 			
 			if (Utils.isNotEmpty(addedSymbols)) {
-				
-				
-				
 				refreshMarketSummaries();
 				
 				initWatchedItems(addedSymbols);
@@ -55,8 +47,7 @@ public class WatchNewCoinsJob implements Job {
 	private void refreshMarketSummaries() {
 		MarketSummaryService ser = new MarketSummaryService();
 		try {
-			ser.save(Mintpal.instance().getMarketSummaries());
-			ser.save(Bittrex.instance().getMarketSummaries());
+			ser.refreshAllSummaries();
 		} catch (SQLException e) {
 			log.error("init market summaries error.", e);
 		}
@@ -76,7 +67,7 @@ public class WatchNewCoinsJob implements Job {
 		}
 		log.info(getWatchedItemsInfo(addedItems));
 		
-		MyCache.inst().getWatchedItmes().addAll(addedItems);
+		MyCache.inst().addAllItems(addedItems);
 	}
 	
 	private String getWatchedItemsInfo(List<WatchListItem> items) {
