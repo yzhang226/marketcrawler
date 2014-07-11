@@ -49,8 +49,6 @@ public class RefreshWatchedCoinJob implements Job {
 		List<WatchListItem> addedItems = ser.findWatchedItems(addedSymbols);
 		
 		if (Utils.isNotEmpty(addedItems)) {
-			System.out.println("New Watched Items " + addedItems);
-			
 			MarketTradeService mtser = new MarketTradeService();
 			for (WatchListItem item : addedItems) {
 				if (!mtser.existWatchedTable(item)) {
