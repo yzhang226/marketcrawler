@@ -77,6 +77,10 @@ public class MarketSummaryService {
 		}
 		nsql.deleteCharAt(nsql.length() - 1);
 		nsql.append(")");
+		
+		// TODO:
+		nsql.append(" and operator <> 'cryptsy'");
+		
 //		System.out.println(nsql.toString());
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
 		BeanListHandler<WatchListItem> handler = new BeanListHandler<>(WatchListItem.class, rowProcessor);

@@ -24,7 +24,7 @@ public class Cryptsy extends TradeOperator {
 	
 	private static final Cryptsy inst = new Cryptsy();
 	
-	private static final String NAME = "cryptsy";
+	public static final String NAME = "cryptsy";
 	
 	public static final String TIME_PATTERN_CRYPTSY = "yyyy-MM-dd HH:mm:ss";
 	

@@ -17,6 +17,8 @@ public final class OperatorFactory {
 			return Bittrex.instance();
 		case Poloniex.NAME:
 			return Poloniex.instance();
+		case Cryptsy.NAME:
+			return Cryptsy.instance();
 		default:
 			return null;
 		}
