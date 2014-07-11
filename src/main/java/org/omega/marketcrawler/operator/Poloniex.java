@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.exchange;
+package org.omega.marketcrawler.operator;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -10,9 +10,11 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
+import org.omega.marketcrawler.entity.WatchListItem;
 
 public class Poloniex extends TradeOperator {
 	
@@ -49,9 +51,9 @@ public class Poloniex extends TradeOperator {
 	}
 	
 	// https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_NXT
-	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
+	public String getMarketTradeAPI(WatchListItem item) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public?command=returnTradeHistory&currencyPair=").append(exchangeSymbol).append("_").append(watchedSymbol);
+		api.append("public?command=returnTradeHistory&currencyPair=").append(item.getExchangeSymbol()).append("_").append(item.getWatchedSymbol());
 		return api.toString();
 	}
 	
@@ -145,8 +147,8 @@ public class Poloniex extends TradeOperator {
 //		for (MarketSummary summ : summs) {
 //			System.out.println(summ.toReadableText());
 //		}
-		
-		List<MarketTrade> trades = inst.getMarketTrades("BC", "BTC");
+		WatchListItem item = new WatchListItem(NAME, "BC", Symbol.BTC.name());
+		List<MarketTrade> trades = inst.getMarketTrades(item);
 		for (MarketTrade mt : trades) {
 			System.out.println(mt.toReadableText());
 		}

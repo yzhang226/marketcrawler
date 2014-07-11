@@ -17,7 +17,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.omega.marketcrawler.exchange.Poloniex;
+import org.omega.marketcrawler.operator.Poloniex;
 
 public final class SSLCertInstaller {
 	public static void main(String[] args) throws Exception {
@@ -26,7 +26,7 @@ public final class SSLCertInstaller {
 
 		new SSLCertInstaller(host, port).install();
 		
-		System.out.println(NetUtils.accessDirectly(Poloniex.instance().getMarketSummaryAPI()));
+		System.out.println(NetUtils.get(Poloniex.instance().getMarketSummaryAPI()));
 	}
 	
 	private String host; 

@@ -54,20 +54,25 @@ public class WatchNewCoinsJob implements Job {
 	}
 	
 	private void initWatchedItems(List<String> addedSymbols) throws SQLException {
+		log.info("New Add Symbols is " + addedSymbols);
+		
 		MarketSummaryService ser = new MarketSummaryService();
 		List<WatchListItem> addedItems = ser.findWatchedItmes(addedSymbols);
-		System.out.println("New Watched Items " + addedItems);
 		
-		MarketTradeService mtser = new MarketTradeService();
-		for (WatchListItem item : addedItems) {
-			if (!mtser.existWatchedTable(item)) {
-				log.info("create trade table for item[" + item.toSimpleText() + "].");
-				mtser.createWatchedTable(item);
+		if (Utils.isNotEmpty(addedItems)) {
+			System.out.println("New Watched Items " + addedItems);
+			
+			MarketTradeService mtser = new MarketTradeService();
+			for (WatchListItem item : addedItems) {
+				if (!mtser.existWatchedTable(item)) {
+					log.info("create trade table for item[" + item.toSimpleText() + "].");
+					mtser.createWatchedTable(item);
+				}
 			}
+			log.info(getWatchedItemsInfo(addedItems));
+			
+			MyCache.inst().addAllItems(addedItems);
 		}
-		log.info(getWatchedItemsInfo(addedItems));
-		
-		MyCache.inst().addAllItems(addedItems);
 	}
 	
 	private String getWatchedItemsInfo(List<WatchListItem> items) {

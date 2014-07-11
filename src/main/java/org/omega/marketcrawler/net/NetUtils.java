@@ -12,18 +12,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.omega.marketcrawler.exchange.Poloniex;
+import org.omega.marketcrawler.operator.Poloniex;
 
 public final class NetUtils {
 	
 	private static final Log log = LogFactory.getLog(NetUtils.class);
 	
+//	public static String post(String url) {
+//		
+//	}
+	
 	/**
 	 * can access http and https
-	 * @param url
-	 * @return
 	 */
-	public static String accessDirectly(String url) throws Exception {
+	public static String get(String url) throws Exception {
 		String responseBody = null;
 		CloseableHttpClient httpclient = null;
 		
@@ -74,8 +76,6 @@ public final class NetUtils {
 		return matched;
 	}
 	
-	// https://poloniex.com:443/public?command=returnTicker  3
-	// https://poloniex.com/public?command=returnTicker 2
 	public static int extractPort(String url) {
 		int port = 443;
 		
@@ -117,7 +117,7 @@ public final class NetUtils {
 		System.out.println(extractPort(url));
 		
 //		System.out.println(accessDirectly(Mintpal.instance().getMarketSummaryAPI()));
-		System.out.println(accessDirectly(Poloniex.instance().getMarketSummaryAPI()));
+		System.out.println(get(Poloniex.instance().getMarketSummaryAPI()));
 		
 	}
 	

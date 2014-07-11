@@ -11,7 +11,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.exchange.Mintpal;
+import org.omega.marketcrawler.operator.Mintpal;
 import org.omega.marketcrawler.thread.MarketTradeSpider;
 
 public class MarketTradeSpiderTask extends TimerTask {

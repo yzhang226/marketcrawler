@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.exchange;
+package org.omega.marketcrawler.operator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
+import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.net.NetUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -24,10 +25,26 @@ public abstract class TradeOperator {
 	public abstract String getName();
 	
 	public abstract String getMarketSummaryAPI();
-	public abstract String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol);
+	public abstract String getMarketTradeAPI(WatchListItem item);
 
-	public abstract List<MarketTrade> transferJsonToMarketTrade(Object json);
 	public abstract List<MarketSummary> transferJsonToMarketSummary(Object json);
+	public abstract List<MarketTrade> transferJsonToMarketTrade(Object json);
+	
+
+	public List<MarketSummary> getMarketSummaries() {
+		List<MarketSummary> records = null;
+		try {
+			String recordText = NetUtils.get(getMarketSummaryAPI());
+			
+			Object json = mapValue(recordText);
+			
+			records = transferJsonToMarketSummary(json);
+		} catch (Exception e) {
+			log.error("try to get and convert json Market Summary to object error.", e);
+		}
+		
+		return records;
+	}
 	
 	/**
 	 * 
@@ -35,10 +52,10 @@ public abstract class TradeOperator {
 	 * @param exchangeSymbol - for example: BTC
 	 * @return
 	 */
-	public List<MarketTrade> getMarketTrades(String watchedSymbol, String exchangeSymbol) {
+	public List<MarketTrade> getMarketTrades(WatchListItem item) {
 		List<MarketTrade> records = null;
 		try {
-			String recordText = NetUtils.accessDirectly(getMarketTradeAPI(watchedSymbol, exchangeSymbol));
+			String recordText = NetUtils.get(getMarketTradeAPI(item));
 			
 			Object json = mapValue(recordText);
 			
@@ -50,7 +67,7 @@ public abstract class TradeOperator {
 		return records;
 	}
 	
-	private Object mapValue(String recordText) throws Exception {
+	protected Object mapValue(String recordText) throws Exception {
 		Object json = null;
 		ObjectMapper mapper = new ObjectMapper();
 		if (recordText.startsWith("{")) {
@@ -61,21 +78,6 @@ public abstract class TradeOperator {
 			json = mapper.readValue(recordText, Object.class);
 		}
 		return json;
-	}
-	
-	public List<MarketSummary> getMarketSummaries() {
-		List<MarketSummary> records = null;
-		try {
-			String recordText = NetUtils.accessDirectly(getMarketSummaryAPI());
-			
-			Object json = mapValue(recordText);
-			
-			records = transferJsonToMarketSummary(json);
-		} catch (Exception e) {
-			log.error("try to get and convert json Market Summary to object error.", e);
-		}
-		
-		return records;
 	}
 	
 }

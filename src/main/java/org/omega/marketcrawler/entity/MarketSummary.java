@@ -10,11 +10,12 @@ public class MarketSummary extends _BaseEntity {
 	private String operator;
 	private String watchedSymbol;
 	private String exchangeSymbol;
-	private String coinName;
+	private Integer marketId;
+	private String watchedCoinName;
+	private String exchangeCoinName;
 	private double lastPrice;
 	private double yesterdayPrice;
-	// chnage
-	private Double fluctuation;
+	private Double fluctuation;// chnage
 	private double highest24h;
 	private double lowest24h;
 	private double volume24h;
@@ -22,7 +23,7 @@ public class MarketSummary extends _BaseEntity {
 	private double topBid;
 	private double topAsk;
 	private Timestamp updateTime;
-	private int marketId;
+	
 	
 	// 
 	public String getOperator() {
@@ -30,18 +31,6 @@ public class MarketSummary extends _BaseEntity {
 	}
 	public void setOperator(String operator) {
 		this.operator = operator;
-	}
-	public int getMarketId() {
-		return marketId;
-	}
-	public void setMarketId(int marketId) {
-		this.marketId = marketId;
-	}
-	public String getCoinName() {
-		return coinName;
-	}
-	public void setCoinName(String coinName) {
-		this.coinName = coinName;
 	}
 	public String getWatchedSymbol() {
 		return watchedSymbol;
@@ -54,6 +43,24 @@ public class MarketSummary extends _BaseEntity {
 	}
 	public void setExchangeSymbol(String exchangeSymbol) {
 		this.exchangeSymbol = exchangeSymbol;
+	}
+	public Integer getMarketId() {
+		return marketId;
+	}
+	public void setMarketId(Integer marketId) {
+		this.marketId = marketId;
+	}
+	public String getWatchedCoinName() {
+		return watchedCoinName;
+	}
+	public void setWatchedCoinName(String watchedCoinName) {
+		this.watchedCoinName = watchedCoinName;
+	}
+	public String getExchangeCoinName() {
+		return exchangeCoinName;
+	}
+	public void setExchangeCoinName(String exchangeCoinName) {
+		this.exchangeCoinName = exchangeCoinName;
 	}
 	public double getLastPrice() {
 		return lastPrice;
@@ -122,7 +129,7 @@ public class MarketSummary extends _BaseEntity {
 		  .append(operator).append(", ")
 		  .append(watchedSymbol).append(", ")
 		  .append(exchangeSymbol).append(", ")
-		  .append(coinName).append(", ")
+		  .append(watchedCoinName).append(", ")
 		  .append(lastPrice).append(", ")
 		  .append(yesterdayPrice).append(", ")
 		  .append(fluctuation).append(", ")

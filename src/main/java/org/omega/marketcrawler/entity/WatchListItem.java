@@ -7,6 +7,7 @@ public class WatchListItem extends _BaseEntity {
 	private String operator;// mintpal, bittrex
 	private String watchedSymbol;// CINNI, MINT
 	private String exchangeSymbol;// BTC
+	private Integer marketId;
 	
 	public WatchListItem() {}
 	
@@ -41,13 +42,20 @@ public class WatchListItem extends _BaseEntity {
 	public void setExchangeSymbol(String exchangeSymbol) {
 		this.exchangeSymbol = exchangeSymbol;
 	}
-
-	@Override
+	public Integer getMarketId() {
+		return marketId;
+	}
+	public void setMarketId(Integer marketId) {
+		this.marketId = marketId;
+	}
+	
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
 				+ ((exchangeSymbol == null) ? 0 : exchangeSymbol.hashCode());
+		result = prime * result
+				+ ((marketId == null) ? 0 : marketId.hashCode());
 		result = prime * result
 				+ ((operator == null) ? 0 : operator.hashCode());
 		result = prime * result
@@ -55,7 +63,6 @@ public class WatchListItem extends _BaseEntity {
 		return result;
 	}
 
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -69,6 +76,11 @@ public class WatchListItem extends _BaseEntity {
 				return false;
 		} else if (!exchangeSymbol.equals(other.exchangeSymbol))
 			return false;
+		if (marketId == null) {
+			if (other.marketId != null)
+				return false;
+		} else if (!marketId.equals(other.marketId))
+			return false;
 		if (operator == null) {
 			if (other.operator != null)
 				return false;
@@ -81,7 +93,7 @@ public class WatchListItem extends _BaseEntity {
 			return false;
 		return true;
 	}
-	
+
 	public String toReadableText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(operator).append("_")

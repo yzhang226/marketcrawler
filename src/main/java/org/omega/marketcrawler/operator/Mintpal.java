@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.exchange;
+package org.omega.marketcrawler.operator;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
+import org.omega.marketcrawler.entity.WatchListItem;
 
 public final class Mintpal extends TradeOperator {
 	
@@ -55,9 +56,9 @@ public final class Mintpal extends TradeOperator {
 	
 	// https://api.mintpal.com/v2/market/trades/{COIN}/{EXCHANGE} maximum limit is 200.
 	// https://api.mintpal.com/v2/market/trades/{COIN}/{EXCHANGE}/{LIMIT} - 404, not implement 
-	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
+	public String getMarketTradeAPI(WatchListItem item) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("market/trades/").append(watchedSymbol).append("/").append(exchangeSymbol);
+		api.append("market/trades/").append(item.getWatchedSymbol()).append("/").append(item.getExchangeSymbol());
 		return api.toString();
 	}
 	
@@ -80,7 +81,7 @@ public final class Mintpal extends TradeOperator {
 				try {
 					summ.setOperator(NAME);
 					summ.setMarketId(Integer.valueOf(da.get("market_id")));
-					if (da.containsKey("coin")) summ.setCoinName(da.get("coin"));
+					if (da.containsKey("coin")) summ.setWatchedCoinName(da.get("coin"));
 					summ.setWatchedSymbol(da.get("code"));
 					summ.setExchangeSymbol(da.get("exchange"));
 					summ.setLastPrice(Double.valueOf(da.get("last_price")));
@@ -88,7 +89,7 @@ public final class Mintpal extends TradeOperator {
 					summ.setFluctuation(Double.valueOf(da.get("change")));
 					summ.setHighest24h(Double.valueOf(da.get("24hhigh")));
 					summ.setLowest24h(Double.valueOf(da.get("24hlow")));
-					summ.setVolume24h(Double.valueOf(da.get("24hlow")));
+					summ.setVolume24h(Double.valueOf(da.get("24hvol")));
 					summ.setTopBid(Double.valueOf(da.get("top_bid")));
 					summ.setTopAsk(Double.valueOf(da.get("top_ask")));
 					summ.setUpdateTime(curr);

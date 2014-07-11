@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.exchange;
+package org.omega.marketcrawler.operator;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -60,9 +60,9 @@ public final class Bittrex extends TradeOperator {
 	}
 	
 	// https://bittrex.com/api/v1/public/getmarkethistory?market=BTC-DOGE&count=5
-	public String getMarketTradeAPI(String watchedSymbol, String exchangeSymbol) {
+	public String getMarketTradeAPI(WatchListItem item) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public/getmarkethistory?market=").append(exchangeSymbol).append("-").append(watchedSymbol);
+		api.append("public/getmarkethistory?market=").append(item.getExchangeSymbol()).append("-").append(item.getWatchedSymbol());
 		return api.toString();
 	}
 	
@@ -157,7 +157,7 @@ public final class Bittrex extends TradeOperator {
 //		String watchedSymbol = "URO";
 //		String exchangeSymbol = Symbol.BTC.name();
 		WatchListItem item = new WatchListItem(NAME, "URO", Symbol.BTC.name());
-		List<MarketTrade> records = Bittrex.instance().getMarketTrades(item.getWatchedSymbol(), item.getExchangeSymbol());
+		List<MarketTrade> records = Bittrex.instance().getMarketTrades(item);
 		MarketTradeService tser = new MarketTradeService();
 		tser.save(item, records);
 //		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

@@ -21,6 +21,11 @@ public class Misc2Test {
 		System.out.println(String.format("%1$.1fy", x));
 		System.out.println(String.format("%1$.2fy", x));
 		
+		String label = "BTC\\/USD";
+		String[] ss = label.split("/");
+		System.out.println(ss[0]);
+		System.out.println(ss[1]);
+		
 	}
 	
 }

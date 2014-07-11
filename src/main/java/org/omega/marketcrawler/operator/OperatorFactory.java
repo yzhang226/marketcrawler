@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.exchange;
+package org.omega.marketcrawler.operator;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public final class OperatorFactory {
 	}
 	
 	public static List<MarketTrade> getMarketTrades(WatchListItem item) {
-		return get(item.getOperator()).getMarketTrades(item.getWatchedSymbol(), item.getExchangeSymbol());
+		return get(item.getOperator()).getMarketTrades(item);
 	}
 	
 }

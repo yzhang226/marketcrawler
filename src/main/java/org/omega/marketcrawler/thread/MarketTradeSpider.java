@@ -10,7 +10,7 @@ import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.exchange.OperatorFactory;
+import org.omega.marketcrawler.operator.OperatorFactory;
 
 public class MarketTradeSpider extends Thread {
 	
