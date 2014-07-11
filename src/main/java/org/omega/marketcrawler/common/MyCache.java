@@ -27,10 +27,6 @@ public final class MyCache {
 		return watchedItems;
 	}
 	
-//	public Set<String> getWatchedSymbols() {
-//		return watchedSymbols;
-//	}
-	
 	public void addAllItems(List<WatchListItem> items) {
 		if (Utils.isEmpty(items)) return;
 		for (WatchListItem item : items) {

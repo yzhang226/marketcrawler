@@ -16,9 +16,9 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class WatchNewCoinsJob implements Job {
+public class RefreshWatchedCoinJob implements Job {
 	
-	private static final Log log = LogFactory.getLog(WatchNewCoinsJob.class);
+	private static final Log log = LogFactory.getLog(RefreshWatchedCoinJob.class);
 	
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		AltCoinService altSer = new AltCoinService();
@@ -32,32 +32,21 @@ public class WatchNewCoinsJob implements Job {
 			}
 			
 			if (Utils.isNotEmpty(addedSymbols)) {
-				refreshMarketSummaries();
-				
 				initWatchedItems(addedSymbols);
 			}
 			
 		} catch (Exception e) {
-			log.error("init watch list item error.", e);
+			log.error("Refresh Watched Coin error.", e);
 		}
 		
 		log.info("end");
-	}
-	
-	private void refreshMarketSummaries() {
-		MarketSummaryService ser = new MarketSummaryService();
-		try {
-			ser.refreshAllSummaries();
-		} catch (SQLException e) {
-			log.error("init market summaries error.", e);
-		}
 	}
 	
 	private void initWatchedItems(List<String> addedSymbols) throws SQLException {
 		log.info("New Add Symbols is " + addedSymbols);
 		
 		MarketSummaryService ser = new MarketSummaryService();
-		List<WatchListItem> addedItems = ser.findWatchedItmes(addedSymbols);
+		List<WatchListItem> addedItems = ser.findWatchedItems(addedSymbols);
 		
 		if (Utils.isNotEmpty(addedItems)) {
 			System.out.println("New Watched Items " + addedItems);

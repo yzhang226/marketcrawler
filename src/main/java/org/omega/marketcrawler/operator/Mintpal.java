@@ -24,8 +24,6 @@ public final class Mintpal extends TradeOperator {
 //	private static final int DEFAULT_LIMITATION = 50;
 	
 	public static final String STATUS_SUCCESS = "success";
-	public static final String TYPE_SELL = "SELL";
-	public static final String TYPE_BUY = "BUY";
 	
 	public static final String KEY_STATUS = "status";
 	public static final String KEY_COUNT = "count";
@@ -120,11 +118,7 @@ public final class Mintpal extends TradeOperator {
 				re = new MarketTrade();
 				try {
 					if ((field = da.get("type")) != null) {
-						if (TYPE_BUY.equalsIgnoreCase(field)) {
-							re.setTradeType(MarketTrade.TRADE_TYPE_BUY);
-						} else if (TYPE_SELL.equalsIgnoreCase(field)) {
-							re.setTradeType(MarketTrade.TRADE_TYPE_SELL);
-						}
+						re.setTradeType(MarketTrade.parseTradeType(field));
 					}
 					if ((field = da.get("price")) != null) { re.setPrice(Double.valueOf(field)); } 
 					if ((field = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(field)); }

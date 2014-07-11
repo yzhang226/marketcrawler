@@ -13,7 +13,7 @@ import org.omega.marketcrawler.entity.WatchListItem;
 public final class Utils {
 
 	public static final long SECONDS_ONE_HOUR = 60 * 60;
-	public static final long SECONDS_ONE_DAY = 24 * 60 * 60;
+	public static final long SECONDS_ONE_DAY = 24 * SECONDS_ONE_HOUR;
 
 	public static boolean isEmpty(String text) {
 		return text == null || text.trim().length() == 0;

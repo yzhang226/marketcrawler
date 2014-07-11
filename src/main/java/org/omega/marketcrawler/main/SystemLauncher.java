@@ -7,8 +7,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.job.BigMarketSummaryCrawlerJob;
 import org.omega.marketcrawler.job.MarketTradeCrawlerJob;
-import org.omega.marketcrawler.job.WatchNewCoinsJob;
+import org.omega.marketcrawler.job.RefreshWatchedCoinJob;
+import org.omega.marketcrawler.job.SmallMarketSummaryCrawlerJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -42,7 +44,7 @@ public final class SystemLauncher extends Thread {
 		}
 		
 		// 
-		SystemWarmup.inst().warmup();
+//		SystemWarmup.inst().warmup();
 		
 		Date curr = new Date(System.currentTimeMillis());
 		// 
@@ -50,21 +52,41 @@ public final class SystemLauncher extends Thread {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             
+            // 2
             JobDetail mtcrawlerJob = JobBuilder.newJob(MarketTradeCrawlerJob.class).withIdentity("mtcjob", "mtcgroup").build();
             Trigger mtcrawlerTri = TriggerBuilder.newTrigger().withIdentity("mctTri", "mtcTriGrop")
-	            		          .startNow().withSchedule(
+	            		          .startAt(Utils.addSeconds(curr, 2 * 60)).withSchedule(
 	            		        		  SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
 	                              .build();
             
-            JobDetail warmupJob = JobBuilder.newJob(WatchNewCoinsJob.class).withIdentity("warmupjob", "warmupgroup").build();
-            Trigger warmupTri = TriggerBuilder.newTrigger().withIdentity("warmupTri", "warmupTriGrop")
-  		          			.startAt(Utils.addSeconds(curr, 15 * 60)).withSchedule(
+            // 2
+            JobDetail rwcJob = JobBuilder.newJob(RefreshWatchedCoinJob.class).withIdentity("rwcjob", "rwcgroup").build();
+            Trigger warmupTri = TriggerBuilder.newTrigger().withIdentity("rwcTri", "rwcTriGrop")
+  		          			.startAt(Utils.addSeconds(curr, 1 * 60)).withSchedule(
   		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
   		          			.build();
             
+            // 1
+            JobDetail smscJob = JobBuilder.newJob(SmallMarketSummaryCrawlerJob.class).withIdentity("smscjob", "smscgroup").build();
+            Trigger smscTri = TriggerBuilder.newTrigger().withIdentity("smscTri", "smscTriGrop")
+  		          			.startNow().withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
+  		          			.build();
+            // 4
+            JobDetail bmscJob = JobBuilder.newJob(BigMarketSummaryCrawlerJob.class).withIdentity("bmscjob", "bmscgroup").build();
+            Trigger bmscTri = TriggerBuilder.newTrigger().withIdentity("bmscTri", "bmscTriGrop")
+  		          			.startAt(Utils.addSeconds(curr, Utils.SECONDS_ONE_DAY)).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(30).repeatForever())
+  		          			.build();
+            
+            
             // Tell quartz to schedule the job using our trigger
+            scheduler.scheduleJob(smscJob, smscTri);
+            scheduler.scheduleJob(rwcJob, warmupTri);
             scheduler.scheduleJob(mtcrawlerJob, mtcrawlerTri);
-            scheduler.scheduleJob(warmupJob, warmupTri);
+            
+            
+            scheduler.scheduleJob(bmscJob, bmscTri);
 
 //            scheduler.shutdown();
 

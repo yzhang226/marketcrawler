@@ -17,13 +17,8 @@ public class AltCoinService {
 	
 	public List<String> findWatchedSymbols() throws SQLException {
 		String sql = "select abbr_name from alt_coin where status = " + STATUS_WATCHED ;// + " limit 1"
-		
 		ColumnListHandler<String> handler = new ColumnListHandler<>(1);
-		
 		List<String> symbols = DbManager.inst().query(sql, handler);
-		
-//		symbols = new ArrayList<>();
-//		symbols.add("VRC");
 		
 		return symbols;
 	}

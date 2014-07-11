@@ -68,7 +68,7 @@ public class MarketSummaryService {
 		return (List<MarketSummary>) DbManager.inst().query("select * from market_summary",  handler);
 	}
 	
-	public List<WatchListItem> findWatchedItmes(List<String> watchedSymbols) throws SQLException {
+	public List<WatchListItem> findWatchedItems(List<String> watchedSymbols) throws SQLException {
 		if (Utils.isEmpty(watchedSymbols)) return new ArrayList<>(0);
 		
 		StringBuilder nsql = new StringBuilder("select operator, watched_symbol, exchange_symbol, market_id from market_summary where watched_symbol in (");
@@ -79,7 +79,6 @@ public class MarketSummaryService {
 		nsql.append(")");
 		
 		// TODO:
-		nsql.append(" and operator <> 'cryptsy'");
 		
 //		System.out.println(nsql.toString());
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));

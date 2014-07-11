@@ -13,7 +13,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.db.MarketSummaryService;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -37,6 +36,7 @@ public class Cryptsy extends TradeOperator {
 	public static final String KEY_RETURN = "return";
 	public static final String KEY_ERROR = "error";
 	public static final String KEY_MARKETS = "markets";
+	public static final String KEY_RECENTTRADES = "recenttrades";
 	
 	private Cryptsy() {}
 	
@@ -66,21 +66,21 @@ public class Cryptsy extends TradeOperator {
 	}
 
 
-	public List<MarketSummary> getMarketSummaries() {
-		List<MarketSummary> records = null;
-		try {
-//			String recordText = NetUtils.get(getMarketSummaryAPI());
-			String recordText = IOUtils.toString(new FileInputStream("/Users/cook/Downloads/api.json"));
-					
-			Object json = super.mapValue(recordText);
-			
-			records = transferJsonToMarketSummary(json);
-		} catch (Exception e) {
-			log.error("try to get and convert json Market Summary to object error.", e);
-		}
-		
-		return records;
-	}
+//	public List<MarketSummary> getMarketSummaries() {
+//		List<MarketSummary> records = null;
+//		try {
+////			String recordText = NetUtils.get(getMarketSummaryAPI());
+//			String recordText = IOUtils.toString(new FileInputStream("/Users/cook/Downloads/api.json"));
+//					
+//			Object json = super.mapValue(recordText);
+//			
+//			records = transferJsonToMarketSummary(json);
+//		} catch (Exception e) {
+//			log.error("try to get and convert json Market Summary to object error.", e);
+//		}
+//		
+//		return records;
+//	}
 	
 	
 	@SuppressWarnings("unchecked")
@@ -126,9 +126,6 @@ public class Cryptsy extends TradeOperator {
 	private long parseMillsecs(String time, SimpleDateFormat sdf) {
 		long millsec = 0;
 		try {
-			if (Utils.isNotEmpty(time) && time.length() < 20) {
-				time = time + ".000";
-			}
 			if (Utils.isNotEmpty(time)) millsec = sdf.parse(time).getTime();
 		} catch (Exception e) {
 			log.error("parse date text[" + time + "] error.", e);
@@ -137,13 +134,38 @@ public class Cryptsy extends TradeOperator {
 		return millsec;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<MarketTrade> transferJsonToMarketTrade(Object json) {
 		LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) json;
 		List<MarketTrade> records = new ArrayList<>(50);
 		
-		String success = (String) map.get(KEY_SUCCESS);
+		Integer success = (Integer) map.get(KEY_SUCCESS);
 		if (SUCCESS_1.equals(success)) {
-			
+			map = (LinkedHashMap<String, Object>) map.get(KEY_RETURN);
+			map = (LinkedHashMap<String, Object>) map.get(KEY_MARKETS);
+			map = (LinkedHashMap<String, Object>) map.values().iterator().next();
+			List<Map<String, String>> trades = (List<Map<String, String>>) map.get(KEY_RECENTTRADES);
+			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
+			MarketTrade re = null;
+			String fieldValue = null;
+			for (Map<String, String> da : trades) {
+				re = new MarketTrade();
+				try {
+					if ((fieldValue = da.get("type")) != null) {
+						re.setTradeType(MarketTrade.parseTradeType(fieldValue));
+					}
+					if ((fieldValue = da.get("price")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
+					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("time")) != null) {// 2014-07-11 04:33:30
+						re.setTradeTime(parseMillsecs(fieldValue, sdf));
+					}
+				} catch (Exception e) {
+					re = null;
+					log.error("", e);
+				}
+				if (re != null) { records.add(re); }
+			}
 		} else {
 			log.error("Transfer Json To Market Trade error: " + map.get(KEY_ERROR));
 		}
@@ -151,15 +173,35 @@ public class Cryptsy extends TradeOperator {
 		return records;
 	}
 	
+//	public List<MarketTrade> getMarketTrades(WatchListItem item) {
+//		List<MarketTrade> records = null;
+//		try {
+////			String recordText = NetUtils.get(getMarketTradeAPI(item));
+//			String recordText = IOUtils.toString(new FileInputStream("d:/api (1).json"));
+//			
+//			Object json = mapValue(recordText);
+//			
+//			records = transferJsonToMarketTrade(json);
+//		} catch (Exception e) {
+//			log.error("try to get and convert json Market Trade to object error.", e);
+//		}
+//		
+//		return records;
+//	}
+	
 	public static void main(String[] args) throws SQLException {
-		List<MarketSummary> summs = Cryptsy.inst.getMarketSummaries();
+//		List<MarketSummary> summs = Cryptsy.inst.getMarketSummaries();
+//		for (MarketSummary summ : summs) {
+//			System.out.println(summ.toReadableText());
+//		}
+//		new MarketSummaryService().save(summs);
 		
-		for (MarketSummary summ : summs) {
-			System.out.println(summ.toReadableText());
+		WatchListItem item = new WatchListItem();
+		item.setMarketId(132);
+		List<MarketTrade> trades = Cryptsy.inst.getMarketTrades(item);
+		for (MarketTrade mt : trades) {
+			System.out.println(mt.toReadableText());
 		}
-		
-		new MarketSummaryService().save(summs);
-		
 	}
 	
 

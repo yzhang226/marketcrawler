@@ -26,20 +26,14 @@ public final class SystemWarmup {
 	}
 	
 	public void warmup() {
-		// first, fetch all market summaries
 		MarketSummaryService ser = new MarketSummaryService();
-		try {
-			ser.refreshAllSummaries();
-		} catch (SQLException e) {
-			log.error("init market summaries error.", e);
-		}
 		
 		// load watch list item for watched coins
 		AltCoinService altSer = new AltCoinService();
 		try {
 			List<String> watchedSymbols = altSer.findWatchedSymbols();
 			System.out.println(watchedSymbols);
-			List<WatchListItem> items = ser.findWatchedItmes(watchedSymbols);
+			List<WatchListItem> items = ser.findWatchedItems(watchedSymbols);
 			
 			MarketTradeService mtser = new MarketTradeService();
 			for (WatchListItem item : items) {
