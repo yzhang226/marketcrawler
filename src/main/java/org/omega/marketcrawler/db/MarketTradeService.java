@@ -5,19 +5,16 @@ import java.util.List;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
 public class MarketTradeService {
 	
 	protected String getMarketTradeTable(WatchListItem item) {
-		return new StringBuilder("trade_")
-		.append(item.getOperator().toLowerCase()).append("_")
-		.append(item.getExchangeSymbol().toLowerCase()).append("_")
-		.append(item.getWatchedSymbol().toLowerCase()).toString();
+		return Utils.getMarketTradeTable(item);
 	}
 	
 	protected String preparedSql4MarketTrade(WatchListItem item) {
