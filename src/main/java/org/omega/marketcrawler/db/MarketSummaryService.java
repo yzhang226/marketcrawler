@@ -65,7 +65,7 @@ public class MarketSummaryService {
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
 		BeanListHandler<MarketSummary> handler = new BeanListHandler<>(MarketSummary.class, rowProcessor);
 		
-		return (List<MarketSummary>) DbManager.inst().query("select * from market_summary",  handler);
+		return DbManager.inst().query("select * from market_summary",  handler);
 	}
 	
 	public List<WatchListItem> findWatchedItems(List<String> watchedSymbols) throws SQLException {
@@ -84,7 +84,7 @@ public class MarketSummaryService {
 		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
 		BeanListHandler<WatchListItem> handler = new BeanListHandler<>(WatchListItem.class, rowProcessor);
 		
-		return (List<WatchListItem>) DbManager.inst().query(nsql.toString(), handler);
+		return DbManager.inst().query(nsql.toString(), handler);
 	}
 	
 	public void refreshAllSummaries() throws SQLException {

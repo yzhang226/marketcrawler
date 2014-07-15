@@ -11,6 +11,7 @@ public class MarketSummary extends _BaseEntity {
 	private String watchedSymbol;
 	private String exchangeSymbol;
 	private Integer marketId;
+	private byte status;
 	private String watchedCoinName;
 	private String exchangeCoinName;
 	private double lastPrice;
@@ -49,6 +50,12 @@ public class MarketSummary extends _BaseEntity {
 	}
 	public void setMarketId(Integer marketId) {
 		this.marketId = marketId;
+	}
+	public byte getStatus() {
+		return status;
+	}
+	public void setStatus(byte status) {
+		this.status = status;
 	}
 	public String getWatchedCoinName() {
 		return watchedCoinName;

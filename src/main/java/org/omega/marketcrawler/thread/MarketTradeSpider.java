@@ -1,6 +1,7 @@
 package org.omega.marketcrawler.thread;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -30,15 +31,14 @@ public class MarketTradeSpider extends Thread {
 		StringBuilder info = new StringBuilder();
 		try {
 			List<MarketTrade> records = OperatorFactory.getMarketTrades(item);
-			Utils.removeRepeated(item, records);
+			removeRepeated(item, records);
 			int[] resu = ser.save(item, records);
 			
 			int updated = Utils.countBatchResult(resu);
 			if (updated > 0) {
-				// update cache
-				for (MarketTrade mt : records) {
-					MyCache.inst().addPK(item, mt.getTradeTime());
-				}
+//				for (MarketTrade mt : records) {
+//					MyCache.inst().addPK(item, mt.getTradeTime());
+//				}
 				info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
 			}
 		} catch (SQLException e) {
@@ -48,6 +48,21 @@ public class MarketTradeSpider extends Thread {
 		info.insert(0, "end crawler, total spent time is [" + (System.currentTimeMillis() - start) + "].");
 		
 		log.info(info.toString());
+	}
+	
+	private void removeRepeated(WatchListItem item, List<MarketTrade> records) {
+		if (Utils.isEmpty(records)) return;
+		
+		Iterator<MarketTrade> iter = records.iterator();
+		MarketTrade nxt = null;
+		while (iter.hasNext()) {
+			nxt = iter.next();
+			if (MyCache.inst().containsKey(item, nxt.getTradeTime())) {// 
+				iter.remove();
+			} else {// update cache
+				MyCache.inst().addPK(item, nxt.getTradeTime());
+			}
+		}
 	}
 
 }

@@ -7,19 +7,15 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.omega.marketcrawler.common.Symbol;
-import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
 public class MarketTradeService {
 	
-	protected String getMarketTradeTable(WatchListItem item) {
-		return Utils.getMarketTradeTable(item);
-	}
 	
 	protected String preparedSql4MarketTrade(WatchListItem item) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO ").append(getMarketTradeTable(item)).append(" (")
+		sb.append("INSERT INTO ").append(item.toMarketTradeTable()).append(" (")
 		  .append("trade_time, trade_type, price, total_units, total_cost").append(") VALUES (?, ?, ?, ?, ?)")
 		  .append(" ON DUPLICATE KEY UPDATE total_cost=total_cost");
 		return sb.toString();
@@ -27,7 +23,7 @@ public class MarketTradeService {
 	
 	protected String createSql4MarketTrade(WatchListItem item) {
 		StringBuilder create = new StringBuilder();
-		create.append("CREATE TABLE ").append(getMarketTradeTable(item)).append(" ( ").append("\n")
+		create.append("CREATE TABLE ").append(item.toMarketTradeTable()).append(" ( ").append("\n")
 		      .append("trade_time BIGINT NOT NULL , ").append("\n")
 		      .append("trade_type TINYINT NULL , ").append("\n")
 		      .append("price DOUBLE NULL ,").append("\n")
@@ -39,11 +35,19 @@ public class MarketTradeService {
 	}
 	
 	public boolean existWatchedTable(WatchListItem item) throws SQLException {
-		return DbManager.inst().existTable(getMarketTradeTable(item));
+		return DbManager.inst().existTable(item.toMarketTradeTable());
 	}
 	
 	public int createWatchedTable(WatchListItem item) throws SQLException {
 		return DbManager.inst().execute(createSql4MarketTrade(item));
+	}
+	
+	public boolean initWatchedTable(WatchListItem item) throws SQLException {
+		if (!existWatchedTable(item)) {
+			createWatchedTable(item);
+			return true;
+		}
+		return false;
 	}
 	
 	public int[] save(WatchListItem item, List<MarketTrade> records) throws SQLException {
@@ -60,21 +64,33 @@ public class MarketTradeService {
 	
 	public Long getCount(WatchListItem item) throws SQLException {
 		ResultSetHandler<Object[]> handler = new ArrayHandler();
-		Object[] resu = (Object[]) DbManager.inst().query("select count(*) from " + getMarketTradeTable(item), handler);
+		Object[] resu = (Object[]) DbManager.inst().query("select count(*) from " + item.toMarketTradeTable(), handler);
 		return (Long) resu[0];
 	}
 	
-	public List<Long> findAllTradeTimes(WatchListItem item) throws SQLException {
+	public Long getMaxTradeTime(WatchListItem item) throws SQLException {
+		return (Long) DbManager.inst().queryUnique("select max(trade_time) from " + item.toMarketTradeTable())[0];
+	}
+	
+	public Long getMinTradeTime(WatchListItem item) throws SQLException {
+		return (Long) DbManager.inst().queryUnique("select min(trade_time) from " + item.toMarketTradeTable())[0];
+	}
+	
+	public List<Long> findTopTradeTimes(WatchListItem item, int limit) throws SQLException {
+		String sql = new StringBuilder("select trade_time from ").append(item.toMarketTradeTable())
+						.append(" order by trade_time desc").append(" limit ").append(limit).toString();
 		ColumnListHandler<Long> handler = new ColumnListHandler<>(1);
-		List<Long> resu = DbManager.inst().query("select trade_time from " + getMarketTradeTable(item), handler);
+		List<Long> resu = DbManager.inst().query(sql, handler);
 		return resu;
 	}
+	
+	
 	
 	public static void main(String[] args) throws SQLException {
 		WatchListItem item = new WatchListItem("mintpal", "VRC", Symbol.BTC.name());
 		MarketTradeService tser = new MarketTradeService();
 //		System.out.println(tser.getCount(item));
-		System.out.println(tser.findAllTradeTimes(item));
+		System.out.println(tser.findTopTradeTimes(item, 200));
 	}
 	
 }

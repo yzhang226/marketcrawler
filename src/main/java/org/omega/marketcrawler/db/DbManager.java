@@ -10,6 +10,7 @@ import java.sql.Types;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,11 +50,16 @@ public final class DbManager {
 		return exist;
 	}
 	
-//	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> T query(String sql, ResultSetHandler<T> handler) throws SQLException {
+	public <T> T query(String sql, ResultSetHandler<T> handler, Object... params) throws SQLException {
 		Connection conn = getConnection();
-		T resu = runner.query(conn, sql, handler);
+		T resu = runner.query(conn, sql, handler, params);
 		DbUtils.close(conn);
+		return resu;
+	}
+	
+	public Object[] queryUnique(String sql, Object... params) throws SQLException {
+		ResultSetHandler<Object[]> handler = new ArrayHandler();
+		Object[] resu = DbManager.inst().query(sql, handler, params);
 		return resu;
 	}
 	
@@ -103,9 +109,9 @@ public final class DbManager {
 		}
 	}
 
-	public int execute(String sql) throws SQLException {
+	public int execute(String sql, Object... params) throws SQLException {
 		Connection conn = getConnection();
-		int resu = runner.update(conn, sql);
+		int resu = runner.update(conn, sql, params);
 		DbUtils.close(conn);
 		return resu;
 	}

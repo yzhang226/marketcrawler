@@ -1,15 +1,16 @@
 package org.omega.marketcrawler.main;
 
 import java.io.File;
-import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.joda.time.DateTime;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.job.BigMarketSummaryCrawlerJob;
 import org.omega.marketcrawler.job.MarketTradeCrawlerJob;
-import org.omega.marketcrawler.job.RefreshWatchedCoinJob;
+import org.omega.marketcrawler.job.RefreshCachedPKJob;
+import org.omega.marketcrawler.job.RefreshWatchedItemJob;
 import org.omega.marketcrawler.job.SmallMarketSummaryCrawlerJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -43,50 +44,52 @@ public final class SystemLauncher extends Thread {
 			return;
 		}
 		
-		// 
-//		SystemWarmup.inst().warmup();
-		
-		Date curr = new Date(System.currentTimeMillis());
-		// 
 		try {
+			DateTime curr = new DateTime();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             
-            // 2
-            JobDetail mtcrawlerJob = JobBuilder.newJob(MarketTradeCrawlerJob.class).withIdentity("mtcjob", "mtcgroup").build();
-            Trigger mtcrawlerTri = TriggerBuilder.newTrigger().withIdentity("mctTri", "mtcTriGrop")
-	            		          .startAt(Utils.addSeconds(curr, 2 * 60)).withSchedule(
+            // 1 - fetch market summary
+            JobDetail marketJob = JobBuilder.newJob(SmallMarketSummaryCrawlerJob.class).withIdentity("marketjob", "marketgroup").build();
+            Trigger marketTrigger = TriggerBuilder.newTrigger().withIdentity("marketTri", "marketTriGrop")
+  		          			.startNow().withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(2).repeatForever())
+  		          			.build();
+            // 2 - refresh watched item
+            JobDetail watchedItemJob = JobBuilder.newJob(RefreshWatchedItemJob.class).withIdentity("watchedItemjob", "watchedItemgroup").build();
+            Trigger watchedItemTrigger = TriggerBuilder.newTrigger().withIdentity("watchedItemTri", "watchedItemTriGrop")
+  		          			.startAt(curr.plusSeconds(25).toDate()).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
+  		          			.build();
+            // 3 - refresh cached pk
+            JobDetail cachedPKJob = JobBuilder.newJob(RefreshCachedPKJob.class).withIdentity("cachedPKjob", "cachedPKgroup").build();
+            Trigger cachedPKTrigger = TriggerBuilder.newTrigger().withIdentity("cachedPKTri", "cachedPKTriGrop")
+  		          			.startAt(curr.plusSeconds(50).toDate()).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
+  		          			.build();
+            
+            // 4 - fetch market trade data
+            JobDetail tradeJob = JobBuilder.newJob(MarketTradeCrawlerJob.class).withIdentity("tradejob", "tradegroup").build();
+            Trigger tradeTrigger = TriggerBuilder.newTrigger().withIdentity("tradeTri", "tradeTriGrop")
+	            		          .startAt(curr.plusSeconds(75).toDate()).withSchedule(
 	            		        		  SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
 	                              .build();
             
-            // 2
-            JobDetail rwcJob = JobBuilder.newJob(RefreshWatchedCoinJob.class).withIdentity("rwcjob", "rwcgroup").build();
-            Trigger warmupTri = TriggerBuilder.newTrigger().withIdentity("rwcTri", "rwcTriGrop")
-  		          			.startAt(Utils.addSeconds(curr, 1 * 60)).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
-  		          			.build();
-            
-            // 1
-            JobDetail smscJob = JobBuilder.newJob(SmallMarketSummaryCrawlerJob.class).withIdentity("smscjob", "smscgroup").build();
-            Trigger smscTri = TriggerBuilder.newTrigger().withIdentity("smscTri", "smscTriGrop")
-  		          			.startNow().withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
-  		          			.build();
-            // 4
-            JobDetail bmscJob = JobBuilder.newJob(BigMarketSummaryCrawlerJob.class).withIdentity("bmscjob", "bmscgroup").build();
-            Trigger bmscTri = TriggerBuilder.newTrigger().withIdentity("bmscTri", "bmscTriGrop")
-  		          			.startAt(Utils.addSeconds(curr, Utils.SECONDS_ONE_DAY)).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(30).repeatForever())
+            // 5 - fetch big market summary
+            JobDetail bigMarketJob = JobBuilder.newJob(BigMarketSummaryCrawlerJob.class).withIdentity("bigMarketjob", "bigMarketgroup").build();
+            Trigger bigMarketTrigger = TriggerBuilder.newTrigger().withIdentity("bigMarketTri", "bigMarketTriGrop")
+  		          			.startAt(curr.plusDays(1).toDate()).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(24).repeatForever())
   		          			.build();
             
             
             // Tell quartz to schedule the job using our trigger
-            scheduler.scheduleJob(smscJob, smscTri);
-            scheduler.scheduleJob(rwcJob, warmupTri);
-            scheduler.scheduleJob(mtcrawlerJob, mtcrawlerTri);
+            scheduler.scheduleJob(marketJob, marketTrigger);
+            scheduler.scheduleJob(watchedItemJob, watchedItemTrigger);
+            scheduler.scheduleJob(cachedPKJob, cachedPKTrigger);
             
-            
-            scheduler.scheduleJob(bmscJob, bmscTri);
+            scheduler.scheduleJob(tradeJob, tradeTrigger);
+            scheduler.scheduleJob(bigMarketJob, bigMarketTrigger);
 
 //            scheduler.shutdown();
 

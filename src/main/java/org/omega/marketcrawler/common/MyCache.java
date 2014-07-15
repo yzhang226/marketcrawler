@@ -27,6 +27,11 @@ public final class MyCache {
 		return watchedItems;
 	}
 	
+	public void clearAllItems() {
+		watchedItems.clear();
+		watchedSymbols.clear();
+	}
+	
 	public void addAllItems(List<WatchListItem> items) {
 		if (Utils.isEmpty(items)) return;
 		for (WatchListItem item : items) {
@@ -43,11 +48,14 @@ public final class MyCache {
 		return watchedSymbols.contains(symbol);
 	}
 	
+	public void clearAllPKs() {
+		pooledPKs.clear();
+	}
 	
 	public Set<Long> getCachedPKs(WatchListItem item) {
 		Set<Long> keys = pooledPKs.get(item);
 		if (Utils.isEmpty(keys)) {
-			keys = new HashSet<>(300);
+			keys = new HashSet<>(200);
 			pooledPKs.put(item, keys);
 		}
 		return keys;
