@@ -38,7 +38,8 @@ public final class ContentMatcher {
 	private static void loadPatterns() {
 		String path = null;
 		try {
-			path = Utils.getResourcePath("patterns.properties");
+//			path = Utils.getResourcePath("patterns.properties");
+			path = Utils.tryGetResourceFile("patterns.properties").getAbsolutePath();
 			InputStream is = new FileInputStream(path);
 			Properties pros = new Properties();
 			pros.load(is);

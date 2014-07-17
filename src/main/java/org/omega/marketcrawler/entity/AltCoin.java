@@ -1,14 +1,13 @@
 package org.omega.marketcrawler.entity;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class AltCoin implements Serializable {
+public class AltCoin extends _BaseEntity {
 	
-	private static final long serialVersionUID = -5430310744786224042L;
+	private static final long serialVersionUID = 4040098830692159352L;
 	
 	public static final byte STATUS_ACTIVE = 0;
 	public static final byte STATUS_INACTIVE = 1;
@@ -27,7 +26,7 @@ public class AltCoin implements Serializable {
 	private String title;
 	private Integer replies;
 	private Integer views;
-	private String link;
+//	private String link;
 	private String publishContent;
 	
 	private Date launchTime;
@@ -124,13 +123,13 @@ public class AltCoin implements Serializable {
 		this.views = views;
 	}
 
-	public String getLink() {
-		return link;
-	}
-
-	public void setLink(String link) {
-		this.link = link;
-	}
+//	public String getLink() {
+//		return link;
+//	}
+//
+//	public void setLink(String link) {
+//		this.link = link;
+//	}
 
 	public String getPublishContent() {
 		return publishContent;
@@ -308,6 +307,26 @@ public class AltCoin implements Serializable {
 		this.memo = memo;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + topicId;
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AltCoin other = (AltCoin) obj;
+		if (topicId != other.topicId)
+			return false;
+		return true;
+	}
+
 	public String toHtml() {
 		StringBuilder sb = new StringBuilder("<tr>");
 		sb.append("<td>").append(null != publishDate ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(publishDate) : "").append("</td>");
@@ -319,5 +338,19 @@ public class AltCoin implements Serializable {
 		
 		return sb.toString();
 	}
+	
+	public String toReableText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(id).append(", ").append(topicId).append(", ").append(status).append(", ").append(interest).append(", ")
+		.append(author).append(", ").append(title).append(", ").append(replies).append(", ").append(views).append(", ")
+		.append(publishContent).append(", ").append(launchTime).append(", ")
+		.append(lastPostTime).append(", ").append(publishDate).append(", ").append(createTime).append(", ").append(name).append(", ")
+		.append(abbrName).append(", ").append(algo).append(", ").append(proof).append(", ").append(launchRaw).append(", ")
+		.append(totalAmount).append(", ").append(blockTime).append(", ").append(halfBlocks).append(", ").append(halfDays).append(", ")
+		.append(blockReward).append(", ").append(difficultyAdjust).append(", ").append(preMined).append(", ").append(minedPercentage).append(", ")
+		.append(powDays).append(", ").append(powHeight).append(", ").append(powAmount).append(", ").append(memo);
+		return sb.toString();
+	}
+	
 	
 }

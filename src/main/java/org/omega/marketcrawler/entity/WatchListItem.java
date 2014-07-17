@@ -110,18 +110,15 @@ public class WatchListItem extends _BaseEntity {
 	public String toReadableText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(id).append("_").append(operator).append("_")
-		.append(exchangeSymbol).append("_")
-		.append(watchedSymbol).append("_").append(marketId);
+		.append(exchangeSymbol.toLowerCase()).append("_")
+		.append(watchedSymbol.toLowerCase()); 
+		if (marketId != null) sb.append("_").append(marketId);
 		return sb.toString();
 	}
 	
-	public String toSimpleText() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(id).append("_").append(operator).append("_")
-		.append(exchangeSymbol).append("_")
-		.append(watchedSymbol).append("_").append(marketId);
-		return sb.toString();
-	}
+//	public String toSimpleText() {
+//		return toReadableText();
+//	}
 	
 	
 	

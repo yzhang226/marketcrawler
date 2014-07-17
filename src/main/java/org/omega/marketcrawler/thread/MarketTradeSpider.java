@@ -24,29 +24,27 @@ public class MarketTradeSpider extends Thread {
 	}
 	
 	public void run() {
-		setName(item.toSimpleText());
+		setName(item.toReadableText());
 		
 		long start = System.currentTimeMillis();
 		MarketTradeService ser = new MarketTradeService();
 		StringBuilder info = new StringBuilder();
 		try {
 			List<MarketTrade> records = OperatorFactory.getMarketTrades(item);
-			removeRepeated(item, records);
-			int[] resu = ser.save(item, records);
-			
-			int updated = Utils.countBatchResult(resu);
-			if (updated > 0) {
-//				for (MarketTrade mt : records) {
-//					MyCache.inst().addPK(item, mt.getTradeTime());
-//				}
-				info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
+			if (Utils.isNotEmpty(records)) {
+				removeRepeated(item, records);
+				int[] resu = ser.save(item, records);
+				
+				int updated = Utils.countBatchResult(resu);
+				if (updated > 0) {
+					info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
+				}
 			}
-		} catch (SQLException e) {
-			log.error("fetch [" + item.toReadableText() + "]'s market data error.", e);
+		} catch (Exception e) {
+			log.error("fetch market data error.", e);
 		}
 		
-		info.insert(0, "end crawler, total spent time is [" + (System.currentTimeMillis() - start) + "].");
-		
+		info.insert(0, "End. Total spent time is [" + (System.currentTimeMillis() - start) + "]. ");
 		log.info(info.toString());
 	}
 	

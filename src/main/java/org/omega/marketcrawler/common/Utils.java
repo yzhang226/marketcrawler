@@ -20,12 +20,6 @@ import org.htmlcleaner.XPatherException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
-import edu.uci.ics.crawler4j.url.WebURL;
-
 public final class Utils {
 
 	private static final Log log = LogFactory.getLog(Utils.class);
@@ -50,8 +44,12 @@ public final class Utils {
 		return !isEmpty(text);
 	}
 	
+	public static boolean isEmpty(Object[] objs) {
+		return objs == null || objs.length == 0;
+	}
+	
 	public static boolean isNotEmpty(Object[] objs) {
-		return objs != null && objs.length != 0;
+		return !isEmpty(objs);
 	}
 	
 	public static boolean isEmpty(Collection<?> list) {
@@ -210,52 +208,6 @@ public final class Utils {
 		}
 		
 		return base.getMillis();
-	}
-	
-	
-	public static String fetchPageByUrl(String pageUrl) {
-		String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
-		WebURL webUrl = new WebURL();
-		webUrl.setURL(canonicalUrl);
-		
-		CrawlConfig config = new CrawlConfig();
-		config.setCrawlStorageFolder(Constants.CRAWL_FOLDER);
-		config.setIncludeHttpsPages(true);
-		config.setMaxDepthOfCrawling(0);
-		config.setPolitenessDelay(1 * 1000);
-
-		PageFetcher pageFetcher = createPageFetcher();
-		
-		edu.uci.ics.crawler4j.crawler.Page page = new edu.uci.ics.crawler4j.crawler.Page(webUrl);
-		
-		PageFetchResult fetchResult = pageFetcher.fetchHeader(webUrl);
-		
-		if (!fetchResult.fetchContent(page)) {
-			return null;
-		}
-		
-		String content = null;
-		try {
-			if (page.getContentCharset() == null) {
-				content = new String(page.getContentData());
-			} else {
-				content = new String(page.getContentData(), page.getContentCharset());
-			}
-		} catch (Exception e) {
-			log.error("get page content error", e);
-		}
-		
-		return content;
-	}
-	
-	private static PageFetcher createPageFetcher() {
-		CrawlConfig config = new CrawlConfig();
-		config.setCrawlStorageFolder(Constants.CRAWL_FOLDER);
-		config.setIncludeHttpsPages(true);
-		config.setMaxDepthOfCrawling(0);
-		config.setPolitenessDelay(1 * 1000);
-
-		return new PageFetcher(config);
 	}
 	
 	public static int extractTotalPagesNumber(String html) {

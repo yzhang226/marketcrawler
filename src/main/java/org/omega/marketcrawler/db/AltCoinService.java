@@ -1,9 +1,7 @@
 package org.omega.marketcrawler.db;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.entity.AltCoin;
-import org.omega.marketcrawler.entity.WatchListItem;
 
 public class AltCoinService {
 
@@ -25,82 +22,61 @@ public class AltCoinService {
 	
 	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
 	
-	private static final String INSERT_SQL = "INSERT INTO alt_coin (topic_id, status, interest, author, title, replies, views, link, publish_content, launch_time, last_post_time, publish_date, create_time, name, abbr_name, algo, proof, launch_raw, total_amount, block_time, half_blocks, half_days, block_reward, difficulty_adjust, pre_mined, mined_percentage, pow_days, pow_height, pow_amount, memo)"
-			+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-	private static final String UPDATE_SQL = "UPDATE alt_coin SET topic_id=?, status=?, interest=?, author=?, title=?, replies=?, views=?, link=?, "
+	private static final String INSERT_SQL = "INSERT INTO alt_coin (topic_id, status, interest, author, title, replies, views, publish_content, launch_time, "
+			+ "last_post_time, publish_date, create_time, name, abbr_name, algo, proof, launch_raw, total_amount, block_time, half_blocks, half_days, block_reward, "
+			+ "difficulty_adjust, pre_mined, mined_percentage, pow_days, pow_height, pow_amount, memo)"
+			+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			// + " ON DUPLICATE KEY UPDATE last_price=VALUES(last_price), ";
+	private static final String UPDATE_SQL = "UPDATE alt_coin SET topic_id=?, status=?, interest=?, author=?, title=?, replies=?, views=?, "
 			+ "publish_content=?, launch_time=?, last_post_time=?, publish_date=?, create_time=?, name=?, abbr_name=?, algo=?, proof=?, launch_raw=?, "
 			+ "total_amount=?, block_time=?, half_blocks=?, half_days=?, block_reward=?, difficulty_adjust=?, pre_mined=?, mined_percentage=?, pow_days=?, "
 			+ "pow_height=?, pow_amount=?, memo=?"
 			+ " WHERE id = ?";
 	
 	static {
-		columnToProperty.put("topicId", "topic_id");
-		columnToProperty.put("publishContent", "publish_content");
+		columnToProperty.put("topic_id", "topicId");
+		columnToProperty.put("publish_content", "publishContent");
 		
-		columnToProperty.put("launchTime", "launch_time");
-		columnToProperty.put("lastPostTime", "last_post_time");
-		columnToProperty.put("publishDate", "publish_date");
-		columnToProperty.put("createTime", "create_time");
-		columnToProperty.put("abbrName", "abbr_name");
-		columnToProperty.put("launchRaw", "launch_raw");
+		columnToProperty.put("launch_time", "launchTime");
+		columnToProperty.put("last_post_time", "lastPostTime");
+		columnToProperty.put("publish_date", "publishDate");
+		columnToProperty.put("create_time", "createTime");
+		columnToProperty.put("abbr_name", "abbrName");
+		columnToProperty.put("launch_raw", "launchRaw");
 		
-		columnToProperty.put("total_amount", "totalAmount");
-		columnToProperty.put("blockTime", "block_time");
-		columnToProperty.put("halfBlocks", "half_blocks");
-		columnToProperty.put("halfDays", "half_days");
-		columnToProperty.put("blockReward", "block_reward");
-		columnToProperty.put("difficultyAdjust", "difficulty_adjust");
-		columnToProperty.put("preMined", "pre_mined");
-		columnToProperty.put("minedPercentage", "mined_percentage");
+		columnToProperty.put("totalAmount", "total_amount");
+		columnToProperty.put("block_time", "blockTime");
+		columnToProperty.put("half_blocks", "halfBlocks");
+		columnToProperty.put("half_days", "halfDays");
+		columnToProperty.put("block_reward", "blockReward");
+		columnToProperty.put("difficulty_adjust", "difficultyAdjust");
+		columnToProperty.put("pre_mined", "preMined");
+		columnToProperty.put("mined_percentage", "minedPercentage");
 		
-		columnToProperty.put("powDays", "pow_days");
-		columnToProperty.put("powHeight", "pow_height");
-		columnToProperty.put("powAmount", "pow_amount");
+		columnToProperty.put("pow_days", "powDays");
+		columnToProperty.put("pow_height", "powHeight");
+		columnToProperty.put("pow_amount", "powAmount");
 	}
 	
 	
 	private Object[] convertBeanPropertiesToArray(AltCoin co) {
-		/**
-		 * 
-	co.topicId;
-	co.status;
-	co.interest;
-	co.author;
-	co.title;
-	co.replies;
-	co.views;
-	co.link;
-	co.publishContent;
-	co.launchTime;
-	co.lastPostTime;
-	co.publishDate;
-	co.createTime;
-	co.name;
-	co.abbrName;
-	co.algo;
-	co.proof;
-	co.launchRaw;
-	co.totalAmount;
-	co.blockTime;
-	co.halfBlocks;
-	co.halfDays;
-	co.blockReward;
-	co.difficultyAdjust;
-	co.preMined;
-	co.minedPercentage;
-	co.powDays;
-	co.powHeight;
-	co.powAmount;
-	co.memo;
-		 */
 		return new Object[] {co.getTopicId(), co.getStatus(), co.getInterest(), co.getAuthor(), co.getTitle(), co.getReplies(), 
-				co.getViews(), co.getLink(), co.getPublishContent(), co.getLaunchTime(), co.getLastPostTime(), co.getPublishDate(), co.getCreateTime(), 
+				co.getViews(), co.getPublishContent(), co.getLaunchTime(), co.getLastPostTime(), co.getPublishDate(), co.getCreateTime(), 
 				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getLaunchRaw(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
-				co.getBlockReward(), co.getDifficultyAdjust(), co.getPreMined(), co.getMinedPercentage(), co.getPowDays(), co.getPowHeight(), co.getPowAmount(), co.getMemo()};
+				co.getBlockReward(), co.getDifficultyAdjust(), co.getPreMined(), co.getMinedPercentage(), co.getPowDays(), co.getPowHeight(), co.getPowAmount(), co.getMemo()
+				};
+	}
+	
+	private Object[] convertBeanPropertiesToArrayWithId(AltCoin co) {
+		return new Object[] {co.getTopicId(), co.getStatus(), co.getInterest(), co.getAuthor(), co.getTitle(), co.getReplies(), 
+				co.getViews(), co.getPublishContent(), co.getLaunchTime(), co.getLastPostTime(), co.getPublishDate(), co.getCreateTime(), 
+				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getLaunchRaw(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
+				co.getBlockReward(), co.getDifficultyAdjust(), co.getPreMined(), co.getMinedPercentage(), co.getPowDays(), co.getPowHeight(), co.getPowAmount(), co.getMemo()
+				, co.getId()};
 	}
 	
 	public int[] save(List<AltCoin> coins) throws SQLException {
-		Object[][] params = new Object[coins.size()][9];
+		Object[][] params = new Object[coins.size()][29];
 		for (int i=0; i<coins.size(); i++) {
 			params[i] = convertBeanPropertiesToArray(coins.get(i));
 		}
@@ -112,16 +88,22 @@ public class AltCoinService {
 	}
 	
 	public int update(AltCoin co) throws SQLException {
-		Object[] props = convertBeanPropertiesToArray(co);
-		Object[] props2 = Arrays.copyOf(props, props.length+1);
-		props2[props.length] = co.getId();
-		return DbManager.inst().execute(UPDATE_SQL, props2);
+		Object[] props = convertBeanPropertiesToArrayWithId(co);
+		return DbManager.inst().execute(UPDATE_SQL, props);
+	}
+	
+	public int[] update(List<AltCoin> cos) throws SQLException {
+		Object[][] params = new Object[cos.size()][30];
+		for (int i=0; i<cos.size(); i++) {
+			params[i] = convertBeanPropertiesToArrayWithId(cos.get(i));
+		}
+		return DbManager.inst().batch(UPDATE_SQL, params);
 	}
 	
 	public List<String> findWatchedSymbols() throws SQLException {
-		String sql = "select abbr_name from alt_coin where status = " + Constants.STATUS_WATCHED ;// + " limit 1"
+		String sql = "select abbr_name from alt_coin where status = ?";// + " limit 1"
 		ColumnListHandler<String> handler = new ColumnListHandler<>(1);
-		List<String> symbols = DbManager.inst().query(sql, handler);
+		List<String> symbols = DbManager.inst().query(sql, handler, Constants.STATUS_WATCHED);
 		
 		return symbols;
 	}
@@ -139,20 +121,36 @@ public class AltCoinService {
 		return topicIds;
 	}
 	
+	public List<AltCoin> findAll() throws SQLException {
+		return find("select * from alt_coin");
+	}
+	
+	public List<AltCoin> find(String sql, Object... params) throws SQLException {
+		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
+		BeanListHandler<AltCoin> handler = new BeanListHandler<>(AltCoin.class, rowProcessor);
+		return DbManager.inst().query(sql,  handler, params);
+	}
+	
 	public static void main(String[] args) throws SQLException {
 		AltCoinService ser = new AltCoinService();
 		System.out.println(ser.findWatchedSymbols());
 //		int topicId = 442876;
 		int topicId = 455854;
+//		int topicId = 656167;
 		AltCoin co = ser.getByTopicId(topicId);
 		System.out.println(co.getId() + ", " + co.getAuthor() + ", " + co.getTopicId());
+		System.out.println(co.toReableText());
+		co.setAlgo("testxxyyy");
+		co.setTitle("okkkyyy");
+		co.setMemo("with testyyy");
 		
-//		co.setAlgo("test");
-//		
-//		ser.update(co);
-//		
-//		co = ser.getByTopicId(topicId);
-//		System.out.println("algo: " + co.getAlgo());
+		ser.update(co);
+//		ser.save(co);
+		
+		co = ser.getByTopicId(topicId);
+		System.out.println("algo: " + co.getAlgo());
+		System.out.println("title: " + co.getTitle());
+		System.out.println(co.toReableText());
 		
 	}
 	

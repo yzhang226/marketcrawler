@@ -2,28 +2,41 @@ package org.omega.marketcrawler.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.BeanProcessor;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.omega.marketcrawler.common.Constants;
-import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.TradeStatistics;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.operator.Mintpal;
 
 public class TradeStatisticsService {
 
 	private static final Log log = LogFactory.getLog(TradeStatisticsService.class);
 	
-	private static final String INSERT_SQL = "INSERT INTO trade_statistics_one_minute (item_id,start_time,end_time,open,high,low,close,watched_vol,exchange_vol,count)  "
+	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
+	
+	private static final String table = "trade_statistics_one_minute";
+	
+	private static final String INSERT_SQL = "INSERT INTO " + table +" (item_id,start_time,end_time,open,high,low,close,watched_vol,exchange_vol,count)  "
 			+ " VALUES (?,?,?,?,?,?,?,?,?,?)"
 			+ " ON DUPLICATE KEY UPDATE open=VALUES(open), high=VALUES(high), low=VALUES(low), close=VALUES(close), "
 			+ " watched_vol=VALUES(watched_vol), exchange_vol=VALUES(exchange_vol), count=VALUES(count)";
 	
+	
+	static {
+		columnToProperty.put("item_id", "itemId");
+		columnToProperty.put("start_time", "startTime");
+		columnToProperty.put("end_time", "endTime");
+		columnToProperty.put("watched_vol", "watchedVol");
+		columnToProperty.put("exchange_vol", "exchangeVol");
+	}
 	
 	private Object[] convertBeanPropertiesToArray(TradeStatistics stat) {
 		return new Object[]{stat.getItemId(), stat.getStartTime(), stat.getEndTime(), stat.getOpen(), stat.getHigh(), stat.getLow(), stat.getClose(), 
@@ -40,6 +53,19 @@ public class TradeStatisticsService {
 		return DbManager.inst().batch(INSERT_SQL, params);
 	}
 	
+	public Long getMaxStartTime(Integer itemId) throws SQLException {
+		String sql = "select max(start_time) from " + table + " where item_id = ?";
+		Object[] resu = DbManager.inst().queryUnique(sql, itemId);
+		return Utils.isEmpty(resu) ? null : (Long) resu[0];
+	}
+	
+	public TradeStatistics getByIdAndTime(Integer itemId, long startMillis, long endMillis) throws SQLException {
+		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
+		BeanHandler<TradeStatistics> handler = new BeanHandler<>(TradeStatistics.class, rowProcessor);
+		String sql = "select * from " + table + " where item_id = ? and start_time = ? and end_time = ?";
+		return DbManager.inst().query(sql,  handler, itemId, startMillis, endMillis);
+	}
+	
 	public int[] doOneMinuteStatistics(WatchListItem item , int minutes) throws SQLException {
 		MarketTradeService mtser = new MarketTradeService();
 		TradeStatisticsService statSer = new TradeStatisticsService();
@@ -51,9 +77,9 @@ public class TradeStatisticsService {
 		
 		String statisticsSql = new StringBuilder("select max(price) as high, min(price) as low")
 								.append(", sum(total_units) as watchedVolume, max(total_cost) as exchangeVolume, count(*) as tradeCount from ")
-								.append(table).append(" where trade_time > ? and trade_time < ?").toString();
-		String openSql = new StringBuilder("select price from ").append(table).append(" where trade_time > ? and trade_time < ? order by trade_time asc limit 1").toString();
-		String closeSql = new StringBuilder("select price from ").append(table).append(" where trade_time > ? and trade_time < ? order by trade_time desc limit 1").toString();
+								.append(table).append(" where trade_time >= ? and trade_time < ?").toString();
+		String openSql = new StringBuilder("select price from ").append(table).append(" where trade_time >= ? and trade_time < ? order by trade_time asc limit 1").toString();
+		String closeSql = new StringBuilder("select price from ").append(table).append(" where trade_time >= ? and trade_time < ? order by trade_time desc limit 1").toString();
 		
 		TradeStatistics stat = null;
 		List<TradeStatistics> stats = new ArrayList<>(minutes);

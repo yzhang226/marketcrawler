@@ -7,6 +7,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
@@ -69,7 +70,8 @@ public class MarketTradeService {
 	}
 	
 	public Long getMaxTradeTime(WatchListItem item) throws SQLException {
-		return (Long) DbManager.inst().queryUnique("select max(trade_time) from " + item.toMarketTradeTable())[0];
+		Object[] resu = DbManager.inst().queryUnique("select max(trade_time) from " + item.toMarketTradeTable());
+		return Utils.isEmpty(resu) ? null : (Long) resu[0];
 	}
 	
 	public Long getMinTradeTime(WatchListItem item) throws SQLException {
@@ -84,6 +86,13 @@ public class MarketTradeService {
 		return resu;
 	}
 	
+	public Long getCountByRange(WatchListItem item, long startMillis, long endMillis) throws SQLException {
+		ResultSetHandler<Object[]> handler = new ArrayHandler();
+		String sql = "select count(*) from " + item.toMarketTradeTable() + " where trade_time >= ? and trade_time < ?";
+		
+		Object[] resu = (Object[]) DbManager.inst().query(sql, handler, startMillis, endMillis);
+		return Utils.isEmpty(resu) ? null : (Long) resu[0];
+	}
 	
 	
 	public static void main(String[] args) throws SQLException {

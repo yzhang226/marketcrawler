@@ -2,179 +2,184 @@ package org.omega.marketcrawler.job;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.beanutils.BeanPropertyValueEqualsPredicate;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omega.marketcrawler.common.Constants;
-import org.omega.marketcrawler.common.DocIder;
+import org.omega.marketcrawler.common.AltCoinParser;
+import org.omega.marketcrawler.common.DetailAltCoinParser;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.entity.AltCoin;
-import org.omega.marketcrawler.spider.AltCoinSpider;
-import org.omega.marketcrawler.spider.DetailAltCoinSpider;
+import org.omega.marketcrawler.net.NetUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import com.google.common.collect.Collections2;
-
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.fetcher.PageFetcher;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
-import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public class SeekCoinJob implements Job {
 
 	private static final Log log = LogFactory.getLog(SeekCoinJob.class);
 	
-	private static final int numberOfCrawlers = 4;
+//	private static final int numberOfCrawlers = 4;
 	
-	private static final String baseSeedUrl = "https://bitcointalk.org/index.php?board=159.";
-	public static final String ANN_PAGE_URL = baseSeedUrl+ ".0";
+	private static final String TOPIC_BASE_URL = "https://bitcointalk.org/index.php?topic=";
+	private static final String BOARD_BASE_URL = "https://bitcointalk.org/index.php?board=";
+	private static final String ANNOUNCEMENTS_BOARD_URL = BOARD_BASE_URL + "159.";
+	public static final String ANN_PAGE_URL = ANNOUNCEMENTS_BOARD_URL+ "0";
 	
+	@SuppressWarnings("unchecked")
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		log.info("start");
+		
+		List<AltCoin> seekedTopics = null;
 		try {
-			int pageNumber = Utils.extractTotalPagesNumber(Utils.fetchPageByUrl(ANN_PAGE_URL));
+			int pageNumber = Utils.extractTotalPagesNumber(NetUtils.get(ANN_PAGE_URL));
 			log.info("There are total " + pageNumber + " topic pages number.");
 		
-			List<AltCoin> anns = fectchAnnTopics(baseSeedUrl, pageNumber);
+			seekedTopics = fectchBoardTopics(ANNOUNCEMENTS_BOARD_URL, pageNumber);
+			log.info("Total " + seekedTopics.size() + " were seeked.");
 			
-			AltCoinService acser = new AltCoinService();
-			List<Long> topicIds = acser.findAllTopicIds();
-			
-			List<AltCoin> undbAnns = new ArrayList<>();
-			List<AltCoin> dbedAnns = new ArrayList<>();
-			for (AltCoin ann : anns) {
-				if (!topicIds.contains(ann.getTopicId())) {
-					undbAnns.add(ann);
-				} else {
-					dbedAnns.add(ann);
-				}
-			}
-			anns.clear();
-			
-			if (Utils.isNotEmpty(undbAnns)) {// insert ann info
-				Timestamp curr = new Timestamp(System.currentTimeMillis());
+		} catch (Exception e) {
+			log.error("Seek New Coin error.", e);
+		}
+		
+		if (Utils.isEmpty(seekedTopics)) {
+			return;
+		}
 
-				List<AltCoin> detailCoins = fectchAnnTopicsByUrls(undbAnns);
-				
+		AltCoinService acser = new AltCoinService();
+		List<AltCoin> allDbCoins = null;
+		try {
+			allDbCoins = acser.findAll();
+		} catch (Exception e) {
+			log.error("Find All Coins From DB error.", e);
+		}
+		
+		List<AltCoin> needToUpdate = null;
+		List<AltCoin> needToAdd = null;
+		if (Utils.isNotEmpty(allDbCoins)) {
+			needToUpdate = (List<AltCoin>) CollectionUtils.intersection(allDbCoins, seekedTopics);
+			needToAdd = (List<AltCoin>) CollectionUtils.subtract(seekedTopics, allDbCoins);
+		} else {
+			needToAdd = seekedTopics;
+		}
+		
+		if (Utils.isNotEmpty(needToAdd)) {// insert 
+			Timestamp curr = new Timestamp(System.currentTimeMillis());
+			try {
+				List<AltCoin> detailCoins = fectchDetailTopicByUrls(needToAdd);
 				AltCoin detail = null;
-				for (AltCoin alt : undbAnns) {
+				for (AltCoin alt : needToAdd) {
 					detail = (AltCoin) CollectionUtils.find(detailCoins, new BeanPropertyValueEqualsPredicate("topicId", alt.getTopicId()));
 					copyProperties(alt, detail);
 					alt.setCreateTime(curr);
 				}
+				acser.save(needToAdd);
 				
-				acser.save(undbAnns);
+				log.info("\t insert alt coin to db, total " + needToAdd.size() + " coins are inserted.");
+			} catch (Exception e) {
+				log.error("Add New Coins To DB error.", e);
 			}
-			
-			for (AltCoin ann : dbedAnns) {
-				AltCoin alt = acser.getByTopicId(ann.getTopicId());
-				alt.setTitle(ann.getTitle());
-				alt.setReplies(ann.getReplies());
-				alt.setViews(ann.getViews());
-				alt.setLastPostTime(ann.getLastPostTime());
-				
-				acser.update(alt);
-			}
-			
-			
-			Thread.sleep(1 * 1000);
-		} catch (Throwable e) {
-			log.error("Init Ann Board By URL error.", e);
-			
 		}
 		
+		if (Utils.isNotEmpty(needToUpdate)) {// update 
+			try {
+				AltCoin finded = null;
+				for (AltCoin co : needToUpdate) {
+					finded = (AltCoin) CollectionUtils.find(seekedTopics, new BeanPropertyValueEqualsPredicate("topicId", co.getTopicId()));
+					co.setTitle(finded.getTitle());
+					co.setReplies(finded.getReplies());
+					co.setViews(finded.getViews());
+					co.setLastPostTime(finded.getLastPostTime());
+				}
+				acser.update(needToUpdate);
+				
+				log.info("\t update alt coin to db, total " + needToUpdate.size() + " coins are updated.");
+			} catch (Exception e) {
+				log.error("Update Coins To DB error.", e);
+			}
+		}
+		
+		log.info("end");
 	}
 	
-	private void copyProperties(AltCoin src, AltCoin matched) {
-		src.setPublishDate(matched.getPublishDate());
+	private void copyProperties(AltCoin dest, AltCoin matched) {
+		dest.setPublishDate(matched.getPublishDate());
 		
-		src.setName(matched.getName());
-		src.setAbbrName(matched.getAbbrName());
+		dest.setName(matched.getName());
+		dest.setAbbrName(matched.getAbbrName());
 		
-		src.setTotalAmount(matched.getTotalAmount());
-		src.setBlockReward(matched.getBlockReward());
-		src.setBlockTime(matched.getBlockTime());
-		src.setMinedPercentage(matched.getMinedPercentage());
+		dest.setTotalAmount(matched.getTotalAmount());
+		dest.setBlockReward(matched.getBlockReward());
+		dest.setBlockTime(matched.getBlockTime());
+		dest.setMinedPercentage(matched.getMinedPercentage());
 		
-		src.setAlgo(matched.getAlgo());
-		src.setPreMined(matched.getPreMined());
+		dest.setAlgo(matched.getAlgo());
+		dest.setPreMined(matched.getPreMined());
 
 		
 		String launchraw = matched.getLaunchRaw();
 		if (Utils.isNotEmpty(launchraw) && launchraw.length() > 119) {
 			launchraw = launchraw.substring(0, 119);
 		}
-		src.setLaunchRaw(launchraw);
+		dest.setLaunchRaw(launchraw);
 	}
 	
-	public List<AltCoin> fectchAnnTopics(String baseSeedUrl, int pageNumber) throws Exception {
-		CrawlController controller = createCrawlController();
-		
+	public List<AltCoin> fectchBoardTopics(String baseSeedUrl, int pageNumber) throws Exception {
+		List<AltCoin> coins = new ArrayList<>(pageNumber*20);
 		String url = null;
+		String html = null;
 		for (int i = 0; i < pageNumber; i++) {
-			url = baseSeedUrl + i * 40;
-			addSeed(controller, url);
-		}
-		controller.start(AltCoinSpider.class, 6);
-		
-		List<Object> data = controller.getCrawlersLocalData();
-		List<AltCoin> coins = new ArrayList<>(data.size());
-		for (Object obj : data) {
-			coins.add((AltCoin) obj);
+			url =  new StringBuilder(baseSeedUrl).append(i * 40).toString();
+			log.info("Visit url: " + url);
+			html = NetUtils.get(url);
+			coins.addAll(new AltCoinParser(html).parse());
 		}
 		return coins;
 	}
 
-	public List<AltCoin> fectchAnnTopicsByUrls(List<AltCoin> undbAnns) throws Exception {
-		CrawlController controller = createCrawlController();
+	public List<AltCoin> fectchDetailTopicByUrls(List<AltCoin> undbAnns) throws Exception {
+		List<AltCoin> coins = new ArrayList<>(undbAnns.size());
 		
-		for (AltCoin alt : undbAnns) {
-			addSeed(controller, alt.getLink());
-		}
-		controller.start(DetailAltCoinSpider.class, 2);
-
-		List<Object> data = controller.getCrawlersLocalData();
-		List<AltCoin> coins = new ArrayList<>(data.size());
-		for (Object obj : data) {
-			coins.add((AltCoin) obj);
+		int topicId;
+		String url = null;
+		String html = null;
+		for (int i=0; i<undbAnns.size(); i++) {
+			topicId = undbAnns.get(i).getTopicId();
+			url = new StringBuilder(TOPIC_BASE_URL).append(topicId).append(".0").toString();
+			log.info("Visit url for detail: " + url);
+			html = NetUtils.get(url);
+			coins.add(new DetailAltCoinParser(html, topicId).parse());
 		}
 		return coins;
 	}
 	
-	public CrawlController createCrawlController() throws Exception {
-		CrawlConfig config = new CrawlConfig();
-		
-		config.setCrawlStorageFolder(Constants.CRAWL_FOLDER);
-		config.setIncludeHttpsPages(true);
-		config.setMaxDepthOfCrawling(0);
-		config.setPolitenessDelay(1 * 1000);
-
-		PageFetcher pageFetcher = new PageFetcher(config);
-		
-		RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-		RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-		
-		return new CrawlController(config, pageFetcher, robotstxtServer);
-	}
 	
-	private void addSeed(CrawlController controller, String url) {
-		int did = controller.getDocIdServer().getDocId(url);
-		if (did == -1) {
-			controller.addSeed(url, DocIder.getNext());
-		} else {
-			controller.addSeed(url, did);
-		}
+	public static void main(String[] args) throws Exception {
+		SeekCoinJob scj = new SeekCoinJob();
+		List<AltCoin> seekedTopics = scj.fectchBoardTopics(ANNOUNCEMENTS_BOARD_URL, 1);
+		System.out.println(seekedTopics.size());
+		
+//		String sql = "select * from alt_coin where create_time > '2014-07-16'";
+//		AltCoinService acser = new AltCoinService();
+//		List<AltCoin> needToUpdate = acser.find(sql);
+//		
+//		try {
+//			List<AltCoin> detailCoins = scj.fectchAnnTopicsByUrls(needToUpdate);
+//			AltCoin detail = null;
+//			for (AltCoin alt : needToUpdate) {
+//				detail = (AltCoin) CollectionUtils.find(detailCoins, new BeanPropertyValueEqualsPredicate("topicId", alt.getTopicId()));
+//				scj.copyProperties(alt, detail);
+//			}
+//			acser.update(needToUpdate);
+//			
+//			log.info("\t update alt coin to db, total " + needToUpdate.size() + " coins are updated.");
+//		} catch (Exception e) {
+//			log.error("Update Coins To DB error.", e);
+//		}
+		
 	}
 	
 }

@@ -9,8 +9,6 @@ import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -20,7 +18,7 @@ import org.omega.marketcrawler.operator.Poloniex;
 
 public class MarketSummaryService {
 	
-	private static final Log log = LogFactory.getLog(MarketSummaryService.class);
+//	private static final Log log = LogFactory.getLog(MarketSummaryService.class);
 	
 	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
 	
@@ -47,6 +45,7 @@ public class MarketSummaryService {
 	
 	// 
 	public int[] save(List<MarketSummary> summs) throws SQLException {
+		if (Utils.isEmpty(summs)) return new int[]{0};
 		StringBuilder sql = new StringBuilder("INSERT INTO market_summary ");
 		sql.append("(operator,watched_symbol,exchange_symbol,market_id,watched_coin_name,exchange_coin_name,last_price,yesterday_price,fluctuation,highest24h,lowest24h,volume24h,coin_volume24h,top_bid,top_ask,update_time) ");
 		sql.append(" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
