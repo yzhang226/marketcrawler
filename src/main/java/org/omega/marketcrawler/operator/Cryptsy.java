@@ -1,7 +1,5 @@
 package org.omega.marketcrawler.operator;
 
-import java.io.FileInputStream;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Utils;
@@ -65,24 +62,6 @@ public class Cryptsy extends TradeOperator {
 		return new StringBuilder(getBasePublicAPI()).append("method=singlemarketdata&marketid=").append(item.getMarketId()).toString();
 	}
 
-
-//	public List<MarketSummary> getMarketSummaries() {
-//		List<MarketSummary> records = null;
-//		try {
-////			String recordText = NetUtils.get(getMarketSummaryAPI());
-//			String recordText = IOUtils.toString(new FileInputStream("/Users/cook/Downloads/api.json"));
-//					
-//			Object json = super.mapValue(recordText);
-//			
-//			records = transferJsonToMarketSummary(json);
-//		} catch (Exception e) {
-//			log.error("try to get and convert json Market Summary to object error.", e);
-//		}
-//		
-//		return records;
-//	}
-	
-	
 	@SuppressWarnings("unchecked")
 	public List<MarketSummary> transferJsonToMarketSummary(Object json) {
 		LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) json;
@@ -173,23 +152,7 @@ public class Cryptsy extends TradeOperator {
 		return records;
 	}
 	
-//	public List<MarketTrade> getMarketTrades(WatchListItem item) {
-//		List<MarketTrade> records = null;
-//		try {
-////			String recordText = NetUtils.get(getMarketTradeAPI(item));
-//			String recordText = IOUtils.toString(new FileInputStream("d:/api (1).json"));
-//			
-//			Object json = mapValue(recordText);
-//			
-//			records = transferJsonToMarketTrade(json);
-//		} catch (Exception e) {
-//			log.error("try to get and convert json Market Trade to object error.", e);
-//		}
-//		
-//		return records;
-//	}
-	
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws Exception {
 //		List<MarketSummary> summs = Cryptsy.inst.getMarketSummaries();
 //		for (MarketSummary summ : summs) {
 //			System.out.println(summ.toReadableText());

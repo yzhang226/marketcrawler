@@ -14,10 +14,10 @@ import org.omega.marketcrawler.job.RefreshWatchedItemJob;
 import org.omega.marketcrawler.job.SeekCoinJob;
 import org.omega.marketcrawler.job.SmallMarketSummaryCrawlerJob;
 import org.omega.marketcrawler.job.TradeStatisticsJob;
+import org.omega.marketcrawler.net.MultiThreadedNetter;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -43,6 +43,13 @@ public final class SystemLauncher extends Thread {
 			log.info("Find log4j.xml path [" + logxml.getAbsolutePath() + "].");
 		} else {
 			System.out.println("DO NOT find any log4j.xml");
+			return;
+		}
+		
+		try {
+			MultiThreadedNetter.inst().reinit();
+		} catch (Exception e) {
+			log.error("init MultiThreadedNetter error.", e);
 			return;
 		}
 		
@@ -114,10 +121,12 @@ public final class SystemLauncher extends Thread {
 
 //            scheduler.shutdown();
 
-        } catch (SchedulerException se) {
-            se.printStackTrace();
+        } catch (Exception se) {
+            log.error("start Launcher error.", se);
         }
 	}
+	
+	
 	
 	public static void main(String[] args) {
 		

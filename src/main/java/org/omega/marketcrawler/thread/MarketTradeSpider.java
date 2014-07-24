@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.thread;
 
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,18 +36,18 @@ public class MarketTradeSpider extends Thread {
 				
 				int updated = Utils.countBatchResult(resu);
 				if (updated > 0) {
-					info.append("Total affected " + updated + " rows number, total " + ser.getCount(item) + " records in table.");
+					info.append("Total affected " + updated + " rows.");
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			log.error("fetch market data error.", e);
 		}
 		
-		info.insert(0, "End. Total spent time is [" + (System.currentTimeMillis() - start) + "]. ");
+		info.insert(0, "End. Spent time [" + (System.currentTimeMillis() - start) + "]. ");
 		log.info(info.toString());
 	}
 	
-	private void removeRepeated(WatchListItem item, List<MarketTrade> records) {
+	private void removeRepeated(WatchListItem item, List<MarketTrade> records) throws Exception {
 		if (Utils.isEmpty(records)) return;
 		
 		Iterator<MarketTrade> iter = records.iterator();

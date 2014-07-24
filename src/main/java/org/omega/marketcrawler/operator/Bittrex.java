@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.operator;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public final class Bittrex extends TradeOperator {
 	private static final Bittrex inst = new Bittrex();
 	
 	public static final String NAME = "bittrex";
-	private static final String VERSION = "v1";
+	private static final String VERSION = "v1.1";
 	
 	// count	optional	a number between 1-100 for the number of entries to return (default = 20)
 //	private static final int DEFAULT_LIMITATION = 20;
@@ -152,7 +151,7 @@ public final class Bittrex extends TradeOperator {
 		return millsec;
 	}
 	
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws Exception {
 //		Mintpal.instance().getHistory("DOGE", Symbol.BTC.name());
 //		String watchedSymbol = "URO";
 //		String exchangeSymbol = Symbol.BTC.name();

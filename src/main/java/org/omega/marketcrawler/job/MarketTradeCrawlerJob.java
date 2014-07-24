@@ -18,10 +18,17 @@ public class MarketTradeCrawlerJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		log.info("start execute job");
 		
-		Set<WatchListItem> items = MyCache.inst().getWatchedItems();
-		for (WatchListItem item : items) {
-			new MarketTradeSpider(item).start();
+		try {
+			Set<WatchListItem> items = MyCache.inst().getWatchedItems();
+			for (WatchListItem item : items) {
+				new MarketTradeSpider(item).start();
+			}
+		} catch (Exception e) {
+			String error = "Execution Market Trade CrawlerJob error.";
+			log.error(error, e);
+			throw new JobExecutionException(error, e);
 		}
+		
 	}
 
 }

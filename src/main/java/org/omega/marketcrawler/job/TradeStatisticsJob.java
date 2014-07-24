@@ -12,9 +12,13 @@ import org.quartz.JobExecutionException;
 public class TradeStatisticsJob implements Job {
 
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		Set<WatchListItem> items = MyCache.inst().getWatchedItems();
-		for (WatchListItem item : items) {
-			new TradeStatisticsThread(item).start();
+		try {
+			Set<WatchListItem> items = MyCache.inst().getWatchedItems();
+			for (WatchListItem item : items) {
+				new TradeStatisticsThread(item).start();
+			}
+		} catch (Exception e) {
+			throw new JobExecutionException("Execute Trade Statistics Job error.", e);
 		}
 	}
 	

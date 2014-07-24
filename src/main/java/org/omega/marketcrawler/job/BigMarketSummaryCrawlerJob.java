@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.job;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -24,8 +23,10 @@ public class BigMarketSummaryCrawlerJob implements Job {
 		try {
 			List<MarketSummary> summs = Cryptsy.instance().getMarketSummaries();
 			if (Utils.isNotEmpty(summs)) mss.save(summs);
-		} catch (SQLException e) {
-			log.error("try refresh Big Market Summary error.", e);
+		} catch (Exception e) {
+			String error = "try refresh Big Market Summary error.";
+			log.error(error, e);
+			throw new JobExecutionException(error, e);
 		}
 		log.info("end refresh Big Market Summary job.");
 	}

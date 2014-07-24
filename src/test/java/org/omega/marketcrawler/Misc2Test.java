@@ -5,6 +5,9 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 public class Misc2Test {
 
 	public static void main(String[] args) {
@@ -25,6 +28,18 @@ public class Misc2Test {
 		String[] ss = label.split("/");
 		System.out.println(ss[0]);
 		System.out.println(ss[1]);
+		
+		long x1 = 1405995720000l;
+		long x2 = 1406082120000l;
+		
+		DateTime dt1 = new DateTime(DateTimeZone.UTC);
+		dt1 = dt1.withMillis(x1);
+		
+		DateTime dt2 = new DateTime(DateTimeZone.UTC);
+		dt2 = dt2.withMillis(x2);
+		
+		System.out.println(dt1);
+		System.out.println(dt2);
 		
 	}
 	

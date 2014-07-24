@@ -76,7 +76,7 @@ public class TradeStatisticsService {
 		String table = item.toMarketTradeTable();
 		
 		String statisticsSql = new StringBuilder("select max(price) as high, min(price) as low")
-								.append(", sum(total_units) as watchedVolume, max(total_cost) as exchangeVolume, count(*) as tradeCount from ")
+								.append(", sum(total_units) as watchedVolume, sum(total_cost) as exchangeVolume, count(*) as tradeCount from ")
 								.append(table).append(" where trade_time >= ? and trade_time < ?").toString();
 		String openSql = new StringBuilder("select price from ").append(table).append(" where trade_time >= ? and trade_time < ? order by trade_time asc limit 1").toString();
 		String closeSql = new StringBuilder("select price from ").append(table).append(" where trade_time >= ? and trade_time < ? order by trade_time desc limit 1").toString();

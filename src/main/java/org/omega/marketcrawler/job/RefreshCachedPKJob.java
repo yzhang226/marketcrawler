@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.job;
 
-import java.sql.SQLException;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -18,16 +17,22 @@ public class RefreshCachedPKJob implements Job {
 
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		
-		MyCache.inst().clearAllPKs();
-		
-		MarketTradeService mtser = new MarketTradeService();
-		Set<WatchListItem> items = MyCache.inst().getWatchedItems();
-		for (WatchListItem item : items) {
-			try {
-				MyCache.inst().getCachedPKs(item).addAll(mtser.findTopTradeTimes(item, 200));
-			} catch (SQLException e) {
-				log.error("add top trade_time pks to cache error.", e);
+		try {
+			MyCache.inst().clearAllPKs();
+			
+			MarketTradeService mtser = new MarketTradeService();
+			Set<WatchListItem> items = MyCache.inst().getWatchedItems();
+			for (WatchListItem item : items) {
+				try {
+					MyCache.inst().getCachedPKs(item).addAll(mtser.findTopTradeTimes(item, 200));
+				} catch (Exception e) {
+					log.error("add top trade_time pks to cache error.", e);
+				}
 			}
+		} catch (Exception e) {
+			String error = "Refresh CachedPK Job error.";
+			log.error(error, e);
+			throw new JobExecutionException(error, e);
 		}
 		
 		log.info("end");

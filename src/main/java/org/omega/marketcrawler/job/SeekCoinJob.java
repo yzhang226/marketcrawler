@@ -13,6 +13,7 @@ import org.omega.marketcrawler.common.DetailAltCoinParser;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.entity.AltCoin;
+import org.omega.marketcrawler.net.MultiThreadedNetter;
 import org.omega.marketcrawler.net.NetUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -35,7 +36,8 @@ public class SeekCoinJob implements Job {
 		
 		List<AltCoin> seekedTopics = null;
 		try {
-			int pageNumber = Utils.extractTotalPagesNumber(NetUtils.get(ANN_PAGE_URL));
+//			int pageNumber = Utils.extractTotalPagesNumber(NetUtils.get(ANN_PAGE_URL));
+			int pageNumber = Utils.extractTotalPagesNumber(MultiThreadedNetter.inst().get(ANN_PAGE_URL));
 			log.info("There are total " + pageNumber + " topic pages number.");
 		
 			seekedTopics = fectchBoardTopics(ANNOUNCEMENTS_BOARD_URL, pageNumber);
@@ -134,8 +136,13 @@ public class SeekCoinJob implements Job {
 		for (int i = 0; i < pageNumber; i++) {
 			url =  new StringBuilder(baseSeedUrl).append(i * 40).toString();
 			log.info("Visit url: " + url);
-			html = NetUtils.get(url);
-			coins.addAll(new AltCoinParser(html).parse());
+//			html = NetUtils.get(url);
+			try {
+				html = MultiThreadedNetter.inst().get(url);
+				coins.addAll(new AltCoinParser(html).parse());
+			} catch (Exception e) {
+				log.error("Visit url: " + url + " error", e);
+			}
 		}
 		return coins;
 	}
@@ -150,8 +157,12 @@ public class SeekCoinJob implements Job {
 			topicId = undbAnns.get(i).getTopicId();
 			url = new StringBuilder(TOPIC_BASE_URL).append(topicId).append(".0").toString();
 			log.info("Visit url for detail: " + url);
-			html = NetUtils.get(url);
-			coins.add(new DetailAltCoinParser(html, topicId).parse());
+			try {
+				html = MultiThreadedNetter.inst().get(url);
+				coins.add(new DetailAltCoinParser(html, topicId).parse());
+			} catch (Exception e) {
+				log.error("Visit for detail: " + url + " error", e);
+			}
 		}
 		return coins;
 	}

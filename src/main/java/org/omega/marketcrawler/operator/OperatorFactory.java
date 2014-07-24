@@ -24,7 +24,7 @@ public final class OperatorFactory {
 		}
 	}
 	
-	public static List<MarketTrade> getMarketTrades(WatchListItem item) {
+	public static List<MarketTrade> getMarketTrades(WatchListItem item) throws Exception {
 		return get(item.getOperator()).getMarketTrades(item);
 	}
 	

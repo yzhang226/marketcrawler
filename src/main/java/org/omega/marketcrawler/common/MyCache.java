@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
 public final class MyCache {
@@ -20,6 +21,7 @@ public final class MyCache {
 	
 	// 
 	private Map<WatchListItem, Set<Long>> pooledPKs = new HashMap<>();
+	private Map<WatchListItem, Set<MarketTrade>> cachedTradeMap = new HashMap<>();
 	private Set<WatchListItem> watchedItems = new HashSet<>();
 	private Set<String> watchedSymbols = new HashSet<>();
 	

@@ -34,7 +34,9 @@ public class RefreshWatchedItemJob implements Job {
 			
 			log.info(getWatchedItemsInfo(items));
 		} catch (Exception e) {
-			log.error("Refresh Watched Item error.", e);
+			String error = "Refresh Watched Item error.";
+			log.error(error, e);
+			throw new JobExecutionException(error, e);
 		}
 		
 		log.info("end");

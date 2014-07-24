@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Arith;
-import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -139,10 +138,10 @@ public final class Mintpal extends TradeOperator {
 		return records;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 //		Mintpal.instance().getHistory("DOGE", Symbol.BTC.name());
-		String watchedSymbol = "BC";
-		String exchangeSymbol = Symbol.BTC.name();
+//		String watchedSymbol = "BC";
+//		String exchangeSymbol = Symbol.BTC.name();
 //		List<MarketTrade> records = Mintpal.instance().getMarketTrades(watchedSymbol, exchangeSymbol);
 //		SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ss");
 //		System.out.println("records.size() is  " + records.size());

@@ -135,7 +135,7 @@ public class Poloniex extends TradeOperator {
 		return millsec;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 //		List<MarketSummary> summs = Poloniex.inst.getMarketSummaries();
 //		for (MarketSummary summ : summs) {
 //			System.out.println(summ.toReadableText());

@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.net.NetUtils;
+import org.omega.marketcrawler.net.MultiThreadedNetter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,16 +28,18 @@ public abstract class TradeOperator {
 	public abstract List<MarketTrade> transferJsonToMarketTrade(Object json);
 	
 
-	public List<MarketSummary> getMarketSummaries() {
+	public List<MarketSummary> getMarketSummaries() throws Exception {
 		List<MarketSummary> records = null;
 		try {
-			String recordText = NetUtils.get(getMarketSummaryAPI());
-			
+//			String recordText = NetUtils.get(getMarketSummaryAPI());
+			String recordText = MultiThreadedNetter.inst().get(getMarketSummaryAPI());
+					
 			Object json = mapValue(recordText);
 			
 			records = transferJsonToMarketSummary(json);
-		} catch (Exception e) {
-			log.error("try to get and convert json Market Summary to object error.", e);
+		} catch (Throwable e) {
+//			log.error("try to get and convert json Market Summary to object error.", e);
+			throw new Exception("try to get and convert json Market Summary to object error.", e);
 		}
 		
 		return records;
@@ -49,22 +51,24 @@ public abstract class TradeOperator {
 	 * @param exchangeSymbol - for example: BTC
 	 * @return
 	 */
-	public List<MarketTrade> getMarketTrades(WatchListItem item) {
+	public List<MarketTrade> getMarketTrades(WatchListItem item) throws Exception {
 		List<MarketTrade> records = null;
 		try {
-			String recordText = NetUtils.get(getMarketTradeAPI(item));
+//			String recordText = NetUtils.get(getMarketTradeAPI(item));
+			String recordText = MultiThreadedNetter.inst().get(getMarketTradeAPI(item));
 			
 			Object json = mapValue(recordText);
 			
 			records = transferJsonToMarketTrade(json);
-		} catch (Exception e) {
-			log.error("try to get and convert json Market Trade to object error.", e);
+		} catch (Throwable e) {
+//			log.error("try to get and convert json Market Trade to object error.", e);
+			throw new Exception("try to get and convert json Market Trade to object error.", e);
 		}
 		
 		return records;
 	}
 	
-	protected Object mapValue(String recordText) throws Exception {
+	protected Object mapValue(String recordText) throws Throwable {
 		Object json = null;
 		ObjectMapper mapper = new ObjectMapper();
 		if (recordText.startsWith("{")) {

@@ -60,7 +60,7 @@ public class TradeStatisticsThread extends Thread {
 			int[] resu = statser.doOneMinuteStatistics(item, minutes);
 			int updated = Utils.countBatchResult(resu);
 			if (updated > 0) {
-				info.append("Total " + updated + " one minute statistics are inserted.");
+				info.append("Affected total " + updated + " row records.");
 			}
 		} catch (Exception e) {
 			log.error("Do One Minute Statistics error.", e);
@@ -71,10 +71,11 @@ public class TradeStatisticsThread extends Thread {
 	
 	public static void main(String[] args) throws SQLException {
 		// 13_bittrex_BTC_XST_Stat
-//		WatchListItem item = new WatchListItem("bittrex", "XST", "BTC");
-//		item.setId(13);
+//		WatchListItem item = new WatchListItem("bittrex", "KEY", "BTC");
+//		item.setId(27);
 		
-		List<WatchListItem> items = new WatchListItemService().findActiveItems();
+		WatchListItemService wiser = new WatchListItemService();
+		List<WatchListItem> items = wiser.findActiveItems();
 		for (WatchListItem item : items) {
 			new TradeStatisticsThread(item).start();
 		}

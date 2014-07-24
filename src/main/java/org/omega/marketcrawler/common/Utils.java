@@ -12,8 +12,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
@@ -22,7 +20,7 @@ import org.joda.time.DateTimeZone;
 
 public final class Utils {
 
-	private static final Log log = LogFactory.getLog(Utils.class);
+//	private static final Log log = LogFactory.getLog(Utils.class);
 	
 	public static final String TIME_ZONE_LOCAL = TimeZone.getDefault().getID();
 	public static final String TIME_ZONE_GMT = "GMT";
@@ -172,46 +170,38 @@ public final class Utils {
 		DateTime base = new DateTime(baseMillis, DateTimeZone.UTC);// 
 		if (interval == 1) {
 			int baseSec = base.getSecondOfMinute();
-			if (baseSec != 0) {
-				base = base.withMillisOfSecond(0).plusSeconds(60 - baseSec);
-			}
+			baseSec = baseSec == 0 ? 0 : 60 - baseSec;
+			base = base.plusSeconds(baseSec);
 		} else {
-			int baseMinute = base.getMinuteOfHour();
-			if (baseMinute != 0) {
-				int mod = baseMinute % interval;
-				int left = mod == 0 ? 0 : interval - mod;
-				base = base.withSecondOfMinute(0).withMillisOfSecond(0).plusMinutes(left);
-			}
+			base = base.withSecondOfMinute(0);
+			
+			int leftMinute = base.getMinuteOfHour();
+			int mod = leftMinute % interval;
+			leftMinute = mod == 0 ? 0 : interval - mod;
+			base = base.plusMinutes(leftMinute);
 		}
 		
-		return base.getMillis();
+		return base.withMillisOfSecond(0).getMillis();
 	}
 	
 	public static long getRangeStartMillis(long baseMillis, int interval) {
 		DateTime base = new DateTime(baseMillis, DateTimeZone.UTC);// 
 		if (interval == 1) {
 			int baseSec = base.getSecondOfMinute();
-			if (baseSec == 0) {
-				base = base.withMillisOfSecond(0).minusMinutes(1);
-			} else {
-				base = base.withMillisOfSecond(0).minusSeconds(baseSec);
-			}
+			baseSec = baseSec == 0 ? 60 : baseSec;
+			base = base.minusSeconds(baseSec);
 		} else {
+			base = base.withSecondOfMinute(0);
+			
 			int baseMinute = base.getMinuteOfHour();
-			if (baseMinute == 0) {
-				base = base.withSecondOfMinute(0).withMillisOfSecond(0).minusMinutes(interval);
-			} else {
-				int mod = baseMinute % interval;
-				int left = mod == 0 ? 0 : interval - mod;
-				base = base.withSecondOfMinute(0).withMillisOfSecond(0).minusMinutes(left);
-			}
+			baseMinute = baseMinute == 0 ? interval : baseMinute % interval;
+			base = base.minusMinutes(baseMinute);
 		}
 		
-		return base.getMillis();
+		return base.withMillisOfSecond(0).getMillis();
 	}
 	
 	public static int extractTotalPagesNumber(String html) {
-		
 		if (isEmpty(html)) {
 			return 100;
 		}
@@ -266,7 +256,7 @@ public final class Utils {
 		System.out.println("start    : " + new DateTime(Utils.getRangeStartMillis(sysmillis, 1), DateTimeZone.UTC));
 		System.out.println("end      : " + new DateTime(Utils.getRangeEndMillis(sysmillis, 1), DateTimeZone.UTC));
 		
-		
+		System.out.println(0 % 5);
 	}
 	
 	

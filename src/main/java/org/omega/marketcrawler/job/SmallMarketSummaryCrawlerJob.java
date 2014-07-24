@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.job;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -26,12 +25,16 @@ public class SmallMarketSummaryCrawlerJob implements Job {
 		try {
 			List<MarketSummary> summs = Mintpal.instance().getMarketSummaries();
 			if (Utils.isNotEmpty(summs)) mss.save(summs);
+			
 			summs = Bittrex.instance().getMarketSummaries();
 			if (Utils.isNotEmpty(summs)) mss.save(summs);
+			
 			summs = Poloniex.instance().getMarketSummaries();
 			if (Utils.isNotEmpty(summs)) mss.save(summs);
-		} catch (SQLException e) {
-			log.error("try refresh Small Market Summary error.", e);
+		} catch (Exception e) {
+			String error = "try refresh Small Market Summary error.";
+			log.error(error, e);
+			throw new JobExecutionException(error, e);
 		}
 		log.info("end refresh Small Market Summary job.");
 	}

@@ -86,7 +86,7 @@ public class MarketSummaryService {
 		return DbManager.inst().query(nsql.toString(), handler);
 	}
 	
-	public void refreshAllSummaries() throws SQLException {
+	public void refreshAllSummaries() throws Exception {
 		save(Mintpal.instance().getMarketSummaries());
 		save(Bittrex.instance().getMarketSummaries());
 		save(Poloniex.instance().getMarketSummaries());
