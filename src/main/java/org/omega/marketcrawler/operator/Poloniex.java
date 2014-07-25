@@ -16,7 +16,7 @@ import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
-public class Poloniex extends TradeOperator {
+public class Poloniex extends Operator {
 	
 	private static final Log log = LogFactory.getLog(Poloniex.class);
 	
@@ -36,21 +36,21 @@ public class Poloniex extends TradeOperator {
 		return NAME;
 	}
 	
-	private String getBaseAPI() {
-		return "https://poloniex.com/";
+	private String getBasePublicAPI() {
+		return "https://poloniex.com/public?";
 	}
 
 	// https://poloniex.com/public?command=returnTicker
 	public String getMarketSummaryAPI() {
-		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public?command=returnTicker");
+		StringBuilder api = new StringBuilder(getBasePublicAPI());
+		api.append("command=returnTicker");
 		return api.toString();
 	}
 	
 	// https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_NXT
 	public String getMarketTradeAPI(WatchListItem item) {
-		StringBuilder api = new StringBuilder(getBaseAPI());
-		api.append("public?command=returnTradeHistory&currencyPair=").append(item.getExchangeSymbol()).append("_").append(item.getWatchedSymbol());
+		StringBuilder api = new StringBuilder(getBasePublicAPI());
+		api.append("command=returnTradeHistory&currencyPair=").append(item.getExchangeSymbol()).append("_").append(item.getWatchedSymbol());
 		return api.toString();
 	}
 	

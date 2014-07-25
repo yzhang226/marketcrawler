@@ -45,4 +45,10 @@ public final class Arith {
 		BigDecimal one = new BigDecimal("1");
 		return b.divide(one, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(divide(1, 3));
+		System.out.println(divide(1, 3, 8));
+	}
+	
 }

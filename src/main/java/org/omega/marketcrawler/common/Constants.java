@@ -13,4 +13,6 @@ public final class Constants {
 	public static final String CRAWL_FOLDER = "/storage/crawler4j";
 	public static final String CRAWL_PAGES_FOLDER = CRAWL_FOLDER + "/pages";
 	
+	public static final String TEXT_NULL = "null";
+	
 }

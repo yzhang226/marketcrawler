@@ -9,8 +9,7 @@ import org.joda.time.DateTime;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.job.BigMarketSummaryCrawlerJob;
 import org.omega.marketcrawler.job.MarketTradeCrawlerJob;
-import org.omega.marketcrawler.job.RefreshCachedPKJob;
-import org.omega.marketcrawler.job.RefreshWatchedItemJob;
+import org.omega.marketcrawler.job.RefreshCacheJob;
 import org.omega.marketcrawler.job.SeekCoinJob;
 import org.omega.marketcrawler.job.SmallMarketSummaryCrawlerJob;
 import org.omega.marketcrawler.job.TradeStatisticsJob;
@@ -65,16 +64,16 @@ public final class SystemLauncher extends Thread {
   		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(2).repeatForever())
   		          			.build();
             // 2 - refresh watched item
-            JobDetail watchedItemJob = JobBuilder.newJob(RefreshWatchedItemJob.class).withIdentity("watchedItemjob", "watchedItemgroup").build();
-            Trigger watchedItemTrigger = TriggerBuilder.newTrigger().withIdentity("watchedItemTri", "watchedItemTriGrop")
-  		          			.startNow().withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
-  		          			.build();
-            // 3 - refresh cached pk
-            JobDetail cachedPKJob = JobBuilder.newJob(RefreshCachedPKJob.class).withIdentity("cachedPKjob", "cachedPKgroup").build();
+//            JobDetail watchedItemJob = JobBuilder.newJob(RefreshWatchedItemJob.class).withIdentity("watchedItemjob", "watchedItemgroup").build();
+//            Trigger watchedItemTrigger = TriggerBuilder.newTrigger().withIdentity("watchedItemTri", "watchedItemTriGrop")
+//  		          			.startNow().withSchedule(
+//  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(15).repeatForever())
+//  		          			.build();
+            // 3 - refresh cache
+            JobDetail cachedPKJob = JobBuilder.newJob(RefreshCacheJob.class).withIdentity("cachedPKjob", "cachedPKgroup").build();
             Trigger cachedPKTrigger = TriggerBuilder.newTrigger().withIdentity("cachedPKTri", "cachedPKTriGrop")
-  		          			.startAt(curr.plusSeconds(10).toDate()).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever())
+  		          			.startNow().withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(30).repeatForever())
   		          			.build();
             
             // 4 - fetch market trade data
@@ -98,7 +97,6 @@ public final class SystemLauncher extends Thread {
   		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
   		          			.build();
             
-            
             // 6
             JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
             Trigger coinTrigger = TriggerBuilder.newTrigger().withIdentity("coinTri", "coinTriGrop")
@@ -110,7 +108,7 @@ public final class SystemLauncher extends Thread {
             
             // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(marketJob, marketTrigger);
-            scheduler.scheduleJob(watchedItemJob, watchedItemTrigger);
+//            scheduler.scheduleJob(watchedItemJob, watchedItemTrigger);
             scheduler.scheduleJob(cachedPKJob, cachedPKTrigger);
 //            
             scheduler.scheduleJob(tradeJob, tradeTrigger);

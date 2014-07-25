@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -14,9 +13,9 @@ import org.omega.marketcrawler.net.MultiThreadedNetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
-public abstract class TradeOperator {
+public abstract class Operator {
 	
-	private static final Log log = LogFactory.getLog(TradeOperator.class);
+//	private static final Log log = LogFactory.getLog(TradeOperator.class);
 	
 //	private int id;
 	public abstract String getName();
@@ -33,7 +32,8 @@ public abstract class TradeOperator {
 		try {
 //			String recordText = NetUtils.get(getMarketSummaryAPI());
 			String recordText = MultiThreadedNetter.inst().get(getMarketSummaryAPI());
-					
+			if (Utils.isEmptyOrNull(recordText) || recordText.length() < 20) return records;
+			
 			Object json = mapValue(recordText);
 			
 			records = transferJsonToMarketSummary(json);
@@ -56,6 +56,7 @@ public abstract class TradeOperator {
 		try {
 //			String recordText = NetUtils.get(getMarketTradeAPI(item));
 			String recordText = MultiThreadedNetter.inst().get(getMarketTradeAPI(item));
+			if (Utils.isEmptyOrNull(recordText) || recordText.length() < 20) return records;
 			
 			Object json = mapValue(recordText);
 			

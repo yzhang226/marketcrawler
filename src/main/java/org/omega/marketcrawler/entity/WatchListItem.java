@@ -14,9 +14,9 @@ public class WatchListItem extends _BaseEntity {
 	public WatchListItem() {}
 	
 	public WatchListItem(String operator, String watchedSymbol, String exchangeSymbol) {
-		this.operator = operator;
-		this.watchedSymbol = watchedSymbol;
-		this.exchangeSymbol = exchangeSymbol;
+		this.operator = operator.toUpperCase();
+		this.watchedSymbol = watchedSymbol.toUpperCase();
+		this.exchangeSymbol = exchangeSymbol.toUpperCase();
 	}
 	
 	public String toMarketTradeTable() {

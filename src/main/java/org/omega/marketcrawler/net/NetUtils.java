@@ -13,8 +13,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.operator.Bittrex;
-import org.omega.marketcrawler.operator.Mintpal;
+import org.omega.marketcrawler.operator.Poloniex;
 
 public final class NetUtils {
 	
@@ -131,10 +130,15 @@ public final class NetUtils {
 //		System.out.println(accessDirectly(Mintpal.instance().getMarketSummaryAPI()));
 //		System.out.println(get(Poloniex.instance().getMarketSummaryAPI()));
 		WatchListItem item = new WatchListItem("bittrex", "VAST", "BTC");
-		System.out.println(get(Bittrex.instance().getMarketTradeAPI(item)));
+//		System.out.println(get(Bittrex.instance().getMarketTradeAPI(item)));
 		
 //		item = new WatchListItem("mintpal", "VRC", "BTC");
 //		System.out.println(get(Mintpal.instance().getMarketTradeAPI(item)));
+		
+		item = new WatchListItem("poloniex", "VRC", "BTC");
+		String x = get(Poloniex.instance().getMarketTradeAPI(item));
+		System.out.println("x is [" + x + "] , " + (x == null ? 0 : x.length()));
+		
 	}
 	
 }

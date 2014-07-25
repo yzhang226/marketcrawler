@@ -14,7 +14,7 @@ import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
-public class Cryptsy extends TradeOperator {
+public class Cryptsy extends Operator {
 
 	private static final Log log = LogFactory.getLog(Cryptsy.class);
 	

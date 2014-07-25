@@ -9,8 +9,6 @@ import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.TradeStatistics;
@@ -18,7 +16,7 @@ import org.omega.marketcrawler.entity.WatchListItem;
 
 public class TradeStatisticsService {
 
-	private static final Log log = LogFactory.getLog(TradeStatisticsService.class);
+//	private static final Log log = LogFactory.getLog(TradeStatisticsService.class);
 	
 	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
 	

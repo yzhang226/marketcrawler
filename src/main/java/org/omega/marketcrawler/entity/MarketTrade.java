@@ -1,5 +1,7 @@
 package org.omega.marketcrawler.entity;
 
+import org.omega.marketcrawler.common.Arith;
+
 public class MarketTrade extends _BaseEntity {
 
 	private static final long serialVersionUID = -5408828461710055307L;
@@ -17,6 +19,8 @@ public class MarketTrade extends _BaseEntity {
 	private double price;
 	private double totalUnits;
 	private double totalCost;
+	
+	
 	public static byte parseTradeType(String textType) {
 		if (textType == null || textType.trim().length() == 0) 
 			return TRADE_TYPE_NA ;
@@ -27,6 +31,30 @@ public class MarketTrade extends _BaseEntity {
 		}
 		return TRADE_TYPE_NA;
 	}
+	
+	private static final double correction = 0.000000003;
+	public boolean isSameWith(MarketTrade obj) {
+		if (// tradeType == obj.getTradeType() && 
+				totalUnits == obj.getTotalUnits()
+				&& Math.abs(Arith.sub(price, obj.getPrice())) < correction
+				&& Math.abs(Arith.sub(totalCost, obj.getTotalCost())) < correction) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isNotSameWith(MarketTrade obj) {
+		if (// tradeType != obj.getTradeType() || 
+				totalUnits != obj.getTotalUnits()
+				|| Math.abs(Arith.sub(price, obj.getPrice())) > correction
+				|| Math.abs(Arith.sub(totalCost, obj.getTotalCost())) > correction) {
+			return true;
+		}
+		return false;
+	}
+	
+	
+	
 	//
 	public long getTradeTime() {
 		return tradeTime;
@@ -79,23 +107,39 @@ public class MarketTrade extends _BaseEntity {
 		return sb.toString();
 	}
 	
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (tradeTime ^ (tradeTime >>> 32));
-		return result;
-	}
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MarketTrade other = (MarketTrade) obj;
-		if (tradeTime != other.tradeTime)
-			return false;
-		return true;
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + (int) (tradeTime ^ (tradeTime >>> 32));
+//		result = prime * result + tradeType;
+//		return result;
+//	}
+//
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		MarketTrade other = (MarketTrade) obj;
+//		if (tradeTime != other.tradeTime)
+//			return false;
+//		if (tradeType != other.tradeType)
+//			return false;
+//		return true;
+//	}
+
+	public MarketTrade copy() {
+		MarketTrade copy = new MarketTrade();
+		
+		copy.setTradeTime(tradeTime);
+		copy.setTradeType(tradeType);
+		copy.setPrice(price);
+		copy.setTotalUnits(totalUnits);
+		copy.setTotalCost(totalCost);
+		
+		return copy;
 	}
 	
 }

@@ -41,6 +41,13 @@ public class Misc2Test {
 		System.out.println(dt1);
 		System.out.println(dt2);
 		
+		double dd1 = 0.00000001;
+		double dd2 = 0.000000011;
+		
+		System.out.println(dd1 == dd2);
+		
+		
+		
 	}
 	
 }

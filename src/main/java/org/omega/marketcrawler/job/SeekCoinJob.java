@@ -14,7 +14,6 @@ import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.AltCoinService;
 import org.omega.marketcrawler.entity.AltCoin;
 import org.omega.marketcrawler.net.MultiThreadedNetter;
-import org.omega.marketcrawler.net.NetUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

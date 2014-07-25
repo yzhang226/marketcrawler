@@ -13,7 +13,7 @@ import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
-public final class Mintpal extends TradeOperator {
+public final class Mintpal extends Operator {
 	
 	private static final Log log = LogFactory.getLog(Mintpal.class);
 	

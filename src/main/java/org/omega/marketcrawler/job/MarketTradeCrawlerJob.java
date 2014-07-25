@@ -6,7 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.MyCache;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.thread.MarketTradeSpider;
+import org.omega.marketcrawler.thread.MarketTradeThread;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,7 +21,7 @@ public class MarketTradeCrawlerJob implements Job {
 		try {
 			Set<WatchListItem> items = MyCache.inst().getWatchedItems();
 			for (WatchListItem item : items) {
-				new MarketTradeSpider(item).start();
+				new MarketTradeThread(item).start();
 			}
 		} catch (Exception e) {
 			String error = "Execution Market Trade CrawlerJob error.";

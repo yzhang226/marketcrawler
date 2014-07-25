@@ -42,6 +42,10 @@ public final class Utils {
 		return !isEmpty(text);
 	}
 	
+	public static boolean isEmptyOrNull(String text) {
+		return isEmpty(text) || (text.trim().length() == 4 && Constants.TEXT_NULL.equals(text.trim().toLowerCase()));
+	}
+	
 	public static boolean isEmpty(Object[] objs) {
 		return objs == null || objs.length == 0;
 	}
