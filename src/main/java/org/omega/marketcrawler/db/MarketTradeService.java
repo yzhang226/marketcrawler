@@ -43,7 +43,7 @@ public class MarketTradeService {
 	protected String createSql4MarketTrade(WatchListItem item) {
 		StringBuilder create = new StringBuilder();
 		create.append("CREATE TABLE ").append(item.toMarketTradeTable()).append(" ( ").append("\n")
-		 	  .append("id INT NOT NULL , ").append("\n")
+		 	  .append("id INT NOT NULL AUTO_INCREMENT, ").append("\n")
 		      .append("trade_time BIGINT NOT NULL , ").append("\n")
 		      .append("trade_type TINYINT NOT NULL , ").append("\n")
 		      .append("price DOUBLE NULL ,").append("\n")
