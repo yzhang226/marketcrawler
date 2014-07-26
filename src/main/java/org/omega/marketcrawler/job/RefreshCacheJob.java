@@ -1,7 +1,5 @@
 package org.omega.marketcrawler.job;
 
-import static org.omega.marketcrawler.common.MyCache.QUERY_LIMIT;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -9,7 +7,6 @@ import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.MyCache;
 import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.db.WatchListItemService;
-import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -36,29 +33,19 @@ public class RefreshCacheJob implements Job {
 			MyCache.inst().addAllItems(items);
 			log.info(getWatchedItemsInfo(items));
 			
-			// refresh overlap market trades only once
+			// refresh the latest market trade
 			for (WatchListItem item : items) {
 				try {
-					List<MarketTrade> trades = mtser.findOverlapMarketTrade(item, QUERY_LIMIT);
-					MyCache.inst().getOverlapTrades(item).addAll(trades);
+					MyCache.inst().putLatestTrade(item, mtser.findLatestTrade(item));
 				} catch (Exception e) {
-					log.error("add overlap market_trade data to cache error.", e);
+					log.error("put latest market_trade to cache error.", e);
 				}
 			}
 			
-			// refresh cache market trades
-			for (WatchListItem item : items) {
-				try {
-					List<MarketTrade> trades = mtser.findTopTrades(item, QUERY_LIMIT);
-					MyCache.inst().addMarketTrade(item, trades);
-				} catch (Exception e) {
-					log.error("add top market_trade data to cache error.", e);
-				}
-			}
 		} catch (Exception e) {
 			String error = "Refresh Cache Job error.";
 			log.error(error, e);
-			throw new JobExecutionException(error, e);
+//			throw new JobExecutionException(error, e);
 		}
 		
 		log.info("end");

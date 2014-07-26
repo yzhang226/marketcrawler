@@ -116,9 +116,8 @@ public final class Mintpal extends Operator {
 			for (Map<String, String> da : data) {
 				re = new MarketTrade();
 				try {
-					if ((field = da.get("type")) != null) {
-						re.setTradeType(MarketTrade.parseTradeType(field));
-					}
+					/* {"time":"1406378150.2185","type":"BUY","price":"0.00019398","amount":"281.65674470","total":"0.05463577"} */
+					if ((field = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(field)); }
 					if ((field = da.get("price")) != null) { re.setPrice(Double.valueOf(field)); } 
 					if ((field = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(field)); }
 					if ((field = da.get("total")) != null) { re.setTotalCost(Double.valueOf(field)); }
@@ -128,11 +127,11 @@ public final class Mintpal extends Operator {
 						 * millisecond ms 1 millisecond = 1,000 microseconds  */
 						re.setTradeTime((long) Arith.multiply(Double.valueOf(field), 1000));
 					}
+					
+					records.add(re);
 				} catch (Exception e) {
-					re = null;
 					log.error("convert one json row error.", e);
 				}
-				if (re != null) records.add(re);
 			}
 		}
 		return records;
@@ -150,10 +149,10 @@ public final class Mintpal extends Operator {
 //		}
 //		System.out.println(SqlUtils.getInsertSql4TradeRecord(watchedSymbol, exchangeSymbol));
 		
-		List<MarketSummary> summs = Mintpal.instance().getMarketSummaries();
-		for (MarketSummary summ : summs) {
-			System.out.println(summ.toReadableText());
-		}
+//		List<MarketSummary> summs = Mintpal.instance().getMarketSummaries();
+//		for (MarketSummary summ : summs) {
+//			System.out.println(summ.toReadableText());
+//		}
 		
 	}
 

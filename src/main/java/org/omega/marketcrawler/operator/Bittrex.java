@@ -122,18 +122,19 @@ public final class Bittrex extends Operator {
 			for (Map<String, Object> da : data) {
 				re = new MarketTrade();
 				try {
-					/* {"Id":449960,"TimeStamp":"2014-07-25T05:19:28.943","Quantity":777.00000000,"Price":0.00020000,"Total":0.15540000,"FillType":"PARTIAL_FILL","OrderType":"SELL"}
-					 */
+					/* {"Id":111910,"TimeStamp":"2014-07-26T12:51:14.477","Quantity":50.00000000,"Price":0.00069000,"Total":0.03450000,"FillType":"FILL","OrderType":"SELL"},
+					 * {"Id":111909,"TimeStamp":"2014-07-26T12:51:14.477","Quantity":88.85123887,"Price":0.00069069,"Total":0.06136866,"FillType":"FILL","OrderType":"SELL"} */
+					if ((fieldValue = da.get("Id")) != null) { re.setTradeId((Integer) fieldValue); }
 					if ((fieldValue = da.get("Price")) != null) { re.setPrice((Double) fieldValue); }
 					if ((fieldValue = da.get("Quantity")) != null) { re.setTotalUnits((Double) fieldValue); }
 					if ((fieldValue = da.get("Total")) != null) { re.setTotalCost((Double) fieldValue); }
 					if ((fieldValue = da.get("TimeStamp")) != null) {  re.setTradeTime(parseMillsecs((String) fieldValue, sdf)); }
 					if ((fieldValue = da.get("OrderType")) != null) { re.setTradeType(MarketTrade.parseTradeType((String) fieldValue)); }
+					
+					records.add(re);
 				} catch (Exception e) {
-					re = null;
 					log.error("convert one json row error.", e);
 				}
-				if (re != null) { records.add(re); }
 			}
 		}
 		

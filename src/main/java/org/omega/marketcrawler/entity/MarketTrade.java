@@ -19,6 +19,8 @@ public class MarketTrade extends _BaseEntity {
 	private double price;
 	private double totalUnits;
 	private double totalCost;
+	/** in bittrex, cryptsy, the tradeTime and tradeType will not identify unique one  */
+	private Integer tradeId;
 	
 	
 	public static byte parseTradeType(String textType) {
@@ -85,6 +87,12 @@ public class MarketTrade extends _BaseEntity {
 	}
 	public void setTotalCost(double totalCost) {
 		this.totalCost = totalCost;
+	}
+	public Integer getTradeId() {
+		return tradeId;
+	}
+	public void setTradeId(Integer tradeId) {
+		this.tradeId = tradeId;
 	}
 	
 	public String toReadableText() {

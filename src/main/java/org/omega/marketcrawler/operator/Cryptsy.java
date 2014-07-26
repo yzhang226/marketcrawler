@@ -130,20 +130,19 @@ public class Cryptsy extends Operator {
 			for (Map<String, String> da : trades) {
 				re = new MarketTrade();
 				try {
-					if ((fieldValue = da.get("type")) != null) {
-						re.setTradeType(MarketTrade.parseTradeType(fieldValue));
-					}
+					/* {"id":"59415429","time":"2014-07-25 05:44:47","type":"Sell","price":"0.00100400","quantity":"475.71627480","total":"0.47761914"},
+					 * {"id":"59415426","time":"2014-07-25 05:44:47","type":"Sell","price":"0.00100400","quantity":"441.20997308","total":"0.44297481"} */
+					if ((fieldValue = da.get("id")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
 					if ((fieldValue = da.get("price")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
 					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
 					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
-					if ((fieldValue = da.get("time")) != null) {// 2014-07-11 04:33:30
-						re.setTradeTime(parseMillsecs(fieldValue, sdf));
-					}
+					if ((fieldValue = da.get("time")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
+					
+					records.add(re);
 				} catch (Exception e) {
-					re = null;
 					log.error("", e);
 				}
-				if (re != null) { records.add(re); }
 			}
 		} else {
 			log.error("Transfer Json To Market Trade error: " + map.get(KEY_ERROR));

@@ -91,11 +91,11 @@ public final class SystemLauncher extends Thread {
   		          			.build();
             
             // 6 - do the statistics for all the active trade
-            JobDetail tradeStatJob = JobBuilder.newJob(TradeStatisticsJob.class).withIdentity("tradeStatjob", "tradeStatgroup").build();
-            Trigger tradeStatTrigger = TriggerBuilder.newTrigger().withIdentity("tradeStatTri", "tradeStatTriGrop")
-  		          			.startAt(curr.plusSeconds(45).toDate()).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
-  		          			.build();
+//            JobDetail tradeStatJob = JobBuilder.newJob(TradeStatisticsJob.class).withIdentity("tradeStatjob", "tradeStatgroup").build();
+//            Trigger tradeStatTrigger = TriggerBuilder.newTrigger().withIdentity("tradeStatTri", "tradeStatTriGrop")
+//  		          			.startAt(curr.plusSeconds(45).toDate()).withSchedule(
+//  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
+//  		          			.build();
             
             // 6
             JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
@@ -113,7 +113,7 @@ public final class SystemLauncher extends Thread {
 //            
             scheduler.scheduleJob(tradeJob, tradeTrigger);
             scheduler.scheduleJob(bigMarketJob, bigMarketTrigger);
-            scheduler.scheduleJob(tradeStatJob, tradeStatTrigger);
+//            scheduler.scheduleJob(tradeStatJob, tradeStatTrigger);
             
             scheduler.scheduleJob(coinJob, coinTrigger);
 

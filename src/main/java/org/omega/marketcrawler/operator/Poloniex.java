@@ -94,31 +94,26 @@ public class Poloniex extends Operator {
 	public List<MarketTrade> transferJsonToMarketTrade(Object jsonObj) {
 		List<Map<String, String>> json = (List<Map<String, String>>) jsonObj;
 		List<MarketTrade> records = null;
-		/*
-		 * [{"date":"2014-02-10 04:23:23","type":"buy","rate":"0.00007600","amount":"140","total":"0.01064"},
-		 * {"date":"2014-02-10 01:19:37","type":"buy","rate":"0.00007600","amount":"655","total":"0.04978"}, ... ]
-		 */
-		String field = null;
+		String fieldValue = null;
 		MarketTrade re = null;
 		records = new ArrayList<>(json.size());
 		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
 		for (Map<String, String> da : json) {
 			re = new MarketTrade();
 			try {
-				if ((field = da.get("type")) != null) {
-					re.setTradeType(MarketTrade.parseTradeType(field));
-				}
-				if ((field = da.get("rate")) != null) { re.setPrice(Double.valueOf(field)); } 
-				if ((field = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(field)); }
-				if ((field = da.get("total")) != null) { re.setTotalCost(Double.valueOf(field)); }
-				if ((field = da.get("date")) != null) {// 2014-02-10 04:23:23
-					re.setTradeTime(parseMillsecs(field, sdf));
-				}
+				/* {"tradeID":"53010","date":"2014-07-26 06:35:07","type":"sell","rate":"0.00019453","amount":"69.50919137","total":"0.01352162"}
+				 * {"tradeID":"53009","date":"2014-07-26 06:35:07","type":"sell","rate":"0.00019453","amount":"64.2514308","total":"0.01249883"} */
+				if ((fieldValue = da.get("tradeID")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
+				if ((fieldValue = da.get("rate")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
+				if ((fieldValue = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("date")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
+				
+				records.add(re);
 			} catch (Exception e) {
-				re = null;
 				log.error("convert one json row error.", e);
 			}
-			if (re != null) { records.add(re); }
 		}
 		
 		return records;

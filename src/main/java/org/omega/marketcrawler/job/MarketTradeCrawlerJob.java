@@ -26,7 +26,7 @@ public class MarketTradeCrawlerJob implements Job {
 		} catch (Exception e) {
 			String error = "Execution Market Trade CrawlerJob error.";
 			log.error(error, e);
-			throw new JobExecutionException(error, e);
+//			throw new JobExecutionException(error, e);
 		}
 		
 	}

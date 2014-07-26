@@ -14,16 +14,22 @@ public class WatchListItem extends _BaseEntity {
 	public WatchListItem() {}
 	
 	public WatchListItem(String operator, String watchedSymbol, String exchangeSymbol) {
-		this.operator = operator.toUpperCase();
-		this.watchedSymbol = watchedSymbol.toUpperCase();
-		this.exchangeSymbol = exchangeSymbol.toUpperCase();
+		this.operator = operator;
+		setWatchedSymbol(watchedSymbol);
+		setExchangeSymbol(exchangeSymbol);
 	}
 	
+	private String market_trade_table;
 	public String toMarketTradeTable() {
-		return new StringBuilder("trade_")
-		.append(operator.toLowerCase()).append("_")
-		.append(exchangeSymbol.toLowerCase()).append("_")
-		.append(watchedSymbol.toLowerCase()).toString();
+		if (market_trade_table == null) {
+			StringBuilder table = new StringBuilder("trade_");
+			table.append(operator.toLowerCase()).append("_");
+			table.append(exchangeSymbol.toLowerCase()).append("_");
+			table.append(watchedSymbol.toLowerCase());
+			
+			market_trade_table = table.toString();
+		}
+		return market_trade_table;
 	}
 	
 	// getter, setter
@@ -49,13 +55,13 @@ public class WatchListItem extends _BaseEntity {
 		return watchedSymbol;
 	}
 	public void setWatchedSymbol(String watchedSymbol) {
-		this.watchedSymbol = watchedSymbol;
+		this.watchedSymbol = watchedSymbol != null ? watchedSymbol.toUpperCase() : watchedSymbol;
 	}
 	public String getExchangeSymbol() {
 		return exchangeSymbol;
 	}
 	public void setExchangeSymbol(String exchangeSymbol) {
-		this.exchangeSymbol = exchangeSymbol;
+		this.exchangeSymbol =  exchangeSymbol != null ? exchangeSymbol.toUpperCase() : exchangeSymbol;
 	}
 	public Integer getMarketId() {
 		return marketId;
@@ -107,19 +113,15 @@ public class WatchListItem extends _BaseEntity {
 		return true;
 	}
 
+	private String readable_text;
 	public String toReadableText() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(id).append("_").append(operator).append("_")
-		.append(exchangeSymbol.toLowerCase()).append("_")
-		.append(watchedSymbol.toLowerCase()); 
-		if (marketId != null) sb.append("_").append(marketId);
-		return sb.toString();
+		if (readable_text == null) {
+			StringBuilder sb = new StringBuilder(toMarketTradeTable());
+			if (marketId != null) sb.append("_").append(marketId);
+			readable_text = sb.toString();
+		}
+		
+		return readable_text;
 	}
-	
-//	public String toSimpleText() {
-//		return toReadableText();
-//	}
-	
-	
 	
 }

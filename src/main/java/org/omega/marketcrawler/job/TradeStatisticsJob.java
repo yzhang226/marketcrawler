@@ -18,7 +18,7 @@ public class TradeStatisticsJob implements Job {
 				new TradeStatisticsThread(item).start();
 			}
 		} catch (Exception e) {
-			throw new JobExecutionException("Execute Trade Statistics Job error.", e);
+//			throw new JobExecutionException("Execute Trade Statistics Job error.", e);
 		}
 	}
 	

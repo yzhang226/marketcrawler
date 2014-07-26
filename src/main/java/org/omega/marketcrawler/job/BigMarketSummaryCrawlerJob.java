@@ -26,7 +26,7 @@ public class BigMarketSummaryCrawlerJob implements Job {
 		} catch (Exception e) {
 			String error = "try refresh Big Market Summary error.";
 			log.error(error, e);
-			throw new JobExecutionException(error, e);
+//			throw new JobExecutionException(error, e);
 		}
 		log.info("end refresh Big Market Summary job.");
 	}

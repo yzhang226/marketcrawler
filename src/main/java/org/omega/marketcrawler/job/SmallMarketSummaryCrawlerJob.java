@@ -34,7 +34,7 @@ public class SmallMarketSummaryCrawlerJob implements Job {
 		} catch (Exception e) {
 			String error = "try refresh Small Market Summary error.";
 			log.error(error, e);
-			throw new JobExecutionException(error, e);
+//			throw new JobExecutionException(error, e);
 		}
 		log.info("end refresh Small Market Summary job.");
 	}
