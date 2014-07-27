@@ -99,7 +99,18 @@ public class WatchListItemService {
 	public static void main(String[] args) throws SQLException {
 		
 		WatchListItemService wiser = new WatchListItemService();
-		wiser.initWatchedItem();
+//		wiser.initWatchedItem();
+		
+		for (WatchListItem item : wiser.findActiveItems()) {
+			StringBuilder sb = new StringBuilder(" ALTER TABLE ");
+			sb.append(item.toMarketTradeTable())
+			  .append(" CHANGE COLUMN price price FLOAT(16,8) NULL DEFAULT NULL  , CHANGE COLUMN total_units total_units FLOAT(16,8) NULL DEFAULT NULL  , CHANGE COLUMN total_cost total_cost FLOAT(16,8) NULL DEFAULT NULL;");
+			System.out.println(sb.toString());
+			/*
+			 * ALTER TABLE trade_bittrex_btc_key CHANGE COLUMN price price FLOAT(16,8) NULL DEFAULT NULL  , CHANGE COLUMN total_units total_units FLOAT(16,8) NULL DEFAULT NULL  , CHANGE COLUMN total_cost total_cost FLOAT(16,8) NULL DEFAULT NULL  ;
+
+			 */
+		}
 		
 	}
 	
