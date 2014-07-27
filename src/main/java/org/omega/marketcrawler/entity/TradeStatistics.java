@@ -2,99 +2,172 @@ package org.omega.marketcrawler.entity;
 
 public class TradeStatistics extends _BaseEntity {
 
-	private static final long serialVersionUID = -8009878791709947226L;
+	private static final long serialVersionUID = -5043870448507147422L;
 	
-	private int itemId;
-	private long startTime;
-	private long endTime;
-	private double open;
-	private double high;
-	private double low;
-	private double close;
-	private double watchedVol;
-	private double exchangeVol;
-	private int count;
+	private short itemId;
+	private int startTime;
+	private int endTime;
+	private float open;
+	private float high;
+	private float low;
+	private float close;
+	private float watchedVol;
+	private float exchangeVol;
+	private short count;
+	
+	private Float buyWatchedVol;
+	private Float buyExchangeVol;
+	private Float buyAvgPrice;
+	private Short buyCount;
+	
+	private Float sellWatchedVol;
+	private Float sellExchangeVol;
+	private Float sellAvgPrice;
+	private Short sellCount;
 	
 	public TradeStatistics() { }
 
-	public int getItemId() {
+	public short getItemId() {
 		return itemId;
 	}
-	
-	public void setItemId(int itemId) {
+
+	public void setItemId(short itemId) {
 		this.itemId = itemId;
 	}
-	
-	public long getStartTime() {
+
+	public int getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(long startTime) {
+	public void setStartTime(int startTime) {
 		this.startTime = startTime;
 	}
 
-	public long getEndTime() {
+	public int getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(long endTime) {
+	public void setEndTime(int endTime) {
 		this.endTime = endTime;
 	}
 
-	public double getOpen() {
+	public float getOpen() {
 		return open;
 	}
 
-	public void setOpen(double open) {
+	public void setOpen(float open) {
 		this.open = open;
 	}
 
-	public double getHigh() {
+	public float getHigh() {
 		return high;
 	}
 
-	public void setHigh(double high) {
+	public void setHigh(float high) {
 		this.high = high;
 	}
 
-	public double getLow() {
+	public float getLow() {
 		return low;
 	}
 
-	public void setLow(double low) {
+	public void setLow(float low) {
 		this.low = low;
 	}
 
-	public double getClose() {
+	public float getClose() {
 		return close;
 	}
 
-	public void setClose(double close) {
+	public void setClose(float close) {
 		this.close = close;
 	}
 
-	public double getWatchedVol() {
+	public float getWatchedVol() {
 		return watchedVol;
 	}
 
-	public void setWatchedVol(double watchedVol) {
+	public void setWatchedVol(float watchedVol) {
 		this.watchedVol = watchedVol;
 	}
 
-	public double getExchangeVol() {
+	public float getExchangeVol() {
 		return exchangeVol;
 	}
 
-	public void setExchangeVol(double exchangeVol) {
+	public void setExchangeVol(float exchangeVol) {
 		this.exchangeVol = exchangeVol;
 	}
 
-	public int getCount() {
+	public short getCount() {
 		return count;
 	}
 
-	public void setCount(int count) {
+	public void setCount(short count) {
 		this.count = count;
 	}
-	
+
+	public Float getBuyWatchedVol() {
+		return buyWatchedVol;
+	}
+
+	public void setBuyWatchedVol(Float buyWatchedVol) {
+		this.buyWatchedVol = buyWatchedVol;
+	}
+
+	public Float getBuyExchangeVol() {
+		return buyExchangeVol;
+	}
+
+	public void setBuyExchangeVol(Float buyExchangeVol) {
+		this.buyExchangeVol = buyExchangeVol;
+	}
+
+	public Float getBuyAvgPrice() {
+		return buyAvgPrice;
+	}
+
+	public void setBuyAvgPrice(Float buyAvgPrice) {
+		this.buyAvgPrice = buyAvgPrice;
+	}
+
+	public Short getBuyCount() {
+		return buyCount;
+	}
+
+	public void setBuyCount(Short buyCount) {
+		this.buyCount = buyCount;
+	}
+
+	public Float getSellWatchedVol() {
+		return sellWatchedVol;
+	}
+
+	public void setSellWatchedVol(Float sellWatchedVol) {
+		this.sellWatchedVol = sellWatchedVol;
+	}
+
+	public Float getSellExchangeVol() {
+		return sellExchangeVol;
+	}
+
+	public void setSellExchangeVol(Float sellExchangeVol) {
+		this.sellExchangeVol = sellExchangeVol;
+	}
+
+	public Float getSellAvgPrice() {
+		return sellAvgPrice;
+	}
+
+	public void setSellAvgPrice(Float sellAvgPrice) {
+		this.sellAvgPrice = sellAvgPrice;
+	}
+
+	public Short getSellCount() {
+		return sellCount;
+	}
+
+	public void setSellCount(Short sellCount) {
+		this.sellCount = sellCount;
+	}
 }

@@ -7,10 +7,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.MyCache;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.operator.OperatorFactory;
+import org.omega.marketcrawler.service.MarketTradeService;
 
 public class MarketTradeThread extends Thread {
 	

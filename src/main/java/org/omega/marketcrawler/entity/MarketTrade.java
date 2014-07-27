@@ -1,6 +1,5 @@
 package org.omega.marketcrawler.entity;
 
-import org.omega.marketcrawler.common.Arith;
 
 public class MarketTrade extends _BaseEntity {
 
@@ -16,9 +15,9 @@ public class MarketTrade extends _BaseEntity {
 	private long tradeTime;
 	/**  NA - 0, buy - 1, sell - 2 */
 	private byte tradeType;
-	private double price;
-	private double totalUnits;
-	private double totalCost;
+	private float price;
+	private float totalUnits;
+	private float totalCost;
 	/** in bittrex, cryptsy, the tradeTime and tradeType will not identify unique one  */
 	private Integer tradeId;
 	
@@ -34,30 +33,25 @@ public class MarketTrade extends _BaseEntity {
 		return TRADE_TYPE_NA;
 	}
 	
-	private static final double correction = 0.000000003;
-	public boolean isSameWith(MarketTrade obj) {
-		if (// tradeType == obj.getTradeType() && 
-				totalUnits == obj.getTotalUnits()
-				&& Math.abs(Arith.sub(price, obj.getPrice())) < correction
-				&& Math.abs(Arith.sub(totalCost, obj.getTotalCost())) < correction) {
-			return true;
-		}
-		return false;
+	public String toReadableText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(tradeTime).append(",").append(tradeType).append(",")
+		  .append(price).append(",").append(totalUnits).append(",")
+		  .append(totalCost);
+		return sb.toString();
 	}
-	
-	public boolean isNotSameWith(MarketTrade obj) {
-		if (// tradeType != obj.getTradeType() || 
-				totalUnits != obj.getTotalUnits()
-				|| Math.abs(Arith.sub(price, obj.getPrice())) > correction
-				|| Math.abs(Arith.sub(totalCost, obj.getTotalCost())) > correction) {
-			return true;
-		}
-		return false;
+
+	public MarketTrade copy() {
+		MarketTrade copy = new MarketTrade();
+		
+		copy.setTradeTime(tradeTime);
+		copy.setTradeType(tradeType);
+		copy.setPrice(price);
+		copy.setTotalUnits(totalUnits);
+		copy.setTotalCost(totalCost);
+		
+		return copy;
 	}
-	
-	
-	
-	//
 	public long getTradeTime() {
 		return tradeTime;
 	}
@@ -70,22 +64,22 @@ public class MarketTrade extends _BaseEntity {
 	public void setTradeType(byte tradeType) {
 		this.tradeType = tradeType;
 	}
-	public double getPrice() {
+	public float getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
-	public double getTotalUnits() {
+	public float getTotalUnits() {
 		return totalUnits;
 	}
-	public void setTotalUnits(double totalUnits) {
+	public void setTotalUnits(float totalUnits) {
 		this.totalUnits = totalUnits;
 	}
-	public double getTotalCost() {
+	public float getTotalCost() {
 		return totalCost;
 	}
-	public void setTotalCost(double totalCost) {
+	public void setTotalCost(float totalCost) {
 		this.totalCost = totalCost;
 	}
 	public Integer getTradeId() {
@@ -93,61 +87,6 @@ public class MarketTrade extends _BaseEntity {
 	}
 	public void setTradeId(Integer tradeId) {
 		this.tradeId = tradeId;
-	}
-	
-	public String toReadableText() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(tradeTime).append(",")
-		.append(tradeType).append(",")
-		.append(price).append(",")
-		.append(totalUnits).append(",")
-		.append(totalCost).append(",");
-		return sb.toString();
-	}
-	
-	public String toInsertValue() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(tradeTime).append(",")
-		.append(tradeType).append(",")
-		.append(String.valueOf(price)).append(",")
-		.append(String.valueOf(totalUnits)).append(",")
-		.append(String.valueOf(totalCost)).append(",");
-		return sb.toString();
-	}
-	
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + (int) (tradeTime ^ (tradeTime >>> 32));
-//		result = prime * result + tradeType;
-//		return result;
-//	}
-//
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		MarketTrade other = (MarketTrade) obj;
-//		if (tradeTime != other.tradeTime)
-//			return false;
-//		if (tradeType != other.tradeType)
-//			return false;
-//		return true;
-//	}
-
-	public MarketTrade copy() {
-		MarketTrade copy = new MarketTrade();
-		
-		copy.setTradeTime(tradeTime);
-		copy.setTradeType(tradeType);
-		copy.setPrice(price);
-		copy.setTotalUnits(totalUnits);
-		copy.setTotalCost(totalCost);
-		
-		return copy;
 	}
 	
 }

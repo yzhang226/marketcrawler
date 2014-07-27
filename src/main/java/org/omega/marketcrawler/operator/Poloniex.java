@@ -105,9 +105,9 @@ public class Poloniex extends Operator {
 				 * {"tradeID":"53009","date":"2014-07-26 06:35:07","type":"sell","rate":"0.00019453","amount":"64.2514308","total":"0.01249883"} */
 				if ((fieldValue = da.get("tradeID")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
 				if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
-				if ((fieldValue = da.get("rate")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
-				if ((fieldValue = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
-				if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("rate")) != null) { re.setPrice(Float.valueOf(fieldValue)); } 
+				if ((fieldValue = da.get("amount")) != null) { re.setTotalUnits(Float.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Float.valueOf(fieldValue)); }
 				if ((fieldValue = da.get("date")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
 				
 				records.add(re);

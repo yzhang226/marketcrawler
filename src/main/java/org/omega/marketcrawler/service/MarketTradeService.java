@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.db;
+package org.omega.marketcrawler.service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 
@@ -46,9 +47,9 @@ public class MarketTradeService {
 		 	  .append("id INT NOT NULL AUTO_INCREMENT, ").append("\n")
 		      .append("trade_time BIGINT NOT NULL , ").append("\n")
 		      .append("trade_type TINYINT NOT NULL , ").append("\n")
-		      .append("price DOUBLE NULL ,").append("\n")
-		      .append("total_units DOUBLE NULL ,").append("\n")
-		      .append("total_cost DOUBLE NULL ,").append("\n")
+		      .append("price FLOAT(16,8) NULL ,").append("\n")
+		      .append("total_units FLOAT(16,8) NULL ,").append("\n")
+		      .append("total_cost FLOAT(16,8) NULL ,").append("\n")
 		      .append("trade_id INT NULL ,").append("\n")
 		      .append("PRIMARY KEY (id) );");
 		
@@ -112,7 +113,7 @@ public class MarketTradeService {
 	}
 	
 	public MarketTrade findLatestTrade(WatchListItem item) throws SQLException {
-		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time, trade_id limit 1";
+		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time desc, trade_id desc limit 1";
 		return findUnique(sql);
 	}
 	

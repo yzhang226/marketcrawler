@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.db;
+package org.omega.marketcrawler.service;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.WatchListItem;
 
 public class WatchListItemService {

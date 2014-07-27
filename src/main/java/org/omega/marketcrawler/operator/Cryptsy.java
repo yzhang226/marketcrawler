@@ -134,9 +134,9 @@ public class Cryptsy extends Operator {
 					 * {"id":"59415426","time":"2014-07-25 05:44:47","type":"Sell","price":"0.00100400","quantity":"441.20997308","total":"0.44297481"} */
 					if ((fieldValue = da.get("id")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
 					if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
-					if ((fieldValue = da.get("price")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
-					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
-					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("price")) != null) { re.setPrice(Float.valueOf(fieldValue)); } 
+					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Float.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Float.valueOf(fieldValue)); }
 					if ((fieldValue = da.get("time")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
 					
 					records.add(re);

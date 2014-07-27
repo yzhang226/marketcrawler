@@ -80,7 +80,7 @@ public final class MultiThreadedNetter {
 			String error = "access URL[" + url + "] error.";
 			throw new Exception(error, e);
 		} finally {
-			httpget.releaseConnection();
+			if (httpget != null) httpget.releaseConnection();
 		}
 
 		return responseBody;

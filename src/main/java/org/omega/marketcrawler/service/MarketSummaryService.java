@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.db;
+package org.omega.marketcrawler.service;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.operator.Bittrex;

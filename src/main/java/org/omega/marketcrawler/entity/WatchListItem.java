@@ -4,7 +4,7 @@ public class WatchListItem extends _BaseEntity {
 
 	private static final long serialVersionUID = -5398296385071762593L;
 	
-	private Integer id;
+	private int id;
 	private byte status;
 	private String operator;// mintpal, bittrex
 	private String watchedSymbol;// CINNI, MINT
@@ -33,10 +33,10 @@ public class WatchListItem extends _BaseEntity {
 	}
 	
 	// getter, setter
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public byte getStatus() {

@@ -118,9 +118,9 @@ public final class Mintpal extends Operator {
 				try {
 					/* {"time":"1406378150.2185","type":"BUY","price":"0.00019398","amount":"281.65674470","total":"0.05463577"} */
 					if ((field = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(field)); }
-					if ((field = da.get("price")) != null) { re.setPrice(Double.valueOf(field)); } 
-					if ((field = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(field)); }
-					if ((field = da.get("total")) != null) { re.setTotalCost(Double.valueOf(field)); }
+					if ((field = da.get("price")) != null) { re.setPrice(Float.valueOf(field)); } 
+					if ((field = da.get("amount")) != null) { re.setTotalUnits(Float.valueOf(field)); }
+					if ((field = da.get("total")) != null) { re.setTotalCost(Float.valueOf(field)); }
 					if ((field = da.get("time")) != null) {
 						/* NOTE: Time is specified as a unix timestamp with microseconds.
 						 * microsecond μs 1 microsecond = 1,000 nanoseconds

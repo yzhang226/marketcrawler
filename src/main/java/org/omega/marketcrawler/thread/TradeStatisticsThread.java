@@ -7,13 +7,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.omega.marketcrawler.common.Constants;
+import static org.omega.marketcrawler.common.Constants.*;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.db.MarketTradeService;
-import org.omega.marketcrawler.db.TradeStatisticsService;
-import org.omega.marketcrawler.db.WatchListItemService;
 import org.omega.marketcrawler.entity.TradeStatistics;
 import org.omega.marketcrawler.entity.WatchListItem;
+import org.omega.marketcrawler.service.MarketTradeService;
+import org.omega.marketcrawler.service.TradeStatisticsService;
+import org.omega.marketcrawler.service.WatchListItemService;
 
 public class TradeStatisticsThread extends Thread {
 
@@ -41,14 +41,17 @@ public class TradeStatisticsThread extends Thread {
 			
 			
 			TradeStatisticsService statser = new TradeStatisticsService();
-			Long maxStartMillis = statser.getMaxStartTime(item.getId());
-			if (maxStartMillis == null) {// no data before
+			Integer maxStatStartSecs = statser.getMaxStartTime(item.getId());
+			Long maxStartMillis = 0l;
+			if (maxStatStartSecs == null) {// no data before
 				maxStartMillis = Utils.getOneMinuteRangeStart(mtser.getMinTradeTime(item));
+			} else {
+				maxStartMillis = (long) (maxStatStartSecs * MILLIS_ONE_SECOND);
 			}
 			
-			int minutes = (int) ((maxTradeMillis - maxStartMillis ) / Constants.MILLIS_ONE_MINUTE);
+			int minutes = (int) ((maxTradeMillis - maxStartMillis ) / MILLIS_ONE_MINUTE);
 			
-			TradeStatistics stat = statser.getByIdAndTime(item.getId(), maxStartMillis, maxTradeMillis);
+			TradeStatistics stat = statser.getByIdAndTime(item.getId(), (int) (maxStartMillis/MILLIS_ONE_SECOND), (int) (maxTradeMillis/MILLIS_ONE_SECOND));
 			if (stat != null) {
 				Long mtCount = (Long) mtser.getCountByRange(item, maxStartMillis, maxTradeMillis);
 				if (mtCount != null && stat.getCount() == mtCount.intValue()) {

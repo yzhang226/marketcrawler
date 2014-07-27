@@ -1,4 +1,4 @@
-package org.omega.marketcrawler.db;
+package org.omega.marketcrawler.service;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Constants;
+import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.AltCoin;
 
 public class AltCoinService {

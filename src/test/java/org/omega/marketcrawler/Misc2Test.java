@@ -46,7 +46,24 @@ public class Misc2Test {
 		
 		System.out.println(dd1 == dd2);
 		
+		long currMills = System.currentTimeMillis();
+		System.out.println(currMills);
+		System.out.println(new DateTime(currMills).minusDays(1).getMillis());
+		System.out.println("-----------------------------------------------------------");
 		
+		System.out.println(Integer.MAX_VALUE);
+		System.out.println(Long.MAX_VALUE);
+		System.out.println(System.currentTimeMillis());
+		System.out.println(System.currentTimeMillis()/1000);
+		
+		/* 1406442064561
+		 * 1406442064 */
+		int secs = 1406251800;
+		System.out.println();
+		System.out.println(new Date((long) secs*1000));
+		System.out.println(new DateTime().withMillis(0));
+		System.out.println(new DateTime().withMillis(0).plusSeconds(secs));
+		System.out.println(new DateTime((long) secs*1000));
 		
 	}
 	

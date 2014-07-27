@@ -21,7 +21,6 @@ public final class DbManager {
 	private static final DbManager manager = new DbManager();
 	private static final QueryRunner runner = new QueryRunner();
 	
-	
 	private DbManager() {}
 	
 	public static DbManager inst() {

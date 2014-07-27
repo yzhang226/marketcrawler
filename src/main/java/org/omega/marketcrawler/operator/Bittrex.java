@@ -11,10 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.db.MarketTradeService;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
+import org.omega.marketcrawler.service.MarketTradeService;
 
 public final class Bittrex extends Operator {
 	
@@ -125,9 +125,9 @@ public final class Bittrex extends Operator {
 					/* {"Id":111910,"TimeStamp":"2014-07-26T12:51:14.477","Quantity":50.00000000,"Price":0.00069000,"Total":0.03450000,"FillType":"FILL","OrderType":"SELL"},
 					 * {"Id":111909,"TimeStamp":"2014-07-26T12:51:14.477","Quantity":88.85123887,"Price":0.00069069,"Total":0.06136866,"FillType":"FILL","OrderType":"SELL"} */
 					if ((fieldValue = da.get("Id")) != null) { re.setTradeId((Integer) fieldValue); }
-					if ((fieldValue = da.get("Price")) != null) { re.setPrice((Double) fieldValue); }
-					if ((fieldValue = da.get("Quantity")) != null) { re.setTotalUnits((Double) fieldValue); }
-					if ((fieldValue = da.get("Total")) != null) { re.setTotalCost((Double) fieldValue); }
+					if ((fieldValue = da.get("Price")) != null) { re.setPrice((Float) fieldValue); }
+					if ((fieldValue = da.get("Quantity")) != null) { re.setTotalUnits((Float) fieldValue); }
+					if ((fieldValue = da.get("Total")) != null) { re.setTotalCost((Float) fieldValue); }
 					if ((fieldValue = da.get("TimeStamp")) != null) {  re.setTradeTime(parseMillsecs((String) fieldValue, sdf)); }
 					if ((fieldValue = da.get("OrderType")) != null) { re.setTradeType(MarketTrade.parseTradeType((String) fieldValue)); }
 					
