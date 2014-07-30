@@ -1,7 +1,6 @@
 package org.omega.marketcrawler.operator;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +9,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
@@ -22,6 +23,7 @@ public class Poloniex extends Operator {
 	
 	public static final String NAME = "poloniex";
 	
+	public static final int DEFAULT_LIMIT = 100;
 	public static final String TIME_PATTERN_BITTREX = "yyyy-MM-dd HH:mm:ss";
 	
 	private static final Poloniex inst = new Poloniex();
@@ -97,7 +99,8 @@ public class Poloniex extends Operator {
 		String fieldValue = null;
 		MarketTrade re = null;
 		records = new ArrayList<>(json.size());
-		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
 		for (Map<String, String> da : json) {
 			re = new MarketTrade();
 			try {
@@ -105,10 +108,10 @@ public class Poloniex extends Operator {
 				 * {"tradeID":"53009","date":"2014-07-26 06:35:07","type":"sell","rate":"0.00019453","amount":"64.2514308","total":"0.01249883"} */
 				if ((fieldValue = da.get("tradeID")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
 				if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
-				if ((fieldValue = da.get("rate")) != null) { re.setPrice(Float.valueOf(fieldValue)); } 
-				if ((fieldValue = da.get("amount")) != null) { re.setTotalUnits(Float.valueOf(fieldValue)); }
-				if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Float.valueOf(fieldValue)); }
-				if ((fieldValue = da.get("date")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
+				if ((fieldValue = da.get("rate")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
+				if ((fieldValue = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+				if ((fieldValue = da.get("date")) != null) { re.setTradeTime(parseMillsecs(fieldValue, formatter)); }
 				
 				records.add(re);
 			} catch (Exception e) {
@@ -119,15 +122,31 @@ public class Poloniex extends Operator {
 		return records;
 	}
 	
-	private long parseMillsecs(String time, SimpleDateFormat sdf) {
+	private long parseMillsecs(String time, DateTimeFormatter formatter) {
 		long millsec = 0;
 		try {
-			if (Utils.isNotEmpty(time)) millsec = sdf.parse(time).getTime();
+			if (Utils.isNotEmpty(time)) millsec = formatter.parseMillis(time);
 		} catch (Exception e) {
 			log.error("parse date text[" + time + "] error.", e);
 		}
 
 		return millsec;
+	}
+	
+	public String reverseToJson(MarketTrade mt) {
+		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+		StringBuilder sb = new StringBuilder("{");
+		sb
+		  .append("\"").append("tradeID").append("\"").append(":").append("\"").append(mt.getTradeId()).append("\"").append(",")
+		  .append("\"").append("date").append("\"").append(":").append("\"").append(formatter.print(mt.getTradeTime())).append("\"").append(",")
+		  .append("\"").append("type").append("\"").append(":").append("\"").append(MarketTrade.formatTradeType(mt.getTradeType()).toLowerCase()).append("\"").append(",")
+		  .append("\"").append("rate").append("\"").append(":").append("\"").append(Utils.justFormat(mt.getPrice())).append("\"").append(",")
+		  .append("\"").append("amount").append("\"").append(":").append("\"").append(Utils.justFormat(mt.getTotalUnits())).append("\"").append(",")
+		  .append("\"").append("total").append("\"").append(":").append("\"").append(Utils.justFormat(mt.getTotalCost())).append("\"")
+		  ;
+		sb.append("}");
+		
+		return sb.toString();
 	}
 	
 	public static void main(String[] args) throws Exception {

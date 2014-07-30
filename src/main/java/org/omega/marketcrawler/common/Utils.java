@@ -2,6 +2,7 @@ package org.omega.marketcrawler.common;
 
 import java.io.File;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,7 +34,18 @@ public final class Utils {
 	
 	public static final long SECONDS_ONE_HOUR = 60 * 60;
 	public static final long SECONDS_ONE_DAY = 24 * SECONDS_ONE_HOUR;
+	
+	private static final String TOPIC_BASE_URL = "https://bitcointalk.org/index.php?topic=";
+	private static final String BOARD_BASE_URL = "https://bitcointalk.org/index.php?board=";
 
+	public static String getTopicUrl(int topicId) {
+		return new StringBuilder(TOPIC_BASE_URL).append(topicId).append(".0").toString();
+	}
+	
+	public static String getBoardUrl(int boardId, int pageNumber) {
+		return new StringBuilder(BOARD_BASE_URL).append(boardId).append(".").append(pageNumber * 40).toString();
+	}
+	
 	public static boolean isEmpty(String text) {
 		return text == null || text.trim().length() == 0;
 	}
@@ -153,8 +165,28 @@ public final class Utils {
 		return postDate;
 	}
 	
+	public static String right8Pad(float f) {
+		DecimalFormat df = new DecimalFormat("###0.00000000");
+		return df.format(f);
+//		String fs = Float.toString(f);
+//		//1.065
+//		// 5 - 1 = 4
+//		int dotIdx = fs.indexOf('.');
+////		int rightLen = 8 - (fs.length() - fs.indexOf('.') - 1);
+//		return fs.substring(0, dotIdx+1) + StringUtils.rightPad(fs.substring(dotIdx+1), 8, '0');
+	}
+	
+	public static String right8Pad(double f) {
+		DecimalFormat df = new DecimalFormat("#######0.00000000");
+		return df.format(f);
+	}
+	
+	public static String justFormat(double dou) {
+		DecimalFormat df = new DecimalFormat("########.########");
+		return df.format(dou);
+	}
+	
 	public static Date convertDateZone(Date sourceDate, String srcTimeZone, String destTimeZone) {
-//		SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT_FULL);
 		TimeZone srcZone = TimeZone.getTimeZone(srcTimeZone);
 		TimeZone destZone = TimeZone.getTimeZone(destTimeZone);
 		long targetTime = sourceDate.getTime() - srcZone.getRawOffset() + destZone.getRawOffset();
@@ -261,6 +293,15 @@ public final class Utils {
 		System.out.println("end      : " + new DateTime(Utils.getRangeEndMillis(sysmillis, 1), DateTimeZone.UTC));
 		
 		System.out.println(0 % 5);
+		
+		System.out.println(right8Pad(222221.546f));
+		System.out.println(right8Pad(0.546f));
+		System.out.println(right8Pad(0.00370002f));
+		System.out.println(right8Pad(0.0000021f));
+		
+		double dou = 0.00075;
+		DecimalFormat df = new DecimalFormat("####.########");
+		System.out.println(df.format(dou));
 	}
 	
 	

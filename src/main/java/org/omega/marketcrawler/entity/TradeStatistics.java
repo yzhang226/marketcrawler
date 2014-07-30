@@ -7,22 +7,22 @@ public class TradeStatistics extends _BaseEntity {
 	private short itemId;
 	private int startTime;
 	private int endTime;
-	private float open;
-	private float high;
-	private float low;
-	private float close;
-	private float watchedVol;
-	private float exchangeVol;
+	private double open;
+	private double high;
+	private double low;
+	private double close;
+	private double watchedVol;
+	private double exchangeVol;
 	private short count;
 	
-	private Float buyWatchedVol;
-	private Float buyExchangeVol;
-	private Float buyAvgPrice;
+	private Double buyWatchedVol;
+	private Double buyExchangeVol;
+	private Double buyAvgPrice;
 	private Short buyCount;
 	
-	private Float sellWatchedVol;
-	private Float sellExchangeVol;
-	private Float sellAvgPrice;
+	private Double sellWatchedVol;
+	private Double sellExchangeVol;
+	private Double sellAvgPrice;
 	private Short sellCount;
 	
 	public TradeStatistics() { }
@@ -51,51 +51,51 @@ public class TradeStatistics extends _BaseEntity {
 		this.endTime = endTime;
 	}
 
-	public float getOpen() {
+	public double getOpen() {
 		return open;
 	}
 
-	public void setOpen(float open) {
+	public void setOpen(double open) {
 		this.open = open;
 	}
 
-	public float getHigh() {
+	public double getHigh() {
 		return high;
 	}
 
-	public void setHigh(float high) {
+	public void setHigh(double high) {
 		this.high = high;
 	}
 
-	public float getLow() {
+	public double getLow() {
 		return low;
 	}
 
-	public void setLow(float low) {
+	public void setLow(double low) {
 		this.low = low;
 	}
 
-	public float getClose() {
+	public double getClose() {
 		return close;
 	}
 
-	public void setClose(float close) {
+	public void setClose(double close) {
 		this.close = close;
 	}
 
-	public float getWatchedVol() {
+	public double getWatchedVol() {
 		return watchedVol;
 	}
 
-	public void setWatchedVol(float watchedVol) {
+	public void setWatchedVol(double watchedVol) {
 		this.watchedVol = watchedVol;
 	}
 
-	public float getExchangeVol() {
+	public double getExchangeVol() {
 		return exchangeVol;
 	}
 
-	public void setExchangeVol(float exchangeVol) {
+	public void setExchangeVol(double exchangeVol) {
 		this.exchangeVol = exchangeVol;
 	}
 
@@ -107,27 +107,27 @@ public class TradeStatistics extends _BaseEntity {
 		this.count = count;
 	}
 
-	public Float getBuyWatchedVol() {
+	public Double getBuyWatchedVol() {
 		return buyWatchedVol;
 	}
 
-	public void setBuyWatchedVol(Float buyWatchedVol) {
+	public void setBuyWatchedVol(Double buyWatchedVol) {
 		this.buyWatchedVol = buyWatchedVol;
 	}
 
-	public Float getBuyExchangeVol() {
+	public Double getBuyExchangeVol() {
 		return buyExchangeVol;
 	}
 
-	public void setBuyExchangeVol(Float buyExchangeVol) {
+	public void setBuyExchangeVol(Double buyExchangeVol) {
 		this.buyExchangeVol = buyExchangeVol;
 	}
 
-	public Float getBuyAvgPrice() {
+	public Double getBuyAvgPrice() {
 		return buyAvgPrice;
 	}
 
-	public void setBuyAvgPrice(Float buyAvgPrice) {
+	public void setBuyAvgPrice(Double buyAvgPrice) {
 		this.buyAvgPrice = buyAvgPrice;
 	}
 
@@ -139,27 +139,27 @@ public class TradeStatistics extends _BaseEntity {
 		this.buyCount = buyCount;
 	}
 
-	public Float getSellWatchedVol() {
+	public Double getSellWatchedVol() {
 		return sellWatchedVol;
 	}
 
-	public void setSellWatchedVol(Float sellWatchedVol) {
+	public void setSellWatchedVol(Double sellWatchedVol) {
 		this.sellWatchedVol = sellWatchedVol;
 	}
 
-	public Float getSellExchangeVol() {
+	public Double getSellExchangeVol() {
 		return sellExchangeVol;
 	}
 
-	public void setSellExchangeVol(Float sellExchangeVol) {
+	public void setSellExchangeVol(Double sellExchangeVol) {
 		this.sellExchangeVol = sellExchangeVol;
 	}
 
-	public Float getSellAvgPrice() {
+	public Double getSellAvgPrice() {
 		return sellAvgPrice;
 	}
 
-	public void setSellAvgPrice(Float sellAvgPrice) {
+	public void setSellAvgPrice(Double sellAvgPrice) {
 		this.sellAvgPrice = sellAvgPrice;
 	}
 

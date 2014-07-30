@@ -6,9 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omega.marketcrawler.common.Arith;
+import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -20,7 +22,7 @@ public final class Mintpal extends Operator {
 	public static final String NAME = "mintpal";
 	private static final String VERSION = "v2";
 	
-//	private static final int DEFAULT_LIMITATION = 50;
+	public static final int DEFAULT_LIMIT = 100;
 	
 	public static final String STATUS_SUCCESS = "success";
 	
@@ -118,14 +120,16 @@ public final class Mintpal extends Operator {
 				try {
 					/* {"time":"1406378150.2185","type":"BUY","price":"0.00019398","amount":"281.65674470","total":"0.05463577"} */
 					if ((field = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(field)); }
-					if ((field = da.get("price")) != null) { re.setPrice(Float.valueOf(field)); } 
-					if ((field = da.get("amount")) != null) { re.setTotalUnits(Float.valueOf(field)); }
-					if ((field = da.get("total")) != null) { re.setTotalCost(Float.valueOf(field)); }
+					if ((field = da.get("price")) != null) { re.setPrice(Double.valueOf(field)); } 
+					if ((field = da.get("amount")) != null) { re.setTotalUnits(Double.valueOf(field)); }
+					if ((field = da.get("total")) != null) { re.setTotalCost(Double.valueOf(field)); }
 					if ((field = da.get("time")) != null) {
 						/* NOTE: Time is specified as a unix timestamp with microseconds.
 						 * microsecond μs 1 microsecond = 1,000 nanoseconds
 						 * millisecond ms 1 millisecond = 1,000 microseconds  */
-						re.setTradeTime((long) Arith.multiply(Double.valueOf(field), 1000));
+						long nanoSecs = (long) Arith.multiply(Double.valueOf(field), 10000);
+						re.setNanoTime((byte) (nanoSecs%10));
+						re.setTradeTime(nanoSecs/10);
 					}
 					
 					records.add(re);
@@ -135,6 +139,25 @@ public final class Mintpal extends Operator {
 			}
 		}
 		return records;
+	}
+	
+	public String reverseToJson(MarketTrade mt) {
+//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+//		DateTimeFormatter formatter = DateTimeFormat.forPattern(Time);
+		int mills = (int) (mt.getTradeTime()%1000);
+		String time = (mt.getTradeTime()/1000) + "." + (StringUtils.leftPad(String.valueOf(mills), 3, "0") ) + ( mt.getNanoTime() == 0 ? "" : mt.getNanoTime());
+		
+		StringBuilder sb = new StringBuilder("{");
+		sb
+		  .append("\"").append("time").append("\"").append(":").append("\"").append(time).append("\"").append(",")
+		  .append("\"").append("type").append("\"").append(":").append("\"").append(MarketTrade.formatTradeType(mt.getTradeType()).toUpperCase()).append("\"").append(",")
+		  .append("\"").append("price").append("\"").append(":").append("\"").append(Utils.right8Pad(mt.getPrice())).append("\"").append(",")
+		  .append("\"").append("amount").append("\"").append(":").append("\"").append(Utils.right8Pad(mt.getTotalUnits())).append("\"").append(",")
+		  .append("\"").append("total").append("\"").append(":").append("\"").append(Utils.right8Pad(mt.getTotalCost())).append("\"")
+		  ;
+		sb.append("}");
+		
+		return sb.toString();
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -153,6 +176,9 @@ public final class Mintpal extends Operator {
 //		for (MarketSummary summ : summs) {
 //			System.out.println(summ.toReadableText());
 //		}
+		
+		WatchListItem item = new WatchListItem("mintpal", "vrc", "btc");
+		System.out.println(inst.getMarketTradeAPI(item));
 		
 	}
 

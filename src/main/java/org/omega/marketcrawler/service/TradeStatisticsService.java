@@ -83,7 +83,7 @@ public class TradeStatisticsService  extends SimpleDBService<TradeStatistics> {
 		TradeStatisticsService statSer = new TradeStatisticsService();
 		
 		int[] resu = null;
-		Float open = null, close = null;
+		Double open = null, close = null;
 		Object[] arr = null;
 		List<Object[]> buySellGroups = null;
 		String table = item.toMarketTradeTable();
@@ -112,8 +112,8 @@ public class TradeStatisticsService  extends SimpleDBService<TradeStatistics> {
 			rangeEnd = maxRangeEnd - i * Constants.MILLIS_ONE_MINUTE;
 			arr = DbManager.inst().queryUnique(openSql, rangeStart, rangeEnd);
 			if (arr != null && arr[0] != null) {
-				open = (Float) arr[0];
-				close = (Float) queryUnique(closeSql, rangeStart, rangeEnd)[0];
+				open = (Double) arr[0];
+				close = (Double) queryUnique(closeSql, rangeStart, rangeEnd)[0];
 				arr = queryUnique(statisticsSql, rangeStart, rangeEnd);
 				buySellGroups = query(buySellSql, rangeStart, rangeEnd);
 				
@@ -123,10 +123,10 @@ public class TradeStatisticsService  extends SimpleDBService<TradeStatistics> {
 				stat.setEndTime((int) (rangeEnd/100));// seconds
 				stat.setOpen(open);
 				stat.setClose(close);
-				stat.setHigh((Float) arr[0]);
-				stat.setLow((Float) arr[1]);
-				stat.setWatchedVol((Float) arr[2]);
-				stat.setExchangeVol((Float) arr[3]);
+				stat.setHigh((Double) arr[0]);
+				stat.setLow((Double) arr[1]);
+				stat.setWatchedVol((Double) arr[2]);
+				stat.setExchangeVol((Double) arr[3]);
 				stat.setCount(((Long) arr[4]).shortValue());
 				
 				statBuySell(buySellGroups, stat);
@@ -156,15 +156,15 @@ public class TradeStatisticsService  extends SimpleDBService<TradeStatistics> {
 		/*  trade_type, sum(total_units), sum(total_cost) , cast(sum(total_cost)/sum(total_units) as dec(16,8)), count(trade_type) */
 		Object[] buy = map.get(TRADE_TYPE_BUY), sell = map.get(TRADE_TYPE_SELL);
 		if (buy != null) {
-			stat.setBuyWatchedVol((Float) buy[1]);
-			stat.setBuyExchangeVol((Float) buy[2]);
-			stat.setBuyAvgPrice(((BigDecimal) buy[3]).floatValue());
+			stat.setBuyWatchedVol((Double) buy[1]);
+			stat.setBuyExchangeVol((Double) buy[2]);
+			stat.setBuyAvgPrice(((BigDecimal) buy[3]).doubleValue());
 			stat.setBuyCount(((Long) buy[4]).shortValue());
 		}
 		if (sell != null) {
-			stat.setSellWatchedVol((Float) sell[1]);
-			stat.setSellExchangeVol((Float) sell[2]);
-			stat.setSellAvgPrice(((BigDecimal) sell[3]).floatValue());
+			stat.setSellWatchedVol((Double) sell[1]);
+			stat.setSellExchangeVol((Double) sell[2]);
+			stat.setSellAvgPrice(((BigDecimal) sell[3]).doubleValue());
 			stat.setSellCount(((Long) sell[4]).shortValue());
 		}
 		

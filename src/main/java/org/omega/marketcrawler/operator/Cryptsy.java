@@ -1,14 +1,16 @@
 package org.omega.marketcrawler.operator;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
@@ -22,6 +24,7 @@ public class Cryptsy extends Operator {
 	
 	public static final String NAME = "cryptsy";
 	
+	public static final int DEFAULT_LIMIT = 200;
 	public static final String TIME_PATTERN_CRYPTSY = "yyyy-MM-dd HH:mm:ss";
 	
 	public static final Integer SUCCESS_1 = 1;
@@ -71,7 +74,8 @@ public class Cryptsy extends Operator {
 		if (SUCCESS_1.equals(success)) {
 			map = (LinkedHashMap<String, Object>) map.get(KEY_RETURN);
 			map = (LinkedHashMap<String, Object>) map.get(KEY_MARKETS);
-			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
+//			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
+			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
 			Map<String, Object> da = null;
 			MarketSummary summ = null;
 			for (String key : map.keySet()) {
@@ -88,7 +92,7 @@ public class Cryptsy extends Operator {
 					summ.setLastPrice(Double.valueOf((String) da.get("lasttradeprice")));
 					summ.setVolume24h(Double.valueOf((String) da.get("volume")));
 					
-					summ.setUpdateTime(new Timestamp(parseMillsecs((String) da.get("lasttradetime"), sdf)));
+					summ.setUpdateTime(new Timestamp(parseMillsecs((String) da.get("lasttradetime"), formatter)));
 				} catch (Exception e) {
 					summ = null;
 					log.error("", e);
@@ -102,10 +106,10 @@ public class Cryptsy extends Operator {
 		return records;
 	}
 
-	private long parseMillsecs(String time, SimpleDateFormat sdf) {
+	private long parseMillsecs(String time, DateTimeFormatter formatter) {
 		long millsec = 0;
 		try {
-			if (Utils.isNotEmpty(time)) millsec = sdf.parse(time).getTime();
+			if (Utils.isNotEmpty(time)) millsec = formatter.parseMillis(time);
 		} catch (Exception e) {
 			log.error("parse date text[" + time + "] error.", e);
 		}
@@ -124,7 +128,8 @@ public class Cryptsy extends Operator {
 			map = (LinkedHashMap<String, Object>) map.get(KEY_MARKETS);
 			map = (LinkedHashMap<String, Object>) map.values().iterator().next();
 			List<Map<String, String>> trades = (List<Map<String, String>>) map.get(KEY_RECENTTRADES);
-			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
+//			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
+			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
 			MarketTrade re = null;
 			String fieldValue = null;
 			for (Map<String, String> da : trades) {
@@ -134,10 +139,10 @@ public class Cryptsy extends Operator {
 					 * {"id":"59415426","time":"2014-07-25 05:44:47","type":"Sell","price":"0.00100400","quantity":"441.20997308","total":"0.44297481"} */
 					if ((fieldValue = da.get("id")) != null) { re.setTradeId(Integer.valueOf(fieldValue)); }
 					if ((fieldValue = da.get("type")) != null) { re.setTradeType(MarketTrade.parseTradeType(fieldValue)); }
-					if ((fieldValue = da.get("price")) != null) { re.setPrice(Float.valueOf(fieldValue)); } 
-					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Float.valueOf(fieldValue)); }
-					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Float.valueOf(fieldValue)); }
-					if ((fieldValue = da.get("time")) != null) { re.setTradeTime(parseMillsecs(fieldValue, sdf)); }
+					if ((fieldValue = da.get("price")) != null) { re.setPrice(Double.valueOf(fieldValue)); } 
+					if ((fieldValue = da.get("quantity")) != null) { re.setTotalUnits(Double.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("total")) != null) { re.setTotalCost(Double.valueOf(fieldValue)); }
+					if ((fieldValue = da.get("time")) != null) { re.setTradeTime(parseMillsecs(fieldValue, formatter)); }
 					
 					records.add(re);
 				} catch (Exception e) {
@@ -151,6 +156,22 @@ public class Cryptsy extends Operator {
 		return records;
 	}
 	
+	public String reverseToJson(MarketTrade mt) {
+//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
+		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
+		StringBuilder sb = new StringBuilder("{");
+		sb.append("\"").append("id").append("\"").append(":").append("\"").append(mt.getTradeId()).append("\"").append(",")
+		  .append("\"").append("time").append("\"").append(":").append("\"").append(formatter.print(mt.getTradeTime())).append("\"").append(",")
+		  .append("\"").append("type").append("\"").append(":").append("\"").append(StringUtils.capitalize(MarketTrade.formatTradeType(mt.getTradeType()).toLowerCase())).append("\"").append(",")
+		  .append("\"").append("price").append("\"").append(":").append("\"").append(String.format("%.8f", mt.getPrice())).append("\"").append(",")
+		  .append("\"").append("quantity").append("\"").append(":").append("\"").append(String.format("%.8f", mt.getTotalUnits())).append("\"").append(",")
+		  .append("\"").append("total").append("\"").append(":").append("\"").append(String.format("%.8f", mt.getTotalCost())).append("\"")
+		  ;
+		sb.append("}");
+		
+		return sb.toString();
+	}
+	
 	public static void main(String[] args) throws Exception {
 //		List<MarketSummary> summs = Cryptsy.inst.getMarketSummaries();
 //		for (MarketSummary summ : summs) {
@@ -159,11 +180,12 @@ public class Cryptsy extends Operator {
 //		new MarketSummaryService().save(summs);
 		
 		WatchListItem item = new WatchListItem();
-		item.setMarketId(132);
-		List<MarketTrade> trades = Cryptsy.inst.getMarketTrades(item);
-		for (MarketTrade mt : trades) {
-			System.out.println(mt.toReadableText());
-		}
+		item.setMarketId(247);
+//		List<MarketTrade> trades = Cryptsy.inst.getMarketTrades(item);
+//		for (MarketTrade mt : trades) {
+//			System.out.println(mt.toReadableText());
+//		}
+		System.out.println(inst.getMarketTradeAPI(item));
 	}
 	
 

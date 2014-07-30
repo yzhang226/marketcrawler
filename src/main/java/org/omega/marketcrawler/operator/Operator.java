@@ -1,5 +1,6 @@
 package org.omega.marketcrawler.operator;
 
+import java.awt.TrayIcon.MessageType;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.net.MultiThreadedNetter;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -25,6 +28,8 @@ public abstract class Operator {
 
 	public abstract List<MarketSummary> transferJsonToMarketSummary(Object json);
 	public abstract List<MarketTrade> transferJsonToMarketTrade(Object json);
+	
+	public abstract String reverseToJson(MarketTrade mt);
 	
 
 	public List<MarketSummary> getMarketSummaries() throws Exception {
@@ -72,6 +77,10 @@ public abstract class Operator {
 	protected Object mapValue(String recordText) throws Throwable {
 		Object json = null;
 		ObjectMapper mapper = new ObjectMapper();
+		
+//		mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+//		mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+		
 		if (recordText.startsWith("{")) {
 			json = mapper.readValue(recordText, LinkedHashMap.class);
 		} else if (recordText.startsWith("[")) {

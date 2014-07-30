@@ -7,6 +7,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -48,8 +53,14 @@ public final class MultiThreadedNetter {
 		}
 		
 		try {
-	        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-			httpclient = HttpClients.custom().disableAutomaticRetries()//.setSSLSocketFactory(sslsf)
+//	        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+	        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", createSSLFactory())
+            .build();
+	        
+	        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
+			httpclient = HttpClients.custom().disableAutomaticRetries()//.setSSLSocketFactory(createSSLFactory())
 									.setConnectionManager(cm)
 									.setMaxConnPerRoute(maxConnPerRoute)
 									.setMaxConnTotal(maxConnTotal)

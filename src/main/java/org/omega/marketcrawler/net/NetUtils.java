@@ -37,10 +37,10 @@ public final class NetUtils {
 //				sslContext.init(null, tm, new java.security.SecureRandom());
 //		        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, new String[] { "TLSv1" }, null, SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
 //				
-//				httpclient = HttpClients.custom().disableAutomaticRetries().setSSLSocketFactory(sslsf).build();
-//			} else {
-				httpclient = HttpClients.custom().disableAutomaticRetries().build();
-//			}
+				httpclient = HttpClients.custom().disableAutomaticRetries().setSSLSocketFactory(createSSLFactory()).build();
+////			} else {
+//				httpclient = HttpClients.custom().disableAutomaticRetries().build();
+////			}
 			
 			httpget = new HttpGet(url);
 			ResponseHandler<String> responseHandler = new PlainResponseHandler();
@@ -62,7 +62,7 @@ public final class NetUtils {
 		return responseBody;
 	}
 	
-	public SSLConnectionSocketFactory createSSLFactory() throws Exception {
+	public static SSLConnectionSocketFactory createSSLFactory() throws Exception {
 		TrustManager[] tm = { new EmptyX509TrustManager() };
 		SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
 		sslContext.init(null, tm, new java.security.SecureRandom());
@@ -136,8 +136,11 @@ public final class NetUtils {
 //		System.out.println(get(Mintpal.instance().getMarketTradeAPI(item)));
 		
 		item = new WatchListItem("poloniex", "VRC", "BTC");
-		String x = get(Poloniex.instance().getMarketTradeAPI(item));
-		System.out.println("x is [" + x + "] , " + (x == null ? 0 : x.length()));
+//		String x = get(Poloniex.instance().getMarketTradeAPI(item));
+//		System.out.println("x is [" + x + "] , " + (x == null ? 0 : x.length()));
+		
+		
+		System.out.println(NetUtils.get("https://bitcointalk.org/index.php?topic=708714.0"));
 		
 	}
 	

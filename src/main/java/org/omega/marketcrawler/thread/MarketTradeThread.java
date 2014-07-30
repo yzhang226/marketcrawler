@@ -59,13 +59,14 @@ public class MarketTradeThread extends Thread {
 		
 		Iterator<MarketTrade> iter = records.iterator();
 		MarketTrade curr = null;
-		int i = 0;
 		while (iter.hasNext()) {
-			i++;
 			curr = iter.next();
 			
 			if (didTradeHappenedAfter(latest, curr)) {
-				if (i == 1) { updatedLatest = curr; }
+				if (updatedLatest == null || 
+						didTradeHappenedAfter(updatedLatest, curr)) { 
+					updatedLatest = curr; 
+				}
 				continue;
 			}
 			
@@ -77,8 +78,14 @@ public class MarketTradeThread extends Thread {
 	private boolean didTradeHappenedAfter(MarketTrade latest, MarketTrade curr) {
 		boolean isAfter = false;
 		if (curr.getTradeTime() == latest.getTradeTime()) {
-			if (latest.getTradeId() != null && curr.getTradeId() != null && curr.getTradeId() > curr.getTradeId()) {
-				isAfter = true;
+			if (latest.getTradeId() != null ) {// 
+				if (curr.getTradeId() != null && curr.getTradeId() > latest.getTradeId()) {
+					isAfter = true;
+				}
+			} else if (latest.getNanoTime() != null) {// 
+				if (curr.getNanoTime() != null && curr.getNanoTime() > latest.getNanoTime()) {
+					isAfter = true;
+				}
 			}
 		} else if (curr.getTradeTime() > latest.getTradeTime()) {
 			isAfter = true;

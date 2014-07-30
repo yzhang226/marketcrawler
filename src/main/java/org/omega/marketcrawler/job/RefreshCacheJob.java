@@ -27,7 +27,7 @@ public class RefreshCacheJob implements Job {
 			MarketTradeService mtser = new MarketTradeService();
 			List<WatchListItem> items = wiser.findActiveItems();
 			for (WatchListItem it : items) {
-				if (mtser.initWatchedTable(it)) { log.info("New Add Watched Item: " + it.toReadableText()); }
+				if (mtser.initWatchedTable(it)) { log.info("New Add Table for Watched Item: [" + it.toReadableText() + "]."); }
 			}
 			
 			MyCache.inst().addAllItems(items);

@@ -23,7 +23,7 @@ public class AltCoinParser {
 	}
 	
 	public List<AltCoin> parse() {
-		List<AltCoin> cos = new ArrayList<>(30);
+		List<AltCoin> cos = new ArrayList<>(60);
 		HtmlCleaner cleaner = new HtmlCleaner();
 		TagNode node = cleaner.clean(content);
 

@@ -1,23 +1,18 @@
 package org.omega.marketcrawler.service;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.dbutils.BasicRowProcessor;
-import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
+import org.omega.marketcrawler.operator.Mintpal;
 
-public class MarketTradeService {
-	
-	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
+public class MarketTradeService extends SimpleDBService<MarketTrade> {
 	
 	static {
 		columnToProperty.put("trade_time", "tradeTime");
@@ -25,19 +20,22 @@ public class MarketTradeService {
 		columnToProperty.put("total_units", "totalUnits");
 		columnToProperty.put("total_cost", "totalCost");
 		columnToProperty.put("trade_id", "tradeId");
+		columnToProperty.put("nano_time", "nanoTime");
+	}
+	
+	protected Map<String, String> getColumnToProperty() {
+		return columnToProperty;
+	}
+	
+	protected String getTableName() {
+		return null;
 	}
 	
 	protected String preparedInsertSql4MarketTrade(WatchListItem item) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO ").append(item.toMarketTradeTable()).append(" (")
-		  .append("trade_time, trade_type, price, total_units, total_cost, trade_id").append(") VALUES (?, ?, ?, ?, ?,?)");
+		  .append("trade_time, trade_type, price, total_units, total_cost, trade_id, nano_time").append(") VALUES (?, ?, ?, ?, ?, ?, ?)");
 //		  .append(" ON DUPLICATE KEY UPDATE total_cost=VALUES(total_cost), total_units=VALUES(total_units), price=VALUES(price)");
-		return sb.toString();
-	}
-	
-	protected String preparedUpdateSql4MarketTrade(WatchListItem item) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("UPDATE ").append(item.toMarketTradeTable()).append(" SET price = ?, total_units = ?, total_cost = ? where trade_time = ? and trade_type = ?");
 		return sb.toString();
 	}
 	
@@ -47,21 +45,21 @@ public class MarketTradeService {
 		 	  .append("id INT NOT NULL AUTO_INCREMENT, ").append("\n")
 		      .append("trade_time BIGINT NOT NULL , ").append("\n")
 		      .append("trade_type TINYINT NOT NULL , ").append("\n")
-		      .append("price FLOAT(16,8) NULL ,").append("\n")
-		      .append("total_units FLOAT(16,8) NULL ,").append("\n")
-		      .append("total_cost FLOAT(16,8) NULL ,").append("\n")
+		      .append("price DOUBLE NULL ,").append("\n")
+		      .append("total_units DOUBLE NULL ,").append("\n")
+		      .append("total_cost DOUBLE NULL ,").append("\n")
 		      .append("trade_id INT NULL ,").append("\n")
+		      .append("nano_time TINYINT NULL , ").append("\n")
 		      .append("PRIMARY KEY (id) );");
-		
 		return create.toString();
 	}
 	
 	public boolean existWatchedTable(WatchListItem item) throws SQLException {
-		return DbManager.inst().existTable(item.toMarketTradeTable());
+		return dbManager.existTable(item.toMarketTradeTable());
 	}
 	
 	public int createWatchedTable(WatchListItem item) throws SQLException {
-		return DbManager.inst().execute(createSql4MarketTrade(item));
+		return execute(createSql4MarketTrade(item));
 	}
 	
 	public boolean initWatchedTable(WatchListItem item) throws SQLException {
@@ -73,16 +71,19 @@ public class MarketTradeService {
 	}
 	
 	public int[] save(WatchListItem item, List<MarketTrade> records) throws SQLException {
-		Object[][] params = new Object[records.size()][6];
+		Object[][] params = new Object[records.size()][7];
+		MarketTrade mt = null;
 		for (int i=0; i<records.size(); i++) {
-			params[i][0] = records.get(i).getTradeTime();
-			params[i][1] = records.get(i).getTradeType();
-			params[i][2] = records.get(i).getPrice();
-			params[i][3] = records.get(i).getTotalUnits();
-			params[i][4] = records.get(i).getTotalCost();
-			params[i][5] = records.get(i).getTradeId();
+			mt = records.get(i);
+			params[i][0] = mt.getTradeTime();
+			params[i][1] = mt.getTradeType();
+			params[i][2] = mt.getPrice();
+			params[i][3] = mt.getTotalUnits();
+			params[i][4] = mt.getTotalCost();
+			params[i][5] = mt.getTradeId();
+			params[i][6] = mt.getNanoTime();
 		}
-		return DbManager.inst().batch(preparedInsertSql4MarketTrade(item), params);
+		return executeBatch(preparedInsertSql4MarketTrade(item), params);
 	}
 	
 	public Long getCount(WatchListItem item) throws SQLException {
@@ -92,28 +93,17 @@ public class MarketTradeService {
 	}
 	
 	public Long getMaxTradeTime(WatchListItem item) throws SQLException {
-		Object[] resu = DbManager.inst().queryUnique("select max(trade_time) from " + item.toMarketTradeTable());
+		Object[] resu = queryUnique("select max(trade_time) from " + item.toMarketTradeTable());
 		return Utils.isEmpty(resu) ? null : (Long) resu[0];
 	}
 	
 	public Long getMinTradeTime(WatchListItem item) throws SQLException {
-		return (Long) DbManager.inst().queryUnique("select min(trade_time) from " + item.toMarketTradeTable())[0];
-	}
-	
-	public List<MarketTrade> find(String sql, Object... params) throws SQLException {
-		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
-		BeanListHandler<MarketTrade> handler = new BeanListHandler<>(MarketTrade.class, rowProcessor);
-		List<MarketTrade> resu = DbManager.inst().query(sql, handler, params);
-		return resu;
-	}
-	
-	public MarketTrade findUnique(String sql, Object... params) throws SQLException {
-		List<MarketTrade> resu = find(sql, params);
-		return Utils.isNotEmpty(resu) ? resu.get(0) : null;
+		Object[] resu = queryUnique("select min(trade_time) from " + item.toMarketTradeTable());
+		return Utils.isEmpty(resu) ? null : (Long) resu[0];
 	}
 	
 	public MarketTrade findLatestTrade(WatchListItem item) throws SQLException {
-		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time desc, trade_id desc limit 1";
+		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time desc, trade_id desc, nano_time desc limit 1";
 		return findUnique(sql);
 	}
 	
@@ -125,12 +115,22 @@ public class MarketTradeService {
 		return Utils.isEmpty(resu) ? null : (Long) resu[0];
 	}
 	
-	
 	public static void main(String[] args) throws SQLException {
-//		WatchListItem item = new WatchListItem("mintpal", "VRC", Symbol.BTC.name());
-//		MarketTradeService tser = new MarketTradeService();
+		WatchListItem item = new WatchListItem("bittrex", "URO", "BTC");
+		MarketTradeService tser = new MarketTradeService();
 //		System.out.println(tser.getCount(item));
 //		System.out.println(tser.findTopTradeTimes(item, 200));
+		item = new WatchListItem("cryptsy", "URO", "BTC");
+		item = new WatchListItem("mintpal", "vrc", "btc");
+		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time desc, trade_id desc limit 100";
+		List<MarketTrade> mts = tser.find(sql);
+		StringBuilder sb = new StringBuilder();
+		for (MarketTrade mt : mts) {
+//			sb.append(Bittrex.instance().reverseToJson(mt)).append("\n");
+//			sb.append(Cryptsy.instance().reverseToJson(mt)).append("\n");
+			sb.append(Mintpal.instance().reverseToJson(mt)).append("\n");
+		}
+		System.out.println(sb.toString());
 	}
 	
 }

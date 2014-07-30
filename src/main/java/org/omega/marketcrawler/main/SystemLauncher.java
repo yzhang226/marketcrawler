@@ -98,11 +98,11 @@ public final class SystemLauncher extends Thread {
 //  		          			.build();
             
             // 6
-            JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
-            Trigger coinTrigger = TriggerBuilder.newTrigger().withIdentity("coinTri", "coinTriGrop")
-  		          			.startAt(curr.plusHours(6).toDate()).withSchedule(
-  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(6).repeatForever())
-  		          			.build();
+//            JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
+//            Trigger coinTrigger = TriggerBuilder.newTrigger().withIdentity("coinTri", "coinTriGrop")
+//  		          			.startAt(curr.plusHours(6).toDate()).withSchedule(
+//  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(6).repeatForever())
+//  		          			.build();
             
             
             
@@ -115,7 +115,7 @@ public final class SystemLauncher extends Thread {
             scheduler.scheduleJob(bigMarketJob, bigMarketTrigger);
 //            scheduler.scheduleJob(tradeStatJob, tradeStatTrigger);
             
-            scheduler.scheduleJob(coinJob, coinTrigger);
+//            scheduler.scheduleJob(coinJob, coinTrigger);
 
 //            scheduler.shutdown();
 
