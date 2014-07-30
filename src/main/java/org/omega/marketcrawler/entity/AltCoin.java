@@ -1,7 +1,5 @@
 package org.omega.marketcrawler.entity;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
@@ -22,17 +20,8 @@ public class AltCoin extends _BaseEntity {
 	private byte interest;
 	
 	// topic info
-	private String author;
-	private String title;
-	private Integer replies;
-	private Integer views;
-//	private String link;
-	private String publishContent;
-	
+	private Integer myTopicId;
 	private Date launchTime;
-	private Timestamp lastPostTime;
-	private Timestamp publishDate;
-	private Timestamp createTime;
 	
 	// coin info
 	private String name;
@@ -90,85 +79,18 @@ public class AltCoin extends _BaseEntity {
 	public void setInterest(byte interest) {
 		this.interest = interest;
 	}
-
-	public String getAuthor() {
-		return author;
+	public Integer getMyTopicId() {
+		return myTopicId;
 	}
-
-	public void setAuthor(String author) {
-		this.author = author;
+	public void setMyTopicId(Integer myTopicId) {
+		this.myTopicId = myTopicId;
 	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public Integer getReplies() {
-		return replies;
-	}
-
-	public void setReplies(Integer replies) {
-		this.replies = replies;
-	}
-
-	public Integer getViews() {
-		return views;
-	}
-
-	public void setViews(Integer views) {
-		this.views = views;
-	}
-
-//	public String getLink() {
-//		return link;
-//	}
-//
-//	public void setLink(String link) {
-//		this.link = link;
-//	}
-
-	public String getPublishContent() {
-		return publishContent;
-	}
-
-	public void setPublishContent(String publishContent) {
-		this.publishContent = publishContent;
-	}
-
 	public Date getLaunchTime() {
 		return launchTime;
 	}
 
 	public void setLaunchTime(Date launchTime) {
 		this.launchTime = launchTime;
-	}
-
-	public Timestamp getLastPostTime() {
-		return lastPostTime;
-	}
-
-	public void setLastPostTime(Timestamp lastPostTime) {
-		this.lastPostTime = lastPostTime;
-	}
-
-	public Timestamp getPublishDate() {
-		return publishDate;
-	}
-
-	public void setPublishDate(Timestamp publishDate) {
-		this.publishDate = publishDate;
-	}
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
 	}
 
 	public String getName() {
@@ -327,24 +249,12 @@ public class AltCoin extends _BaseEntity {
 		return true;
 	}
 
-	public String toHtml() {
-		StringBuilder sb = new StringBuilder("<tr>");
-		sb.append("<td>").append(null != publishDate ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(publishDate) : "").append("</td>");
-		sb.append("<td>").append(title).append("</td>");
-		sb.append("<td>").append(author).append("</td>");
-		sb.append("<td>").append(replies).append("</td>");
-		sb.append("<td>").append(views).append("</td>");
-		sb.append("</tr>\n");
-		
-		return sb.toString();
-	}
 	
 	public String toReableText() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(id).append(", ").append(topicId).append(", ").append(status).append(", ").append(interest).append(", ")
-		.append(author).append(", ").append(title).append(", ").append(replies).append(", ").append(views).append(", ")
-		.append(publishContent).append(", ").append(launchTime).append(", ")
-		.append(lastPostTime).append(", ").append(publishDate).append(", ").append(createTime).append(", ").append(name).append(", ")
+		.append(launchTime).append(", ")
+		.append(name).append(", ")
 		.append(abbrName).append(", ").append(algo).append(", ").append(proof).append(", ").append(launchRaw).append(", ")
 		.append(totalAmount).append(", ").append(blockTime).append(", ").append(halfBlocks).append(", ").append(halfDays).append(", ")
 		.append(blockReward).append(", ").append(difficultyAdjust).append(", ").append(preMined).append(", ").append(minedPercentage).append(", ")

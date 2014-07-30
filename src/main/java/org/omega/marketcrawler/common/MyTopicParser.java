@@ -1,6 +1,7 @@
 package org.omega.marketcrawler.common;
 
-import java.sql.Timestamp;
+import static org.omega.marketcrawler.common.Constants.MILLIS_ONE_SECOND;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,20 +11,20 @@ import org.apache.commons.logging.LogFactory;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
-import org.omega.marketcrawler.entity.AltCoin;
+import org.omega.marketcrawler.entity.MyTopic;
 
-public class AltCoinParser {
+public class MyTopicParser {
 
-	private static final Log log = LogFactory.getLog(AltCoinParser.class);
+	private static final Log log = LogFactory.getLog(MyTopicParser.class);
 	
 	private String content;
 	
-	public AltCoinParser(String content) {
+	public MyTopicParser(String content) {
 		this.content = content;
 	}
 	
-	public List<AltCoin> parse() {
-		List<AltCoin> cos = new ArrayList<>(60);
+	public List<MyTopic> parse() {
+		List<MyTopic> cos = new ArrayList<>(60);
 		HtmlCleaner cleaner = new HtmlCleaner();
 		TagNode node = cleaner.clean(content);
 
@@ -55,7 +56,7 @@ public class AltCoinParser {
 						String topicTitle = topicNode.getText().toString().trim();
 
 						if (topicTitle.toLowerCase().contains("ann")) {
-							AltCoin bean = new AltCoin();
+							MyTopic bean = new MyTopic();
 							String link = topicNode.getAttributeByName("href");
 
 							bean.setTitle(topicTitle);
@@ -88,7 +89,7 @@ public class AltCoinParser {
 									}
 								}
 								
-								if (lastPost != null) bean.setLastPostTime(new Timestamp(lastPost.getTime()));
+								if (lastPost != null) bean.setLastPostTime((int) (lastPost.getTime()/MILLIS_ONE_SECOND));
 							}
 							
 							cos.add(bean);

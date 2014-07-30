@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -46,27 +47,35 @@ public abstract class SimpleDBService<E> {
 	protected BeanListHandler<E> getBeanListHandler() {
 		return new BeanListHandler<>(clz, getRowProcessor());
 	}
+
+	public <T> T query(String sql, ResultSetHandler<T> handler, Object... params) throws SQLException {
+		return dbManager.query(sql, handler, params);
+	}
 	
 	public List<E> find(String sql, Object... params) throws SQLException {
-		return dbManager.query(sql, getBeanListHandler(), params);
+		return query(sql, getBeanListHandler(), params);
 	}
 	
 	public E findUnique(String sql, Object... params) throws SQLException {
-		return dbManager.query(sql, getBeanHandler(), params);
+		return query(sql, getBeanHandler(), params);
 	}
 	
 	public List<Object[]> query(String sql, Object... params) throws SQLException {
 		ArrayListHandler handler = new ArrayListHandler();
-		return dbManager.query(sql, handler, params);
+		return query(sql, handler, params);
 	}
 	
 	public Object[] queryUnique(String sql, Object... params) throws SQLException {
 		ArrayHandler handler = new ArrayHandler();
-		return dbManager.query(sql, handler, params);
+		return query(sql, handler, params);
 	}
 	
 	public List<E> findAll() throws SQLException {
-		String sql = new StringBuilder("select * from ").append(getTableName()).toString();
+		return findAll(getTableName());
+	}
+	
+	public List<E> findAll(String tableName) throws SQLException {
+		String sql = new StringBuilder("select * from ").append(tableName).toString();
 		return find(sql);
 	}
 	

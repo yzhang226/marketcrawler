@@ -1,6 +1,6 @@
 package org.omega.marketcrawler.entity;
 
-public class MyTopicBean extends _BaseEntity {
+public class MyTopic extends _BaseEntity {
 	
 	private static final long serialVersionUID = 3138816061561501848L;
 	
@@ -14,9 +14,9 @@ public class MyTopicBean extends _BaseEntity {
 	
 	private String content;
 	
-	private Long lastPostTime;
-	private Long publishTime;
-	private Long createTime;
+	private Integer lastPostTime;
+	private Integer publishTime;
+	private Integer createTime;
 	
 	public Integer getId() {
 		return id;
@@ -66,22 +66,22 @@ public class MyTopicBean extends _BaseEntity {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public Long getPublishTime() {
+	public Integer getPublishTime() {
 		return publishTime;
 	}
-	public void setPublishTime(Long publishTime) {
+	public void setPublishTime(Integer publishTime) {
 		this.publishTime = publishTime;
 	}
-	public Long getLastPostTime() {
+	public Integer getLastPostTime() {
 		return lastPostTime;
 	}
-	public void setLastPostTime(Long lastPostTime) {
+	public void setLastPostTime(Integer lastPostTime) {
 		this.lastPostTime = lastPostTime;
 	}
-	public Long getCreateTime() {
+	public Integer getCreateTime() {
 		return createTime;
 	}
-	public void setCreateTime(Long createTime) {
+	public void setCreateTime(Integer createTime) {
 		this.createTime = createTime;
 	}
 	

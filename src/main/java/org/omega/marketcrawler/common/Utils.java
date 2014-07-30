@@ -19,6 +19,8 @@ import org.htmlcleaner.XPatherException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import static org.omega.marketcrawler.common.Constants.*;
+
 public final class Utils {
 
 //	private static final Log log = LogFactory.getLog(Utils.class);
@@ -44,6 +46,10 @@ public final class Utils {
 	
 	public static String getBoardUrl(int boardId, int pageNumber) {
 		return new StringBuilder(BOARD_BASE_URL).append(boardId).append(".").append(pageNumber * 40).toString();
+	}
+	
+	public static int changeMillsToSeconds(long mills) {
+		return (int) (mills/MILLIS_ONE_SECOND);
 	}
 	
 	public static boolean isEmpty(String text) {

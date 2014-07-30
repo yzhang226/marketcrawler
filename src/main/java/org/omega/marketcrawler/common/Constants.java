@@ -16,4 +16,6 @@ public final class Constants {
 	
 	public static final String TEXT_NULL = "null";
 	
+	public static final int BOARD_ID_ANN = 159;
+	
 }

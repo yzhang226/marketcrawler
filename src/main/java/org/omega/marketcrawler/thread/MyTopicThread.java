@@ -5,36 +5,39 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omega.marketcrawler.common.AltCoinParser;
+import org.omega.marketcrawler.common.MyTopicParser;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.entity.AltCoin;
+import org.omega.marketcrawler.entity.MyTopic;
 import org.omega.marketcrawler.net.MultiThreadedNetter;
 
-public class AltCoinThread implements Callable<List<AltCoin>> {
+public class MyTopicThread implements Callable<List<MyTopic>> {
 
-	private static final Log log = LogFactory.getLog(AltCoinThread.class);
+	private static final Log log = LogFactory.getLog(MyTopicThread.class);
 	
 	private int boardId;
 	private int pageNumber;
 	
-	public AltCoinThread(int boardId, int pageNumber) {
+	public MyTopicThread(int boardId, int pageNumber) {
 		this.boardId = boardId;
 		this.pageNumber = pageNumber;
 	}
 
-	public List<AltCoin> call() throws Exception {
+	public List<MyTopic> call() throws Exception {
 		
 		String url = Utils.getBoardUrl(boardId, pageNumber);
 		log.info("Visit url: " + url);
 		
-		List<AltCoin> coins = null;
+		List<MyTopic> topics = null;
 		try {
 			String html = MultiThreadedNetter.inst().get(url);
-			coins = new AltCoinParser(html).parse();
+			topics = new MyTopicParser(html).parse();
+			for (MyTopic m : topics) {
+				m.setBoardId((short) boardId);
+			}
 		} catch (Throwable e) {
 			log.error("Visit url: " + url + " error.", e);
 		}
-		return coins;
+		return topics;
 	}
 
 }

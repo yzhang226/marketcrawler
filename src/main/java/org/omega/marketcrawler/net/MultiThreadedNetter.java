@@ -9,7 +9,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -30,7 +29,9 @@ public final class MultiThreadedNetter {
 
 	private static final Log log = LogFactory.getLog(MultiThreadedNetter.class);
 	
-	private static MultiThreadedNetter netter = new MultiThreadedNetter();
+	private static final Object lock = new Object();
+	
+	private static final MultiThreadedNetter netter = new MultiThreadedNetter();
 	
 	private CloseableHttpClient httpclient = null;
 	
@@ -86,7 +87,7 @@ public final class MultiThreadedNetter {
 			httpget = new HttpGet(url);
 			ResponseHandler<String> responseHandler = new PlainResponseHandler();
 			
-			responseBody = httpclient.execute(httpget, responseHandler);
+			responseBody = getHttpclient().execute(httpget, responseHandler);
 		} catch (Throwable e) {
 			String error = "access URL[" + url + "] error.";
 			throw new Exception(error, e);
@@ -95,6 +96,16 @@ public final class MultiThreadedNetter {
 		}
 
 		return responseBody;
+	}
+	
+	public CloseableHttpClient getHttpclient() throws Exception {
+		if (httpclient == null) {
+			synchronized (lock) {
+				if (httpclient == null) { reinit(); }
+			}
+		}
+		
+		return httpclient;
 	}
 	
 	public void close() throws Exception {

@@ -1,10 +1,5 @@
 package org.omega.marketcrawler.common;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +11,7 @@ import org.htmlcleaner.PrettyHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
 import org.omega.marketcrawler.entity.AltCoin;
+import org.omega.marketcrawler.entity.MyTopic;
 
 public class DetailAltCoinParser {
 
@@ -24,10 +20,11 @@ public class DetailAltCoinParser {
 	private static final boolean IS_DOWNLOADING = false;
 	
 	private String content;
-	private int topicId;
-	public DetailAltCoinParser(String content, int topicId) {
+	private MyTopic myTopic;
+	
+	public DetailAltCoinParser(String content, MyTopic myTopic) {
 		this.content = content;
-		this.topicId = topicId;
+		this.myTopic = myTopic;
 	}
 	
 	public AltCoin parse() {
@@ -49,14 +46,12 @@ public class DetailAltCoinParser {
 					}
 					
 					coin = buildAltCion(node, cleaner);
-					coin.setTopicId(topicId);
-					coin.setPublishDate(new Timestamp(postDate.getTime()));
-					
+					myTopic.setPublishTime(Utils.changeMillsToSeconds(postDate.getTime()));
 				}
 			}
 		
 		} catch (Exception e) {
-			log.error("Parse html page error topic id[" + topicId + "].", e);
+			log.error("Parse html page error topic id[" + myTopic.getTopicId() + "].", e);
 		}
 		
 		try {
@@ -64,7 +59,7 @@ public class DetailAltCoinParser {
 				downloadHtmlPage(coin, content);
 			}
 		} catch (Exception e) {
-			log.error("Download page error topic id[" + topicId + "].", e);
+			log.error("Download page error topic id[" + myTopic.getTopicId() + "].", e);
 		}
 		
 		return coin;
@@ -150,29 +145,29 @@ public class DetailAltCoinParser {
 	}
 
 	public void downloadHtmlPage(AltCoin alt, String html) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		String pdate = sdf.format(alt.getPublishDate());
-		
-		String fileName = pdate + "-" + alt.getTopicId() + "-" + alt.getName() + "-" + alt.getAbbrName() + ".html";
-		fileName = fileName.replace("/", "").replace("\\", "");
-		File htmlPath = new File(Constants.CRAWL_PAGES_FOLDER + "/" + fileName);
-		
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(htmlPath);
-			byte[] bs = html.getBytes();
-			fos.write(bs);
-			fos.flush();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fos != null) fos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+//		String pdate = sdf.format(alt.getPublishDate());
+//		
+//		String fileName = pdate + "-" + alt.getTopicId() + "-" + alt.getName() + "-" + alt.getAbbrName() + ".html";
+//		fileName = fileName.replace("/", "").replace("\\", "");
+//		File htmlPath = new File(Constants.CRAWL_PAGES_FOLDER + "/" + fileName);
+//		
+//		FileOutputStream fos = null;
+//		try {
+//			fos = new FileOutputStream(htmlPath);
+//			byte[] bs = html.getBytes();
+//			fos.write(bs);
+//			fos.flush();
+//			
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (fos != null) fos.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		
 	}
 	
