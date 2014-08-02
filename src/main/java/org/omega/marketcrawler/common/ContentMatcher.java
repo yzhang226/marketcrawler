@@ -254,6 +254,7 @@ public final class ContentMatcher {
 					btime = m.group(1);
 					unit = m.group(4);
 					btime = btime.trim();
+					btime = Utils.replaceAll(btime, "\\D+", "");
 					break;
 				}
 			}

@@ -18,14 +18,13 @@ public class AltCoinService extends SimpleDBService<AltCoin> {
 	private static final Map<String, String> columnToProperty = new HashMap<String, String>();
 	
 	private static final String INSERT_SQL = "INSERT INTO alt_coin (my_topic_id, status, interest, launch_time, "
-			+ "name, abbr_name, algo, proof, launch_raw, total_amount, block_time, half_blocks, half_days, block_reward, "
-			+ "difficulty_adjust, pre_mined, mined_percentage, pow_days, pow_height, pow_amount, memo)"
-			+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			// + " ON DUPLICATE KEY UPDATE last_price=VALUES(last_price), ";
-	private static final String UPDATE_SQL = "UPDATE alt_coin SET my_topic_id=?, status=?, interest=?, launch_time=?, name=?, abbr_name=?, algo=?, proof=?, launch_raw=?, "
-			+ "total_amount=?, block_time=?, half_blocks=?, half_days=?, block_reward=?, difficulty_adjust=?, pre_mined=?, mined_percentage=?, pow_days=?, "
-			+ "pow_height=?, pow_amount=?, memo=?"
-			+ " WHERE id = ?";
+											+ "name, abbr_name, algo, proof, total_amount, block_time, half_blocks, half_days, block_reward, "
+											+ "difficulty_adjust, pre_mined, mined_percentage, pow_days, pow_height, pow_amount, memo)"
+											+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String UPDATE_SQL = "UPDATE alt_coin SET my_topic_id=?, status=?, interest=?, launch_time=?, name=?, abbr_name=?, algo=?, proof=?, "
+											+ "total_amount=?, block_time=?, half_blocks=?, half_days=?, block_reward=?, difficulty_adjust=?, pre_mined=?, mined_percentage=?, pow_days=?, "
+											+ "pow_height=?, pow_amount=?, memo=?"
+											+ " WHERE id = ?";
 	
 	static {
 		columnToProperty.put("topic_id", "topicId");
@@ -33,7 +32,6 @@ public class AltCoinService extends SimpleDBService<AltCoin> {
 		
 		columnToProperty.put("launch_time", "launchTime");
 		columnToProperty.put("abbr_name", "abbrName");
-		columnToProperty.put("launch_raw", "launchRaw");
 		
 		columnToProperty.put("totalAmount", "total_amount");
 		columnToProperty.put("block_time", "blockTime");
@@ -61,20 +59,20 @@ public class AltCoinService extends SimpleDBService<AltCoin> {
 	
 	private Object[] convertBeanPropertiesToArray(AltCoin co) {
 		return new Object[] {co.getMyTopicId(), co.getStatus(), co.getInterest(), co.getLaunchTime(), 
-				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getLaunchRaw(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
+				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
 				co.getBlockReward(), co.getDifficultyAdjust(), co.getPreMined(), co.getMinedPercentage(), co.getPowDays(), co.getPowHeight(), co.getPowAmount(), co.getMemo()
 				};
 	}
 	
 	private Object[] convertBeanPropertiesToArrayWithId(AltCoin co) {
 		return new Object[] {co.getMyTopicId(), co.getStatus(), co.getInterest(), co.getLaunchTime(), 
-				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getLaunchRaw(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
+				co.getName(), co.getAbbrName(), co.getAlgo(), co.getProof(), co.getTotalAmount(), co.getBlockTime(), co.getHalfBlocks(), co.getHalfDays(), 
 				co.getBlockReward(), co.getDifficultyAdjust(), co.getPreMined(), co.getMinedPercentage(), co.getPowDays(), co.getPowHeight(), co.getPowAmount(), co.getMemo()
 				, co.getId()};
 	}
 	
 	public int[] save(List<AltCoin> coins) throws SQLException {
-		Object[][] params = new Object[coins.size()][29];
+		Object[][] params = new Object[coins.size()][20];
 		for (int i=0; i<coins.size(); i++) {
 			params[i] = convertBeanPropertiesToArray(coins.get(i));
 		}
@@ -91,7 +89,7 @@ public class AltCoinService extends SimpleDBService<AltCoin> {
 	}
 	
 	public int[] update(List<AltCoin> cos) throws SQLException {
-		Object[][] params = new Object[cos.size()][30];
+		Object[][] params = new Object[cos.size()][21];
 		for (int i=0; i<cos.size(); i++) {
 			params[i] = convertBeanPropertiesToArrayWithId(cos.get(i));
 		}
@@ -122,12 +120,6 @@ public class AltCoinService extends SimpleDBService<AltCoin> {
 	public List<AltCoin> findAll() throws SQLException {
 		return find("select * from alt_coin");
 	}
-	
-//	public List<AltCoin> find(String sql, Object... params) throws SQLException {
-//		BasicRowProcessor rowProcessor = new BasicRowProcessor(new BeanProcessor(columnToProperty));
-//		BeanListHandler<AltCoin> handler = new BeanListHandler<>(AltCoin.class, rowProcessor);
-//		return DbManager.inst().query(sql,  handler, params);
-//	}
 	
 	public static void main(String[] args) throws SQLException {
 		

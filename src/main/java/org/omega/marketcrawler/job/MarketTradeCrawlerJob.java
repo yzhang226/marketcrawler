@@ -1,6 +1,9 @@
 package org.omega.marketcrawler.job;
 
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,16 +22,23 @@ public class MarketTradeCrawlerJob implements Job {
 		log.info("start execute job");
 		
 		try {
+			ExecutorService exec = Executors.newFixedThreadPool(6);
+//			CompletionService<AltCoin> pool = new ExecutorCompletionService<>(exec);
+			
 			Set<WatchListItem> items = MyCache.inst().getWatchedItems();
 			for (WatchListItem item : items) {
-				new MarketTradeThread(item).start();
+				exec.submit(new MarketTradeThread(item));
 			}
+			exec.shutdown();
+			while (!exec.isTerminated()) {
+				exec.awaitTermination(2, TimeUnit.SECONDS);
+			}
+			
 		} catch (Exception e) {
 			String error = "Execution Market Trade CrawlerJob error.";
 			log.error(error, e);
-//			throw new JobExecutionException(error, e);
 		}
-		
+		log.info("end");
 	}
 
 }

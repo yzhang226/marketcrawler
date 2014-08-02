@@ -1,16 +1,17 @@
 package org.omega.marketcrawler.job;
 
 import static org.omega.marketcrawler.common.Constants.BOARD_ID_ANN;
-import static org.omega.marketcrawler.common.Constants.MILLIS_ONE_SECOND;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanPropertyValueEqualsPredicate;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,31 +29,93 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import static org.omega.marketcrawler.common.Utils.*;
+
 public class SeekCoinJob implements Job {
 
 	private static final Log log = LogFactory.getLog(SeekCoinJob.class);
 	
-	@SuppressWarnings("unchecked")
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		log.info("start");
 		
+		long start = System.currentTimeMillis();
 		List<MyTopic> seekedTopics = null;
 		try {
-			int pageNumber = Utils.extractTotalPagesNumber(MultiThreadedNetter.inst().get(Utils.getBoardUrl(BOARD_ID_ANN, 0)));
+			String htmlContent = MultiThreadedNetter.inst().getWithRetries(getBoardUrl(BOARD_ID_ANN, 0));
+			int pageNumber = Utils.extractTotalPagesNumber(htmlContent);
 			log.info("There are total " + pageNumber + " topic pages number.");
 		
-			seekedTopics = fectchBoardTopics(159, pageNumber);
+			seekedTopics = fectchBoardTopics(BOARD_ID_ANN, pageNumber);
 			
 			log.info("Total " + seekedTopics.size() + " were seeked.");
-			
 		} catch (Exception e) {
 			log.error("Seek New Coin error.", e);
 		}
+		System.out.println("used time: " + (System.currentTimeMillis() - start));
 		
-		if (Utils.isEmpty(seekedTopics)) {
+		if (isEmpty(seekedTopics)) {
 			return;
 		}
 
+		saveOrUpdate(seekedTopics);
+		
+		log.info("end");
+	}
+	
+	
+	public List<MyTopic> fectchBoardTopics(int boardId, int pageNumber) throws Exception {
+		List<MyTopic> seekedTopics = new ArrayList<>(pageNumber*60);
+		
+		ExecutorService exec = Executors.newFixedThreadPool(2);
+		CompletionService<List<MyTopic>> pool = new ExecutorCompletionService<>(exec);
+		for (int i=0; i<pageNumber; i++) {
+			pool.submit(new MyTopicThread(boardId, i));
+		}
+		exec.shutdown();
+		while (!exec.isTerminated()) {
+			exec.awaitTermination(2, TimeUnit.SECONDS);
+		}
+		
+		System.out.println(" end Pool fectchBoardTopics");
+		
+		List<MyTopic> re = null;
+		
+		for (int i=0; i<pageNumber; i++) {
+			re = pool.take().get();
+			if (isNotEmpty(re)) { seekedTopics.addAll(re); }
+		}
+		
+		return seekedTopics;
+	}
+
+	public List<AltCoin> fectchDetailTopic(List<MyTopic> needToAdd) throws Exception {
+		List<AltCoin> coins = new ArrayList<>(needToAdd.size());
+		
+		ExecutorService exec = Executors.newFixedThreadPool(4);
+		CompletionService<AltCoin> pool = new ExecutorCompletionService<>(exec);
+		for (int i=0; i<needToAdd.size(); i++) {
+			pool.submit(new DetailAltCoinThread(needToAdd.get(i)));
+		}
+		exec.shutdown();
+		while (!exec.isTerminated()) {
+			exec.awaitTermination(2, TimeUnit.SECONDS);
+		}
+		
+		System.out.println(" end Pool fectchDetailTopic");
+		
+		List<AltCoin> detailCoins = new ArrayList<>(30);
+		AltCoin re = null;
+		
+		for (int i=0; i<needToAdd.size(); i++) {
+			re = pool.take().get();
+			if (re != null) { detailCoins.add(re); }
+		}
+		
+		return coins;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void saveOrUpdate(List<MyTopic> seekedTopics) {
 		AltCoinService acser = new AltCoinService();
 		MyTopicService topicService = new MyTopicService();
 		List<MyTopic> allDbTopics = null;
@@ -64,30 +127,32 @@ public class SeekCoinJob implements Job {
 		
 		List<MyTopic> needToUpdate = null;
 		List<MyTopic> needToAdd = null;
-		if (Utils.isNotEmpty(allDbTopics)) {
+		if (isNotEmpty(allDbTopics)) {
 			needToUpdate = (List<MyTopic>) CollectionUtils.intersection(allDbTopics, seekedTopics);
 			needToAdd = (List<MyTopic>) CollectionUtils.subtract(seekedTopics, allDbTopics);
 		} else {
 			needToAdd = seekedTopics;
 		}
 		
-		if (Utils.isNotEmpty(needToAdd)) {// insert 
+		if (isNotEmpty(needToAdd)) {// insert
+			log.info("needToAdd.size() is " + needToAdd.size());
 			Timestamp curr = new Timestamp(System.currentTimeMillis());
 			try {
 				List<AltCoin> detailCoins = fectchDetailTopic(needToAdd);
+				log.info("total " + detailCoins.size() + " detail coins.");
 				
 				Map<Integer, Integer> topicIdToMyId = new HashMap<>(needToAdd.size());
 				Integer latestId = 0;
 				for (MyTopic my : needToAdd) {
 					try {
-						my.setCreateTime((int) (curr.getTime()/MILLIS_ONE_SECOND));
+						my.setCreateTime(changeMillsToSeconds(curr.getTime()));
 						latestId = topicService.save(my);
 						if (latestId != null) { 
 							topicIdToMyId.put(my.getTopicId(), latestId);
 							my.setId(latestId); 
 						}
 					} catch (Exception e) {
-						log.error("Save MyTopic error.", e);
+						log.error("Insert MyTopic to DB error.", e);
 					}
 				}
 				
@@ -96,13 +161,13 @@ public class SeekCoinJob implements Job {
 				}
 				acser.save(detailCoins);
 				
-				log.info("\t insert alt coin to db, total " + needToAdd.size() + " coins are inserted.");
+				log.info("insert my_topic and alt_coin to db, total " + needToAdd.size() + " coins are inserted.");
 			} catch (Exception e) {
-				log.error("Add New Coins To DB error.", e);
+				log.error("Add MyTopics and AltCoins To DB error.", e);
 			}
 		}
 		
-		if (Utils.isNotEmpty(needToUpdate)) {// update 
+		if (isNotEmpty(needToUpdate)) {// update 
 			try {
 				MyTopic finded = null;
 				for (MyTopic co : needToUpdate) {
@@ -114,86 +179,17 @@ public class SeekCoinJob implements Job {
 				}
 				topicService.update(needToUpdate);
 				
-				log.info("\t update alt coin to db, total " + needToUpdate.size() + " coins are updated.");
+				log.info("update my_topic to db, total " + needToUpdate.size() + " coins are updated.");
 			} catch (Exception e) {
-				log.error("Update Coins To DB error.", e);
+				log.error("Update MyTopics To DB error.", e);
 			}
 		}
 		
-		log.info("end");
 	}
-	
-	
-	public List<MyTopic> fectchBoardTopics(int boardId, int pageNumber) throws Exception {
-		List<MyTopic> seekedTopics = new ArrayList<>(pageNumber*60);
-		ExecutorService exec = Executors.newCachedThreadPool();
-		List<Future<List<MyTopic>>> resu = new ArrayList<>();
-		for (int i=0; i<pageNumber; i++) {
-			resu.add(exec.submit(new MyTopicThread(boardId, i)));
-		}
-		
-		List<MyTopic> re = null;
-		for (Future<List<MyTopic>> futu : resu) {
-			if (futu.isDone()) {
-				re = futu.get();
-				if (Utils.isNotEmpty(re)) { seekedTopics.addAll(re); }
-            } else {
-                System.out.println("MyTopicThread Future result is not yet complete");  
-            }
-		}
-		exec.shutdown();
-		
-		return seekedTopics;
-	}
-
-	public List<AltCoin> fectchDetailTopic(List<MyTopic> needToAdd) throws Exception {
-		List<AltCoin> coins = new ArrayList<>(needToAdd.size());
-		
-		ExecutorService exec = Executors.newCachedThreadPool();
-		List<Future<AltCoin>> resu = new ArrayList<>();
-		for (int i=0; i<needToAdd.size(); i++) {
-			resu.add(exec.submit(new DetailAltCoinThread(needToAdd.get(i))));
-		}
-		
-		List<AltCoin> detailCoins = new ArrayList<>(30);
-		AltCoin re = null;
-		for (Future<AltCoin> futu : resu) {
-			if (futu.isDone()) {
-				re = futu.get();
-				if (re != null) detailCoins.add(re);
-            } else {
-                System.out.println("DetailAltCoinThread Future result is not yet complete");  
-            }
-		}
-		exec.shutdown();
-		
-		return coins;
-	}
-	
 	
 	public static void main(String[] args) throws Exception {
-//		SeekCoinJob scj = new SeekCoinJob();
-//		List<AltCoin> seekedTopics = scj.fectchBoardTopics(ANNOUNCEMENTS_BOARD_URL, 1);
-//		System.out.println(seekedTopics.size());
-		
-//		String sql = "select * from alt_coin where create_time > '2014-07-16'";
-//		AltCoinService acser = new AltCoinService();
-//		List<AltCoin> needToUpdate = acser.find(sql);
-//		
-//		try {
-//			List<AltCoin> detailCoins = scj.fectchAnnTopicsByUrls(needToUpdate);
-//			AltCoin detail = null;
-//			for (AltCoin alt : needToUpdate) {
-//				detail = (AltCoin) CollectionUtils.find(detailCoins, new BeanPropertyValueEqualsPredicate("topicId", alt.getTopicId()));
-//				scj.copyProperties(alt, detail);
-//			}
-//			acser.update(needToUpdate);
-//			
-//			log.info("\t update alt coin to db, total " + needToUpdate.size() + " coins are updated.");
-//		} catch (Exception e) {
-//			log.error("Update Coins To DB error.", e);
-//		}
-		
+		SeekCoinJob seeker = new SeekCoinJob();
+		seeker.execute(null);
 	}
 	
 }

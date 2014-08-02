@@ -2,7 +2,7 @@ package org.omega.marketcrawler.entity;
 
 public class MyTopic extends _BaseEntity {
 	
-	private static final long serialVersionUID = 3138816061561501848L;
+	private static final long serialVersionUID = -2611176928206592346L;
 	
 	private Integer id;
 	private Short boardId;
@@ -84,5 +84,36 @@ public class MyTopic extends _BaseEntity {
 	public void setCreateTime(Integer createTime) {
 		this.createTime = createTime;
 	}
+	
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((boardId == null) ? 0 : boardId.hashCode());
+		result = prime * result + ((topicId == null) ? 0 : topicId.hashCode());
+		return result;
+	}
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MyTopic other = (MyTopic) obj;
+		if (boardId == null) {
+			if (other.boardId != null)
+				return false;
+		} else if (!boardId.equals(other.boardId))
+			return false;
+		if (topicId == null) {
+			if (other.topicId != null)
+				return false;
+		} else if (!topicId.equals(other.topicId))
+			return false;
+		return true;
+	}
+	
+	
+	
 	
 }

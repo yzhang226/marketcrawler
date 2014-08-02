@@ -129,6 +129,18 @@ public final class Utils {
 		return Integer.valueOf(link.substring(link.indexOf('=') + 1, link.lastIndexOf('.')));
 	}
 	
+	public static Date parsePostDate(String dateText) {
+		// January 21, 2014, 09:01:57 PM
+		// MMMMM dd, yyyy, KK:mm:ss aaa
+		Date postDate = null;
+		if (dateText.toLowerCase().contains("today")) {// Today at 12:39:37 AM
+			postDate = Utils.parseTodayText(dateText);
+		} else {
+			postDate = Utils.parseDateText(dateText);
+		}
+		return postDate;
+	}
+	
 	public static Date parseDateText(String dateText) {
 		Date postDate = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy, hh:mm:ss aaa", LOCALE_US);

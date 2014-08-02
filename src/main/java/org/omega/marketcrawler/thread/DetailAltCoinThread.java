@@ -1,6 +1,7 @@
 package org.omega.marketcrawler.thread;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +27,11 @@ public class DetailAltCoinThread implements Callable<AltCoin> {
 		
 		AltCoin coin = null;
 		try {
-			String html = MultiThreadedNetter.inst().get(url);
+			String html = MultiThreadedNetter.inst().getWithRetries(url);
 			coin = new DetailAltCoinParser(html, myTopic).parse();
-			coin.setTopicId(myTopic.getTopicId());
+			if (coin != null) coin.setTopicId(myTopic.getTopicId());
+			
+			TimeUnit.MILLISECONDS.sleep(1000);
 		} catch (Throwable e) {
 			log.error("Visit for detail: " + url + " error.", e);
 		}

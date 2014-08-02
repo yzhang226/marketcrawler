@@ -11,7 +11,7 @@ public class MyTopicService extends SimpleDBService<MyTopic> {
 	private static final String INSERT_SQL = "INSERT INTO my_topic (board_id, topic_id, author, title, replies, views, content, last_post_time, publish_time, create_time)"
 			+ " VALUES (?,?,?,?,?,?,?,?,?,?)";
 	private static final String UPDATE_SQL = "UPDATE my_topic SET board_id=?, topic_id=?, author=?, title=?, replies=?, views=?, "
-			+ "content=?, last_post_time=?, publish_date=?, create_time=?"
+			+ "content=?, last_post_time=?, publish_time=?, create_time=?"
 			+ " WHERE id = ?";
 	
 	static {
@@ -31,19 +31,25 @@ public class MyTopicService extends SimpleDBService<MyTopic> {
 	}
 	
 	protected Object[] objectToArray(MyTopic my) {
-		return new Object[]{my.getBoardId(), my.getTopicId(), my.getAuthor(), my.getTitle(), my.getViews(), my.getContent(), my.getLastPostTime(), my.getCreateTime()};
+		return new Object[]{my.getBoardId(), my.getTopicId(), my.getAuthor(), my.getTitle(), my.getReplies(), my.getViews(), my.getContent(), my.getLastPostTime(), my.getPublishTime(), my.getCreateTime()};
 	}
 	
 	protected Object[] objectToArrayWithId(MyTopic my) {
-		return new Object[]{my.getBoardId(), my.getTopicId(), my.getAuthor(), my.getTitle(), my.getViews(), my.getContent(), my.getLastPostTime(), my.getCreateTime(), my.getId()};
+		return new Object[]{my.getBoardId(), my.getTopicId(), my.getAuthor(), my.getTitle(), my.getReplies(), my.getViews(), my.getContent(), my.getLastPostTime(), my.getPublishTime(), my.getCreateTime(), my.getId()};
 	}
 	
+	/**
+	 * 
+	 * @param my
+	 * @return - with auto-generated id
+	 * @throws SQLException
+	 */
 	public Integer save(MyTopic my) throws SQLException {
 		int resu = save(INSERT_SQL, objectToArray(my));
 		if (resu > 0) {
 			Object[] re = queryUnique("select max(id) from " + getTableName());
 			if (re != null && re[0] != null) {
-				return ((Long) re[0]).intValue();
+				return (Integer) re[0];
 			}
 		}
 		return null;

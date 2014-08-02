@@ -36,16 +36,13 @@ public class DetailAltCoinParser {
 				String date = getPublishDate(node);
 				Date postDate = null;
 				if (Utils.isNotEmpty(date)) {
-					coin = new AltCoin();
-					// January 21, 2014, 09:01:57 PM
-					// MMMMM dd, yyyy, KK:mm:ss aaa
-					if (date.toLowerCase().contains("today")) {// Today at 12:39:37 AM
-						postDate = Utils.parseTodayText(date);
-					} else {
-						postDate = Utils.parseDateText(date);
+					postDate = Utils.parsePostDate(date);
+					
+					if (myTopic.getTitle().toLowerCase().contains("ann")) {
+						coin = new AltCoin();
+						coin = buildAltCion(node, cleaner);
 					}
 					
-					coin = buildAltCion(node, cleaner);
 					myTopic.setPublishTime(Utils.changeMillsToSeconds(postDate.getTime()));
 				}
 			}

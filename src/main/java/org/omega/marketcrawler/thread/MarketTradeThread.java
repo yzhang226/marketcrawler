@@ -2,6 +2,7 @@ package org.omega.marketcrawler.thread;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,7 @@ public class MarketTradeThread extends Thread {
 	}
 	
 	public void run() {
-		setName(item.toReadableText());
+//		setName(item.toReadableText());
 		
 		long start = System.currentTimeMillis();
 		MarketTradeService ser = new MarketTradeService();
@@ -37,11 +38,13 @@ public class MarketTradeThread extends Thread {
 				int updated = Utils.countBatchResult(resu);
 				if (updated > 0) { info.append(" Add " + updated + " rows."); }
 			}
+			
+			TimeUnit.MILLISECONDS.sleep(50);
 		} catch (Throwable e) {
 			log.error("fetch market data error.", e);
 		}
 		
-		info.insert(0, "End[" + (System.currentTimeMillis() - start) + "].");
+		info.insert(0, item.toReadableText() + " End[" + (System.currentTimeMillis() - start) + "].");
 		log.info(info.toString());
 	}
 	
