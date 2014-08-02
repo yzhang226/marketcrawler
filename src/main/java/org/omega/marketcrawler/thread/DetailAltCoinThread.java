@@ -29,9 +29,12 @@ public class DetailAltCoinThread implements Callable<AltCoin> {
 		try {
 			String html = MultiThreadedNetter.inst().getWithRetries(url);
 			coin = new DetailAltCoinParser(html, myTopic).parse();
-			if (coin != null) coin.setTopicId(myTopic.getTopicId());
+			if (coin != null) {
+				coin.setTopicId(myTopic.getTopicId());
+				coin.setMyTopicId(myTopic.getId());
+			}
 			
-			TimeUnit.MILLISECONDS.sleep(1000);
+			TimeUnit.MILLISECONDS.sleep(500);
 		} catch (Throwable e) {
 			log.error("Visit for detail: " + url + " error.", e);
 		}

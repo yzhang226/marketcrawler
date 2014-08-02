@@ -22,7 +22,14 @@ import org.omega.marketcrawler.operator.Poloniex;
 
 
 /**
- * access url by using common <code>httpclient</code>
+ * access url by using common <code>httpclient</code><br>
+ * The Thread involved in this blocking IO call can get hang for either:<br>
+ * Socket.connect() operation (establish a new physical connection between your production server and your remote service provider <br>
+ * 							   &nbsp;such as an Oracle database listener, a Web Service URL etc.) <br>
+ * Socket.write() operation (send the data to the service provider such as a database query request / SQL, an XML request data etc.) <br>
+ * Socket.read() operation  (wait for the service provider to complete its processing and consume the response data <br>
+ * 							 such as results of a database SQL query or an XML response data) <br>
+ * 
  * @author cook
  *
  */
@@ -30,8 +37,8 @@ public final class MultiThreadedNetter {
 
 	private static final Log log = LogFactory.getLog(MultiThreadedNetter.class);
 	
-	private static final int CONN_TIMEOUT_MS = 2 * 1000;
-	private static final int CONN_REQUEST_TIMEOUT_MS = 2 * 1000;
+	private static final int CONN_TIMEOUT_MS = 3 * 1000;
+	private static final int CONN_REQUEST_TIMEOUT_MS = 3 * 1000;
 	private static final int SOCKET_TIMEOUT_MS = 3 * 1000;
 	
 	private static final Object lock = new Object();
@@ -62,7 +69,7 @@ public final class MultiThreadedNetter {
 	        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(buildSocketFactoryRegistry());
 			httpclient = HttpClients.custom().disableAutomaticRetries()//.setSSLSocketFactory(createSSLFactory())
 									.setConnectionManager(cm)
-									.setDefaultRequestConfig(buildRequestConfig(CONN_TIMEOUT_MS*3, CONN_REQUEST_TIMEOUT_MS*3, SOCKET_TIMEOUT_MS*2))
+									.setDefaultRequestConfig(buildRequestConfig())
 									.setMaxConnPerRoute(maxConnPerRoute)
 									.setMaxConnTotal(maxConnTotal)
 									.build();
@@ -151,16 +158,22 @@ public final class MultiThreadedNetter {
 	}
 	
 	public void close() {
-		if (httpclient != null) {
+		if (httpclient != null || retriesHttpclient != null) {
 			synchronized (lock) {
-				if (httpclient != null) {
-					try {
-						httpclient.close();
-					} catch (Exception e) {
-						log.error("close httpclient error.", e);
-					} finally {
-						httpclient = null;
-					}
+				try {
+					if (httpclient != null) httpclient.close();
+				} catch (Exception e) {
+					log.error("close httpclient error.", e);
+				} finally {
+					httpclient = null;
+				}
+				
+				try {
+					if (retriesHttpclient != null) retriesHttpclient.close();
+				} catch (Exception e) {
+					log.error("close httpclient error.", e);
+				} finally {
+					retriesHttpclient = null;
 				}
 			}
 		}

@@ -2,11 +2,8 @@ package org.omega.marketcrawler.job;
 
 import static org.omega.marketcrawler.common.Constants.BOARD_ID_ANN;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -116,7 +113,6 @@ public class SeekCoinJob implements Job {
 	
 	@SuppressWarnings("unchecked")
 	public void saveOrUpdate(List<MyTopic> seekedTopics) {
-		AltCoinService acser = new AltCoinService();
 		MyTopicService topicService = new MyTopicService();
 		List<MyTopic> allDbTopics = null;
 		try {
@@ -135,35 +131,12 @@ public class SeekCoinJob implements Job {
 		}
 		
 		if (isNotEmpty(needToAdd)) {// insert
-			log.info("needToAdd.size() is " + needToAdd.size());
-			Timestamp curr = new Timestamp(System.currentTimeMillis());
 			try {
-				List<AltCoin> detailCoins = fectchDetailTopic(needToAdd);
-				log.info("total " + detailCoins.size() + " detail coins.");
+				topicService.save(needToAdd);
 				
-				Map<Integer, Integer> topicIdToMyId = new HashMap<>(needToAdd.size());
-				Integer latestId = 0;
-				for (MyTopic my : needToAdd) {
-					try {
-						my.setCreateTime(changeMillsToSeconds(curr.getTime()));
-						latestId = topicService.save(my);
-						if (latestId != null) { 
-							topicIdToMyId.put(my.getTopicId(), latestId);
-							my.setId(latestId); 
-						}
-					} catch (Exception e) {
-						log.error("Insert MyTopic to DB error.", e);
-					}
-				}
-				
-				for (AltCoin detail : detailCoins) {
-					detail.setMyTopicId(topicIdToMyId.get(detail.getTopicId()));
-				}
-				acser.save(detailCoins);
-				
-				log.info("insert my_topic and alt_coin to db, total " + needToAdd.size() + " coins are inserted.");
+				log.info("insert my_topic to db, total " + needToAdd.size() + " are  inserted.");
 			} catch (Exception e) {
-				log.error("Add MyTopics and AltCoins To DB error.", e);
+				log.error("Add MyTopics To DB error.", e);
 			}
 		}
 		
@@ -183,6 +156,22 @@ public class SeekCoinJob implements Job {
 			} catch (Exception e) {
 				log.error("Update MyTopics To DB error.", e);
 			}
+		}
+		
+		// search topic that are not added into alt_coin table 
+		AltCoinService coinService = new AltCoinService();
+		String sql = "select * from my_topic my where my.board_id = " + BOARD_ID_ANN + " and my.id not in ( select a.my_topic_id from alt_coin a ) and LOWER(my.title) like '%ann%'";
+		try {
+			List<MyTopic> needAddAsCoins = topicService.find(sql);
+			if (Utils.isNotEmpty(needAddAsCoins)) {
+				List<AltCoin> coins = fectchDetailTopic(needAddAsCoins);
+				int[] resu1 = coinService.save(coins);
+				int[] resu2 = topicService.updatePublishTime(needAddAsCoins);
+				
+				log.info("Add topics to coins to db, total " + Utils.countBatchResult(resu1) + " coins are inserted and total topic " + Utils.countBatchResult(resu2) + " are updated.");
+			}
+		} catch (Exception e) {
+			log.error("Add topics to coins error.", e);
 		}
 		
 	}

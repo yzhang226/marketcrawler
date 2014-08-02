@@ -18,4 +18,7 @@ public final class Constants {
 	
 	public static final int BOARD_ID_ANN = 159;
 	
+	public static final int MAX_AWAIT_MILLIS = 59 * MILLIS_ONE_SECOND;
+	
+	
 }

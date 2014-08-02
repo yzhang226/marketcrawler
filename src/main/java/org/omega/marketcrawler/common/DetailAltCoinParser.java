@@ -38,11 +38,8 @@ public class DetailAltCoinParser {
 				if (Utils.isNotEmpty(date)) {
 					postDate = Utils.parsePostDate(date);
 					
-					if (myTopic.getTitle().toLowerCase().contains("ann")) {
-						coin = new AltCoin();
-						coin = buildAltCion(node, cleaner);
-					}
-					
+					coin = new AltCoin();
+					coin = buildAltCion(node, cleaner);
 					myTopic.setPublishTime(Utils.changeMillsToSeconds(postDate.getTime()));
 				}
 			}
