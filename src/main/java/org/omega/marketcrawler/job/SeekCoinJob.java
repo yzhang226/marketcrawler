@@ -2,6 +2,7 @@ package org.omega.marketcrawler.job;
 
 import static org.omega.marketcrawler.common.Constants.BOARD_ID_ANN;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionService;
@@ -86,9 +87,7 @@ public class SeekCoinJob implements Job {
 	}
 
 	public List<AltCoin> fectchDetailTopic(List<MyTopic> needToAdd) throws Exception {
-		List<AltCoin> coins = new ArrayList<>(needToAdd.size());
-		
-		ExecutorService exec = Executors.newFixedThreadPool(4);
+		ExecutorService exec = Executors.newFixedThreadPool(2);
 		CompletionService<AltCoin> pool = new ExecutorCompletionService<>(exec);
 		for (int i=0; i<needToAdd.size(); i++) {
 			pool.submit(new DetailAltCoinThread(needToAdd.get(i)));
@@ -108,7 +107,7 @@ public class SeekCoinJob implements Job {
 			if (re != null) { detailCoins.add(re); }
 		}
 		
-		return coins;
+		return detailCoins;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -159,7 +158,13 @@ public class SeekCoinJob implements Job {
 		}
 		
 		// search topic that are not added into alt_coin table 
+		addTopicAsCoin();
+		
+	}
+	
+	private void addTopicAsCoin() {
 		AltCoinService coinService = new AltCoinService();
+		MyTopicService topicService = new MyTopicService();
 		String sql = "select * from my_topic my where my.board_id = " + BOARD_ID_ANN + " and my.id not in ( select a.my_topic_id from alt_coin a ) and LOWER(my.title) like '%ann%'";
 		try {
 			List<MyTopic> needAddAsCoins = topicService.find(sql);
@@ -168,7 +173,9 @@ public class SeekCoinJob implements Job {
 				int[] resu1 = coinService.save(coins);
 				int[] resu2 = topicService.updatePublishTime(needAddAsCoins);
 				
-				log.info("Add topics to coins to db, total " + Utils.countBatchResult(resu1) + " coins are inserted and total topic " + Utils.countBatchResult(resu2) + " are updated.");
+				log.info("Add topics to coins to db, total " + Utils.countBatchResult(resu1) + " coins are inserted.");
+				log.info("Add topics to coins to db, total " + Utils.countBatchResult(resu2) + " topics are updated.");
+				
 			}
 		} catch (Exception e) {
 			log.error("Add topics to coins error.", e);
@@ -178,7 +185,8 @@ public class SeekCoinJob implements Job {
 	
 	public static void main(String[] args) throws Exception {
 		SeekCoinJob seeker = new SeekCoinJob();
-		seeker.execute(null);
+//		seeker.execute(null);
+		seeker.addTopicAsCoin();
 	}
 	
 }

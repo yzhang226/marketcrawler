@@ -54,7 +54,7 @@ public final class MultiThreadedNetter {
 	}
 	
 	public void reinit() throws Exception {
-		reinit(2, 20);// default
+		reinit(3, 30);// default
 	}
 	
 	public void reinit(int maxConnPerRoute, int maxConnTotal) throws Exception {

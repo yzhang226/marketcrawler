@@ -34,7 +34,7 @@ public class DetailAltCoinThread implements Callable<AltCoin> {
 				coin.setMyTopicId(myTopic.getId());
 			}
 			
-			TimeUnit.MILLISECONDS.sleep(500);
+			TimeUnit.MILLISECONDS.sleep(1000);
 		} catch (Throwable e) {
 			log.error("Visit for detail: " + url + " error.", e);
 		}

@@ -12,7 +12,6 @@ import org.omega.marketcrawler.job.MarketTradeCrawlerJob;
 import org.omega.marketcrawler.job.RefreshCacheJob;
 import org.omega.marketcrawler.job.SeekCoinJob;
 import org.omega.marketcrawler.job.SmallMarketSummaryCrawlerJob;
-import org.omega.marketcrawler.job.TradeStatisticsJob;
 import org.omega.marketcrawler.net.MultiThreadedNetter;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -98,11 +97,11 @@ public final class SystemLauncher extends Thread {
 //  		          			.build();
             
             // 6
-//            JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
-//            Trigger coinTrigger = TriggerBuilder.newTrigger().withIdentity("coinTri", "coinTriGrop")
-//  		          			.startAt(curr.plusHours(6).toDate()).withSchedule(
-//  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(6).repeatForever())
-//  		          			.build();
+            JobDetail coinJob = JobBuilder.newJob(SeekCoinJob.class).withIdentity("coinjob", "coingroup").build();
+            Trigger coinTrigger = TriggerBuilder.newTrigger().withIdentity("coinTri", "coinTriGrop")
+  		          			.startAt(curr.plusHours(4).toDate()).withSchedule(
+  		          					SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(4).repeatForever())
+  		          			.build();
             
             
             
@@ -115,7 +114,7 @@ public final class SystemLauncher extends Thread {
             scheduler.scheduleJob(bigMarketJob, bigMarketTrigger);
 //            scheduler.scheduleJob(tradeStatJob, tradeStatTrigger);
             
-//            scheduler.scheduleJob(coinJob, coinTrigger);
+            scheduler.scheduleJob(coinJob, coinTrigger);
 
 //            scheduler.shutdown();
 

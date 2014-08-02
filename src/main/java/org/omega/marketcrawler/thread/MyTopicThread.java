@@ -36,7 +36,7 @@ public class MyTopicThread implements Callable<List<MyTopic>> {
 			}
 			
 			// wait for a while
-			TimeUnit.MILLISECONDS.sleep(500);
+			TimeUnit.MILLISECONDS.sleep(1000);
 		} catch (Throwable e) {
 			log.error("Visit url: " + url + " error.", e);
 		}
