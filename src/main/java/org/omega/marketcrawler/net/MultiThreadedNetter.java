@@ -18,7 +18,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.omega.marketcrawler.operator.Poloniex;
 
 
 /**
@@ -53,12 +52,13 @@ public final class MultiThreadedNetter {
 		return netter;
 	}
 	
-	public void reinit() throws Exception {
-		reinit(3, 30);// default
+	public void refresh() throws Exception {
+		refresh(3, 30);// default
 	}
 	
-	public void reinit(int maxConnPerRoute, int maxConnTotal) throws Exception {
-		log.info("Start Reinit MultiThreadedNetter.");
+	public void refresh(int maxConnPerRoute, int maxConnTotal) throws Exception {
+		log.info("Start Refresh MultiThreadedNetter.");
+		
 		try {
 			close();
 		} catch (Exception e) {
@@ -66,10 +66,11 @@ public final class MultiThreadedNetter {
 		}
 		
 		try {
+			synchronized (lock) {
 	        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(buildSocketFactoryRegistry());
 			httpclient = HttpClients.custom().disableAutomaticRetries()//.setSSLSocketFactory(createSSLFactory())
 									.setConnectionManager(cm)
-									.setDefaultRequestConfig(buildRequestConfig())
+									.setDefaultRequestConfig(buildRequestConfig(CONN_TIMEOUT_MS*1, CONN_REQUEST_TIMEOUT_MS*1, SOCKET_TIMEOUT_MS*1))
 									.setMaxConnPerRoute(maxConnPerRoute)
 									.setMaxConnTotal(maxConnTotal)
 									.build();
@@ -81,11 +82,12 @@ public final class MultiThreadedNetter {
 									.setMaxConnPerRoute(maxConnPerRoute)
 									.setMaxConnTotal(maxConnTotal)
 									.build();
+			}
 		} catch (Throwable e) {
-			throw new Exception("reinit httpclient error.", e);
+			throw new Exception("Refresh httpclient error.", e);
 		}
 		
-		log.info("End Reinit MultiThreadedNetter.");
+		log.info("End Refresh MultiThreadedNetter.");
 	}
 
 	public SSLConnectionSocketFactory createSSLFactory() throws Exception {
@@ -142,7 +144,7 @@ public final class MultiThreadedNetter {
 	public CloseableHttpClient getRetriesHttpclient() throws Exception {
 		if (retriesHttpclient == null) {
 			synchronized (lock) {
-				if (retriesHttpclient == null) { reinit(); }
+				if (retriesHttpclient == null) { refresh(); }
 			}
 		}
 		return retriesHttpclient;
@@ -151,7 +153,7 @@ public final class MultiThreadedNetter {
 	public CloseableHttpClient getHttpclient() throws Exception {
 		if (httpclient == null) {
 			synchronized (lock) {
-				if (httpclient == null) { reinit(); }
+				if (httpclient == null) { refresh(); }
 			}
 		}
 		return httpclient;
@@ -181,9 +183,13 @@ public final class MultiThreadedNetter {
 	
 	public static void main(String[] args) throws Exception {
 		MultiThreadedNetter netter = MultiThreadedNetter.inst();
-		netter.reinit();
-		String resu = netter.get(Poloniex.instance().getMarketSummaryAPI());
-		System.out.println(resu);
+		netter.refresh();
+		// String resu = netter.get(Poloniex.instance().getMarketSummaryAPI());
+		// System.out.println(resu);
+//		WatchListItem item = new WatchListItem("poloniex", "uro", "btc");
+//		System.out.println(netter.get(Poloniex.instance().getMarketTradeAPI(item)));
+//		System.out.println(netter.get("https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_URO"));
+		System.out.println(netter.get("https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_TRUST"));
 		netter.close();
 	}
 	
