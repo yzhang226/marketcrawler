@@ -1,18 +1,12 @@
 package org.omega.marketcrawler;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.TimeZone;
 
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.omega.marketcrawler.common.Arith;
 import org.omega.marketcrawler.common.Utils;
-import org.omega.marketcrawler.db.DbManager;
 
 public class MiscTest {
 
@@ -87,8 +81,50 @@ public class MiscTest {
 		
 //		re.setNanoTime((byte) (nanoSecs%10));
 //		re.setTradeTime(nanoSecs/10);
+		System.out.println("------------------------------------");
+		long mintpalMax = 1407220133278l;
+		long bittrexMax = 1407190592090l;
 		
+		DateTime mintdt = new DateTime(mintpalMax);
+//		DateTime mintdt2 = new DateTime(mintpalMax, DateTimeZone.UTC);
+		DateTime bittdt = new DateTime(bittrexMax);
+//		DateTime bittdt2 = new DateTime(bittrexMax, DateTimeZone.UTC);
+		System.out.println(mintdt);
+//		System.out.println(mintdt2);
+		System.out.println("******************");
+		System.out.println(bittdt);
+//		System.out.println(bittdt2);
 		
+		System.out.println("00000000000000000000000000000000000000000");
+		
+		String dtext = "2014-08-05T06:16:32.09";
+		
+		String bittrexPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+		
+		DateTimeFormatter formatter = DateTimeFormat.forPattern(bittrexPattern)
+				.withZoneUTC();
+//		formatter = formatter.withZone(DateTimeZone.UTC);
+		
+		long bittmillis3 = formatter.parseMillis(dtext);
+		System.out.println(new DateTime(bittmillis3));
+		
+		formatter = DateTimeFormat.forPattern(bittrexPattern);
+//		formatter.withZone(DateTimeZone.UTC);
+		
+		long bittmillis4 = formatter.parseMillis(dtext);
+		System.out.println(new DateTime(bittmillis4));
+		
+		for (String tz : TimeZone.getAvailableIDs() ) {
+			if (tz.contains("New")) {
+				System.out.println(tz);
+			}
+			if (tz.contains("UTC")) {
+				System.out.println(tz);
+			}
+		}
+		
+		System.out.println(TimeZone.getTimeZone("America/New_York"));
+		System.out.println(TimeZone.getTimeZone("UTC"));
 	}
 	
 }

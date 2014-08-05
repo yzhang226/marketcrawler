@@ -9,7 +9,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTimeZone;
 import org.omega.marketcrawler.common.Arith;
+import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
@@ -23,6 +25,7 @@ public final class Mintpal extends Operator {
 	private static final String VERSION = "v2";
 	
 	public static final int DEFAULT_LIMIT = 100;
+	public static final int MAX_LIMIT = 200;
 	
 	public static final String STATUS_SUCCESS = "success";
 	
@@ -37,7 +40,14 @@ public final class Mintpal extends Operator {
 		return inst;
 	}
 	
-	@Override
+	public String getTimePattern() {
+		return "";
+	}
+	
+	public DateTimeZone getTimeZone() {
+		return Constants.ZONE_UTC;
+	}
+	
 	public String getName() {
 		return NAME;
 	}
@@ -130,6 +140,7 @@ public final class Mintpal extends Operator {
 						long nanoSecs = (long) Arith.multiply(Double.valueOf(field), 10000);
 						re.setNanoTime((byte) (nanoSecs%10));
 						re.setTradeTime(nanoSecs/10);
+						
 					}
 					
 					records.add(re);
@@ -142,8 +153,6 @@ public final class Mintpal extends Operator {
 	}
 	
 	public String reverseToJson(MarketTrade mt) {
-//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-//		DateTimeFormatter formatter = DateTimeFormat.forPattern(Time);
 		int mills = (int) (mt.getTradeTime()%1000);
 		String time = (mt.getTradeTime()/1000) + "." + (StringUtils.leftPad(String.valueOf(mills), 3, "0") ) + ( mt.getNanoTime() == 0 ? "" : mt.getNanoTime());
 		

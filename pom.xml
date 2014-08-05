@@ -11,6 +11,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<project.jar.file>${artifactId}-${version}.${packaging}</project.jar.file>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.second.dir>/programs/marketcrawler</project.build.second.dir>
 	</properties>
@@ -236,30 +237,100 @@
 						<configuration>
 							<!-- <basedir>${project.build.second.dir}</basedir> -->
 							<!-- <assembleDirectory>${project.build.second.dir}/appassembler</assembleDirectory> -->
-							<target>${project.build.second.dir}/appassembler2</target>
+							<target>${project.build.second.dir}</target>
+							<logsDirectory>${project.build.second.dir}</logsDirectory>
+							<generateRepository>false</generateRepository>
 							<repositoryLayout>flat</repositoryLayout>
 							<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+							<useWildcardClassPath>true</useWildcardClassPath>
+							
 							<daemons>
-								<!-- <daemon>
-									<id>marketcrawlerapp</id>
-									<wrapperMainClass>org.omega.marketcrawler.main.Main</wrapperMainClass>
-									<commandLineArguments>
-										<commandLineArgument>test</commandLineArgument>
-									</commandLineArguments>
-									<platforms>
-										<platform>jsw</platform>
-									</platforms>
-								</daemon> -->
 								<daemon>
 									<id>marketcrawlerapp</id>
+									
 									<wrapperMainClass>org.tanukisoftware.wrapper.WrapperJarApp</wrapperMainClass>
 									<platforms>
 										<platform>jsw</platform>
 									</platforms>
-									
+									<generatorConfigurations>
+										<generatorConfiguration>
+											<generator>jsw</generator>
+											<includes>
+												<include>macosx-universal-32</include>
+												<include>macosx-universal-64</include>
+											</includes>
+											<configuration>
+												<property>
+													<name>configuration.directory.in.classpath.first</name>
+													<value>etc</value>
+												</property>
+												<property>
+													<name>set.default.REPO_DIR</name>
+													<value>lib</value>
+												</property>
+												
+												<property>
+													<name>wrapper.java.classpath.1</name>
+													<value>wrapper.jar</value>
+												</property>
+												<property>
+													<name>wrapper.java.classpath.2</name>
+													<value>${project.jar.file}</value>
+												</property>
+												
+												<property>
+													<name>wrapper.java.library.path.1</name>
+													<value>%REPO_DIR%</value>
+												</property>
+												
+												<property>
+													<name>wrapper.app.parameter.1</name>
+													<value>${project.jar.file}</value>
+												</property>
+												
+												<property>
+													<name>wrapper.console.format</name>
+													<value>PM</value>
+												</property>
+												<property>
+													<name>wrapper.console.loglevel</name>
+													<value>INFO</value>
+												</property>
+												
+												<property>
+													<name>wrapper.logfile</name>
+													<value>app.log</value>
+												</property>
+												<property>
+													<name>wrapper.logfile.format</name>
+													<value>M</value>
+												</property>
+												<property>
+													<name>wrapper.logfile.loglevel</name>
+													<value>INFO</value>
+												</property>
+												<property>
+													<name>wrapper.logfile.maxsize</name>
+													<value>10m</value>
+												</property>
+												<property>
+													<name>wrapper.logfile.maxfiles</name>
+													<value>5</value>
+												</property>
+												
+												<property>
+													<name>wrapper.syslog.loglevel</name>
+													<value>NONE</value>
+												</property>
+												
+											</configuration>
+										</generatorConfiguration>
+									</generatorConfigurations>
 								</daemon>
 							</daemons>
+							
 						</configuration>
+						
 					</execution>
 				</executions>
 			</plugin>

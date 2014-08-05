@@ -2,23 +2,19 @@ package org.omega.marketcrawler.operator;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.omega.marketcrawler.common.Symbol;
+import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.net.MultiThreadedNetter;
 
 public final class Bittrex extends Operator {
 	
@@ -30,7 +26,8 @@ public final class Bittrex extends Operator {
 	private static final String VERSION = "v1.1";
 	
 	// count	optional	a number between 1-100 for the number of entries to return (default = 20)
-	public static final int DEFAULT_LIMIT = 100;
+	public static final int DEFAULT_LIMIT = 20;
+	public static final int MAX_LIMIT = 50;
 	
 	public static final String STATUS_TRUE = "true";
 	
@@ -46,7 +43,14 @@ public final class Bittrex extends Operator {
 		return inst;
 	}
 	
-	@Override
+	public String getTimePattern() {
+		return TIME_PATTERN_BITTREX;
+	}
+	
+	public DateTimeZone getTimeZone() {
+		return Constants.ZONE_UTC;
+	}
+	
 	public String getName() {
 		return NAME;
 	}
@@ -66,7 +70,7 @@ public final class Bittrex extends Operator {
 	public String getMarketTradeAPI(WatchListItem item) {
 		StringBuilder api = new StringBuilder(getBaseAPI());
 		api.append("public/getmarkethistory?market=").append(item.getExchangeSymbol()).append("-").append(item.getWatchedSymbol());
-		api.append("&count=").append(DEFAULT_LIMIT);
+		api.append("&count=").append(MAX_LIMIT);
 		return api.toString();
 	}
 	
@@ -78,8 +82,7 @@ public final class Bittrex extends Operator {
 		
 		if (STATUS_TRUE.equals(String.valueOf(json.get(KEY_SUCCESS)))) {
 			records = new ArrayList<>(45);
-//			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+			DateTimeFormatter formatter = getTimeFormatter();
 			List<Map<String, Object>> data = (List<Map<String, Object>>) json.get(KEY_RESULT);
 			MarketSummary summ = null;
 			Object field = null;
@@ -122,7 +125,7 @@ public final class Bittrex extends Operator {
 		if (STATUS_TRUE.equals(String.valueOf(json.get(KEY_SUCCESS)))) {
 			records = new ArrayList<>(25);
 //			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+			DateTimeFormatter formatter = getTimeFormatter();
 			List<Map<String, Object>> data = (List<Map<String, Object>>) json.get(KEY_RESULT);
 			MarketTrade re = null;
 			Object fieldValue = null;
@@ -151,7 +154,7 @@ public final class Bittrex extends Operator {
 	public String reverseToJson(MarketTrade mt) {
 		// {"Id":111910,"TimeStamp":"2014-07-26T12:51:14.477","Quantity":50.00000000,"Price":0.00069000,"Total":0.03450000,"FillType":"FILL","OrderType":"SELL"}
 //		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+		DateTimeFormatter formatter = getTimeFormatter();
 		StringBuilder sb = new StringBuilder("{");
 		sb.append("\"").append("Id").append("\"").append(":").append(mt.getTradeId()).append(",")
 		  .append("\"").append("TimeStamp").append("\"").append(":").append("\"").append(formatter.print(mt.getTradeTime())).append("\"").append(",")

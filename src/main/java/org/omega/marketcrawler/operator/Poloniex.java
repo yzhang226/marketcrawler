@@ -9,8 +9,9 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.format.DateTimeFormat;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
+import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.common.Symbol;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
@@ -33,7 +34,14 @@ public class Poloniex extends Operator {
 		return inst;
 	}
 	
-	@Override
+	public String getTimePattern() {
+		return TIME_PATTERN_BITTREX;
+	}
+	
+	public DateTimeZone getTimeZone() {
+		return Constants.ZONE_UTC;
+	}
+	
 	public String getName() {
 		return NAME;
 	}
@@ -99,8 +107,7 @@ public class Poloniex extends Operator {
 		String fieldValue = null;
 		MarketTrade re = null;
 		records = new ArrayList<>(json.size());
-//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+		DateTimeFormatter formatter = getTimeFormatter();
 		for (Map<String, String> da : json) {
 			re = new MarketTrade();
 			try {
@@ -122,19 +129,8 @@ public class Poloniex extends Operator {
 		return records;
 	}
 	
-	private long parseMillsecs(String time, DateTimeFormatter formatter) {
-		long millsec = 0;
-		try {
-			if (Utils.isNotEmpty(time)) millsec = formatter.parseMillis(time);
-		} catch (Exception e) {
-			log.error("parse date text[" + time + "] error.", e);
-		}
-
-		return millsec;
-	}
-	
 	public String reverseToJson(MarketTrade mt) {
-		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_BITTREX);
+		DateTimeFormatter formatter = getTimeFormatter();
 		StringBuilder sb = new StringBuilder("{");
 		sb
 		  .append("\"").append("tradeID").append("\"").append(":").append("\"").append(mt.getTradeId()).append("\"").append(",")

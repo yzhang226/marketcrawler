@@ -1,5 +1,9 @@
 package org.omega.marketcrawler.common;
 
+import java.util.TimeZone;
+
+import org.joda.time.DateTimeZone;
+
 public final class Constants {
 	
 	private Constants() {}
@@ -19,6 +23,10 @@ public final class Constants {
 	public static final int BOARD_ID_ANN = 159;
 	
 	public static final int MAX_AWAIT_MILLIS = 59 * MILLIS_ONE_SECOND;
+	
+	public static final DateTimeZone ZONE_NEWYORK = DateTimeZone.forTimeZone(TimeZone.getTimeZone("America/New_York"));
+	public static final DateTimeZone ZONE_UTC = DateTimeZone.forTimeZone(TimeZone.getTimeZone("UTC"));
+	
 	
 	
 }

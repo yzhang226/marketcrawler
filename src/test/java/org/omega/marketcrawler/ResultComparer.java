@@ -21,8 +21,8 @@ public class ResultComparer {
 	public static void main(String[] args) throws Exception {
 		ResultComparer comparer = new ResultComparer();
 		
-		WatchListItem item = new WatchListItem("bittrex", "vrc", "BTC");
-		comparer.compareDbAndServerJJson(item, Bittrex.DEFAULT_LIMIT);
+		WatchListItem item = new WatchListItem("bittrex", "key", "BTC");
+		comparer.compareDbAndServerJJson(item, Bittrex.MAX_LIMIT);
 		
 //		item = new WatchListItem("mintpal", "gue", "BTC");
 //		comparer.compareDbAndServerJJson(item, Mintpal.DEFAULT_LIMIT);

@@ -138,14 +138,12 @@ public final class SystemLauncher {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run() {
-		        log.info("Shutdown hook was invoked. Shutting down App1.");
+		        log.info("Shutdown hook was invoked. Shutting down App.");
 		        launcher.shutdown();
 		    }
 		});
 		
 		launcher.startup();
-		
-		
 		
 	}
 	

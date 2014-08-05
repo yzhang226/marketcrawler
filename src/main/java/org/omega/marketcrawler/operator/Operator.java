@@ -1,18 +1,18 @@
 package org.omega.marketcrawler.operator;
 
-import java.awt.TrayIcon.MessageType;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
 import org.omega.marketcrawler.net.MultiThreadedNetter;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -21,6 +21,26 @@ public abstract class Operator {
 //	private static final Log log = LogFactory.getLog(TradeOperator.class);
 	
 //	private int id;
+	public abstract DateTimeZone getTimeZone();
+	public abstract String getTimePattern();
+	
+//	DateTimeFormatter timeFormatter = null;
+	protected DateTimeFormatter getTimeFormatter() {
+//		if (timeFormatter == null) timeFormatter = DateTimeFormat.forPattern(getTimePattern()).withZone(getTimeZone());
+		return DateTimeFormat.forPattern(getTimePattern()).withZone(getTimeZone());
+	}
+	
+	protected long parseMillsecs(String time, DateTimeFormatter timeFormatter) throws Exception {
+		long millsec = 0;
+		try {
+			if (Utils.isNotEmpty(time)) millsec = timeFormatter.parseMillis(time);
+		} catch (Exception e) {
+			throw new Exception("parse date text[" + time + "] error.", e);
+		}
+
+		return millsec;
+	}
+	
 	public abstract String getName();
 	
 	public abstract String getMarketSummaryAPI();
@@ -30,6 +50,7 @@ public abstract class Operator {
 	public abstract List<MarketTrade> transferJsonToMarketTrade(Object json);
 	
 	public abstract String reverseToJson(MarketTrade mt);
+	
 	
 
 	public List<MarketSummary> getMarketSummaries() throws Exception {

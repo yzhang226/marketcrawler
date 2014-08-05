@@ -9,9 +9,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.format.DateTimeFormat;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
-import org.omega.marketcrawler.common.Utils;
+import org.omega.marketcrawler.common.Constants;
 import org.omega.marketcrawler.entity.MarketSummary;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
@@ -49,6 +49,14 @@ public class Cryptsy extends Operator {
 		return "http://pubapi.cryptsy.com/api.php?";
 	}
 	
+	public String getTimePattern() {
+		return TIME_PATTERN_CRYPTSY;
+	}
+	
+	public DateTimeZone getTimeZone() {
+		return Constants.ZONE_NEWYORK;
+	}
+	
 	public String getName() {
 		return NAME;
 	}
@@ -74,8 +82,7 @@ public class Cryptsy extends Operator {
 		if (SUCCESS_1.equals(success)) {
 			map = (LinkedHashMap<String, Object>) map.get(KEY_RETURN);
 			map = (LinkedHashMap<String, Object>) map.get(KEY_MARKETS);
-//			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
-			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
+			DateTimeFormatter formatter = getTimeFormatter();
 			Map<String, Object> da = null;
 			MarketSummary summ = null;
 			for (String key : map.keySet()) {
@@ -106,17 +113,6 @@ public class Cryptsy extends Operator {
 		return records;
 	}
 
-	private long parseMillsecs(String time, DateTimeFormatter formatter) {
-		long millsec = 0;
-		try {
-			if (Utils.isNotEmpty(time)) millsec = formatter.parseMillis(time);
-		} catch (Exception e) {
-			log.error("parse date text[" + time + "] error.", e);
-		}
-
-		return millsec;
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<MarketTrade> transferJsonToMarketTrade(Object json) {
 		LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) json;
@@ -128,8 +124,7 @@ public class Cryptsy extends Operator {
 			map = (LinkedHashMap<String, Object>) map.get(KEY_MARKETS);
 			map = (LinkedHashMap<String, Object>) map.values().iterator().next();
 			List<Map<String, String>> trades = (List<Map<String, String>>) map.get(KEY_RECENTTRADES);
-//			SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_CRYPTSY);
-			DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
+			DateTimeFormatter formatter = getTimeFormatter();
 			MarketTrade re = null;
 			String fieldValue = null;
 			for (Map<String, String> da : trades) {
@@ -157,8 +152,7 @@ public class Cryptsy extends Operator {
 	}
 	
 	public String reverseToJson(MarketTrade mt) {
-//		SimpleDateFormat sdf = new SimpleDateFormat(TIME_PATTERN_BITTREX);
-		DateTimeFormatter formatter = DateTimeFormat.forPattern(TIME_PATTERN_CRYPTSY);
+		DateTimeFormatter formatter = getTimeFormatter();
 		StringBuilder sb = new StringBuilder("{");
 		sb.append("\"").append("id").append("\"").append(":").append("\"").append(mt.getTradeId()).append("\"").append(",")
 		  .append("\"").append("time").append("\"").append(":").append("\"").append(formatter.print(mt.getTradeTime())).append("\"").append(",")
@@ -180,7 +174,7 @@ public class Cryptsy extends Operator {
 //		new MarketSummaryService().save(summs);
 		
 		WatchListItem item = new WatchListItem();
-		item.setMarketId(247);
+		item.setMarketId(209);
 //		List<MarketTrade> trades = Cryptsy.inst.getMarketTrades(item);
 //		for (MarketTrade mt : trades) {
 //			System.out.println(mt.toReadableText());
