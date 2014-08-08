@@ -11,6 +11,8 @@ public class MarketTrade extends _BaseEntity {
 
 	private static final long serialVersionUID = -5408828461710055307L;
 	
+	public static final MarketTrade EMPTY_TRADE = new MarketTrade();
+	
 	public static final String TYPE_TEXT_SELL = "sell";
 	public static final String TYPE_TEXT_BUY = "buy";
 	
@@ -65,6 +67,8 @@ public class MarketTrade extends _BaseEntity {
 		copy.setPrice(price);
 		copy.setTotalUnits(totalUnits);
 		copy.setTotalCost(totalCost);
+		copy.setTradeId(tradeId);
+		copy.setNanoTime(nanoTime);
 		
 		return copy;
 	}

@@ -1,33 +1,31 @@
 package org.omega.marketcrawler.common;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
+import org.omega.marketcrawler.service.MarketTradeService;
+import org.omega.marketcrawler.service.WatchListItemService;
 
 public final class MyCache {
 
-	public static final int QUERY_LIMIT = 200;
+	private static final Object lock = new Object();
 	
-	private static final MyCache pool = new MyCache();
+	private static final MyCache cache = new MyCache();
 	
 	private MyCache() {}
 	
 	public static MyCache inst() {
-		return pool;
+		return cache;
 	}
 	
-	// 
-	private Map<WatchListItem, MarketTrade> latestTradeMap = new HashMap<>();
-//	private Map<WatchListItem, List<MarketTrade>> overlapTradeMap = new HashMap<>();
-//	private Map<WatchListItem, Set<MarketTrade>> pooledTradeMap = new HashMap<>();
+	private Map<WatchListItem, MarketTrade> latestTradeMap = new ConcurrentHashMap<>();
 	private Set<WatchListItem> watchedItems = new HashSet<>();
-	private Set<String> watchedSymbols = new HashSet<>();
-	
 	
 	public MarketTrade getLatestTrade(WatchListItem item) {
 		MarketTrade last = latestTradeMap.get(item);
@@ -35,116 +33,50 @@ public final class MyCache {
 	}
 	
 	public void putLatestTrade(WatchListItem item, MarketTrade latest) {
+		if (latest == null)  latest = MarketTrade.EMPTY_TRADE;
 		latestTradeMap.put(item, latest);
 	}
 	
 	public Set<WatchListItem> getWatchedItems() {
-		return watchedItems;
-	}
-	
-	public void addAllItems(List<WatchListItem> items) {
-		if (Utils.isEmpty(items)) return;
-		for (WatchListItem item : items) {
-			watchedItems.add(item);
-			watchedSymbols.add(item.getWatchedSymbol());
+		synchronized (lock) {
+			return watchedItems;
 		}
 	}
 	
-	public boolean cointainsItem(WatchListItem item) {
-		return watchedItems.contains(item);
+	private void addAllItems(List<WatchListItem> items) {
+		if (Utils.isEmpty(items)) return;
+		for (WatchListItem item : items) {
+			watchedItems.add(item);
+		}
 	}
 	
-	public boolean containsSymbol(String symbol) {
-		return watchedSymbols.contains(symbol);
-	}
-	
-	public void clear() {
+	private void clear() {
 		watchedItems.clear();
-		watchedSymbols.clear();
-//		pooledTradeMap.clear();
-//		overlapTradeMap.clear();
+	}
+	
+	public List<WatchListItem> refresh() throws Exception {
+		synchronized (lock) {
+			clear();
+			
+			List<WatchListItem> addedItems = new ArrayList<>();
+			WatchListItemService wiser = new WatchListItemService();
+			wiser.initWatchedItem();
+			
+			MarketTradeService mtser = new MarketTradeService();
+			List<WatchListItem> items = wiser.findActiveItems();
+			for (WatchListItem it : items) {
+				if (mtser.initWatchedTable(it)) { addedItems.add(it); }
+			}
+			
+			addAllItems(items);
+			
+			// refresh the latest market trade
+			for (WatchListItem item : items) {
+				putLatestTrade(item, mtser.findLatestTrade(item));
+			}
+			
+			return addedItems;
+		}
 	}
 
-//	public boolean addMarketTrade(WatchListItem item, MarketTrade mt) {
-//		if (mt == null) return false;
-//		return getCachedTrades(item).add(mt);
-//	}
-	
-//	public boolean addMarketTrade(WatchListItem item, List<MarketTrade> trades) {
-//		if (Utils.isEmpty(trades)) return false;
-//		return getCachedTrades(item).addAll(trades);
-//	}
-	
-//	public Set<MarketTrade> getCachedTrades(WatchListItem item) {
-//		Set<MarketTrade> trades = pooledTradeMap.get(item);
-//		if (Utils.isEmpty(trades)) {
-//			trades = new HashSet<>(QUERY_LIMIT);
-//			pooledTradeMap.put(item, trades);
-//		}
-//		return trades;
-//	}
-	
-//	public MarketTrade getCachedTrade(WatchListItem item, long tradeTime, byte tradeType) {
-//		Set<MarketTrade> trades = getCachedTrades(item);
-//		for (MarketTrade mt : trades) {
-//			if (mt.getTradeTime() == tradeTime && mt.getTradeType() == tradeType) {
-//				return mt;
-//			}
-//		}
-//		return null;
-//	}
-	
-//	public boolean containsCachedTrade(WatchListItem item, long tradeTime, byte tradeType) {
-//		Set<MarketTrade> trades = getCachedTrades(item);
-//		for (MarketTrade mt : trades) {
-//			if (mt.getTradeTime() == tradeTime && mt.getTradeType() == tradeType) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-	
-//	public MarketTrade getOverlapedTrade(WatchListItem item, long tradeTime, byte tradeType) {
-//		List<MarketTrade> overlaps = getOverlapTrades(item);
-//		for (MarketTrade mt : overlaps) {
-//			if (mt.getTradeTime() == tradeTime && mt.getTradeType() == tradeType) {
-//				return mt;
-//			}
-//		}
-//		return null;
-//	}
-	
-//	public boolean containsOverlapedTrade(WatchListItem item, long tradeTime, byte tradeType) {
-//		List<MarketTrade> overlaps = getOverlapTrades(item);
-//		for (MarketTrade mt : overlaps) {
-//			if (mt.getTradeTime() == tradeTime && mt.getTradeType() == tradeType) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-	
-//	public boolean addOverlapTarde(WatchListItem item, MarketTrade lap) {
-//		if (lap == null) return false;
-//		return getOverlapTrades(item).add(lap);
-//	}
-	
-//	public boolean addOverlapTarde(WatchListItem item, List<MarketTrade> laps) {
-//		if (Utils.isEmpty(laps)) return false;
-//		return getOverlapTrades(item).addAll(laps);
-//	}
-	
-//	public Map<WatchListItem, List<MarketTrade>> getOverlapTradeMap() {
-//		return overlapTradeMap;
-//	}
-	
-//	public List<MarketTrade> getOverlapTrades(WatchListItem item) {
-//		List<MarketTrade> trades = overlapTradeMap.get(item);
-//		if (Utils.isEmpty(trades)) {
-//			trades = new ArrayList<>(QUERY_LIMIT);
-//			overlapTradeMap.put(item, trades);
-//		}
-//		return trades;
-//	}
-	
 }

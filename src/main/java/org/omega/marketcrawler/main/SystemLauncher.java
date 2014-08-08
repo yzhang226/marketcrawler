@@ -1,8 +1,8 @@
 package org.omega.marketcrawler.main;
 
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.JobBuilder.*;
+import static org.quartz.SimpleScheduleBuilder.*;
+import static org.quartz.TriggerBuilder.*;
 
 import java.io.File;
 
@@ -29,9 +29,7 @@ public final class SystemLauncher {
 	private static final SystemLauncher launcher = new SystemLauncher();
 	private Scheduler scheduler;
 	
-	private SystemLauncher() {
-		
-	}
+	private SystemLauncher() { }
 	
 	public static SystemLauncher getLauncher() {
 		return launcher;
@@ -69,7 +67,7 @@ public final class SystemLauncher {
             JobDetail cachedPKJob = newJob(RefreshCacheJob.class).withIdentity("cachedPKjob", "cachedPKgroup").build();
             Trigger cachedPKTrigger = newTrigger().withIdentity("cachedPKTri", "cachedPKTriGrop")
   		          			.startNow().withSchedule(
-  		          					simpleSchedule().withIntervalInMinutes(30).repeatForever())
+  		          					simpleSchedule().withIntervalInMinutes(15).repeatForever())
   		          			.build();
             
             // 4 - fetch market trade data
@@ -100,8 +98,6 @@ public final class SystemLauncher {
   		          					simpleSchedule().withIntervalInHours(4).repeatForever())
   		          			.build();
             
-            
-            
             // Tell quartz to schedule the job using our trigger
             scheduler.scheduleJob(marketJob, marketTrigger);
 //            scheduler.scheduleJob(watchedItemJob, watchedItemTrigger);
@@ -112,7 +108,7 @@ public final class SystemLauncher {
 //            scheduler.scheduleJob(tradeStatJob, tradeStatTrigger);
             
             scheduler.scheduleJob(coinJob, coinTrigger);
-
+            
 //            scheduler.shutdown();
 
         } catch (Exception se) {
@@ -132,10 +128,7 @@ public final class SystemLauncher {
 		}
 	}
 	
-	
-	
 	public static void main(String[] args) {
-		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run() {
 		        log.info("Shutdown hook was invoked. Shutting down App.");
@@ -144,7 +137,6 @@ public final class SystemLauncher {
 		});
 		
 		launcher.startup();
-		
 	}
 	
 }

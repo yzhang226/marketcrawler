@@ -10,7 +10,6 @@ import org.omega.marketcrawler.common.Utils;
 import org.omega.marketcrawler.db.DbManager;
 import org.omega.marketcrawler.entity.MarketTrade;
 import org.omega.marketcrawler.entity.WatchListItem;
-import org.omega.marketcrawler.operator.Mintpal;
 
 public class MarketTradeService extends SimpleDBService<MarketTrade> {
 	
@@ -116,21 +115,10 @@ public class MarketTradeService extends SimpleDBService<MarketTrade> {
 	}
 	
 	public static void main(String[] args) throws SQLException {
-		WatchListItem item = new WatchListItem("bittrex", "URO", "BTC");
-		MarketTradeService tser = new MarketTradeService();
-//		System.out.println(tser.getCount(item));
-//		System.out.println(tser.findTopTradeTimes(item, 200));
-		item = new WatchListItem("cryptsy", "URO", "BTC");
-		item = new WatchListItem("mintpal", "vrc", "btc");
-		String sql = "select * from " + item.toMarketTradeTable() + " order by trade_time desc, trade_id desc limit 100";
-		List<MarketTrade> mts = tser.find(sql);
-		StringBuilder sb = new StringBuilder();
-		for (MarketTrade mt : mts) {
-//			sb.append(Bittrex.instance().reverseToJson(mt)).append("\n");
-//			sb.append(Cryptsy.instance().reverseToJson(mt)).append("\n");
-			sb.append(Mintpal.instance().reverseToJson(mt)).append("\n");
-		}
-		System.out.println(sb.toString());
+//		WatchListItem item = new WatchListItem("bittrex", "URO", "BTC");
+//		MarketTradeService tser = new MarketTradeService();
+//		item = new WatchListItem("cryptsy", "URO", "BTC");
+//		item = new WatchListItem("mintpal", "vrc", "btc");
 	}
 	
 }

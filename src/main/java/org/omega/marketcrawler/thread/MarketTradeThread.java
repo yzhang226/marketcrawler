@@ -41,7 +41,7 @@ public class MarketTradeThread extends Thread {
 			
 			TimeUnit.MILLISECONDS.sleep(50);
 		} catch (Throwable e) {
-			log.error("fetch market data error.", e);
+			log.error("fetch market trade data[" + item.toReadableText() + "] error.", e);
 		}
 		
 		info.insert(0, item.toReadableText() + " End[" + (System.currentTimeMillis() - start) + "].");
@@ -52,12 +52,11 @@ public class MarketTradeThread extends Thread {
 		if (Utils.isEmpty(records)) return;
 		
 		MarketTrade latest = MyCache.inst().getLatestTrade(item);
-		if (latest == null) {
+		if (latest == null || latest.getTradeTime() == 0) {
 			MyCache.inst().putLatestTrade(item, records.get(0));
 			return;
 		}
 		
-		// 
 		MarketTrade updatedLatest = null;
 		
 		Iterator<MarketTrade> iter = records.iterator();

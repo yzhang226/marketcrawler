@@ -65,7 +65,7 @@ public abstract class Operator {
 			records = transferJsonToMarketSummary(json);
 		} catch (Throwable e) {
 //			log.error("try to get and convert json Market Summary to object error.", e);
-			throw new Exception("try to get and convert json Market Summary to object error.", e);
+			throw new Exception("try to get and convert json Market Summary[" + getName() + "] to object error.", e);
 		}
 		
 		return records;
@@ -89,7 +89,7 @@ public abstract class Operator {
 			records = transferJsonToMarketTrade(json);
 		} catch (Throwable e) {
 //			log.error("try to get and convert json Market Trade to object error.", e);
-			throw new Exception("try to get and convert json Market Trade to object error.", e);
+			throw new Exception("try to get and convert json Market Trade[" + item.toReadableText() + "] to object error.", e);
 		}
 		
 		return records;
